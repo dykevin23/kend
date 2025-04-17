@@ -9,6 +9,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import BottomNavigation from "./common/components/bottom-navigation";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -32,8 +33,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
-        {children}
+      <body className="w-full max-w-lg mx-auto overflow-x-hidden">
+        <main>{children}</main>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -45,6 +46,7 @@ export default function App() {
   return (
     <div>
       <Outlet />
+      <BottomNavigation />
     </div>
   );
 }

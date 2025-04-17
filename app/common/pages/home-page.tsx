@@ -1,7 +1,6 @@
-export default function () {
-  return (
-    <div>
-      <h1>home</h1>
-    </div>
-  );
+import { redirect } from "react-router";
+import Header from "../components/header";
+
+export function loader() {
+  return redirect("/products");
 }
