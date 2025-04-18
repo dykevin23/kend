@@ -9,7 +9,7 @@ import { cn } from "~/lib/utils";
 
 export default function BottomNavigation() {
   return (
-    <nav className="flex justify-between w-full h-[56px] items-start self-stretch py-2.5 px-6 fixed bottom-0 border-t-1">
+    <nav className="flex justify-between w-full h-[56px] items-start self-stretch py-2.5 px-6 fixed bottom-0 border-t-1 bg-white">
       <NaviMenuItem
         url="/products"
         name="거래하기"
