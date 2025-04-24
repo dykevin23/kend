@@ -8,8 +8,9 @@ import {
 export default [
   index("common/pages/home-page.tsx"),
   ...prefix("products", [
-    index("features/products/pages/product-page.tsx"),
+    index("features/products/pages/products-page.tsx"),
     route("/submit", "features/products/pages/submit-page.tsx"),
+    route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
   route("/children", "features/children/pages/child-page.tsx"),
   route("/chats", "features/chats/pages/chat-page.tsx"),

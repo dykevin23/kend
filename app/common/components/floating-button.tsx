@@ -9,11 +9,7 @@ import { useState } from "react";
 import CloseFloatingIcon from "~/assets/icons/closeFloatingIcon";
 import PlusFloatingIcon from "~/assets/icons/plusFloatingIcon";
 
-interface FloatingButtonProps {
-  onOpenChange: (open: boolean) => void;
-}
-
-export default function FloatingButton({ onOpenChange }: FloatingButtonProps) {
+export default function FloatingButton() {
   const [open, setOpen] = useState<boolean>(false);
   return (
     <>
