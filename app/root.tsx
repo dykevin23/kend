@@ -49,7 +49,7 @@ export default function App() {
   return (
     <div>
       <Outlet />
-      {naviMenus.includes(pathname) && <BottomNavigation pathname={pathname} />}
+      {naviMenus.includes(pathname) && <BottomNavigation />}
     </div>
   );
 }
