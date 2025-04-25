@@ -1,11 +1,23 @@
 import Header from "~/common/components/header";
 import ProductCard from "../components/product-card";
 import FloatingButton from "~/common/components/floating-button";
+import { Heart, Search } from "lucide-react";
+import { Link } from "react-router";
 
-export default function ProductPage() {
+export default function ProductsPage() {
   return (
     <div>
-      <Header title="거래하기" />
+      <Header
+        title="거래하기"
+        rightComponent={
+          <div className="flex items-center gap-6">
+            <Search className="size-7" />
+            <Link to="likes">
+              <Heart className="size-7" />
+            </Link>
+          </div>
+        }
+      />
       <div>
         {Array.from({ length: 10 }).map((_, index) => (
           <ProductCard
