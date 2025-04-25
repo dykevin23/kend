@@ -5,7 +5,7 @@ import FloatingButton from "~/common/components/floating-button";
 export default function ProductPage() {
   return (
     <div>
-      <Header />
+      <Header title="거래하기" />
       <div>
         {Array.from({ length: 10 }).map((_, index) => (
           <ProductCard
