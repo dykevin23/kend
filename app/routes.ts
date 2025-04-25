@@ -13,6 +13,9 @@ export default [
     route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
   route("/children", "features/children/pages/child-page.tsx"),
-  route("/chats", "features/chats/pages/chat-page.tsx"),
+  ...prefix("chats", [
+    index("features/chats/pages/chats-page.tsx"),
+    route("/:chatId", "features/chats/pages/chat-page.tsx"),
+  ]),
   route("/mypage", "features/mypage/pages/mypage-page.tsx"),
 ] satisfies RouteConfig;

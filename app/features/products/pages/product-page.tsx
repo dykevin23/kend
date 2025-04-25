@@ -8,6 +8,8 @@ import {
   MessageSquare,
   Share,
 } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router";
 import SubHeader from "~/common/components/sub-header";
 import {
   Avatar,
@@ -24,6 +26,8 @@ import {
 } from "~/common/components/ui/dropdown-menu";
 
 export default function ProductPage() {
+  const [isLike, setIsLike] = useState<boolean>(false);
+
   return (
     <div>
       <SubHeader
@@ -117,13 +121,17 @@ export default function ProductPage() {
           <span className="text-xl font-semibold">200,000원</span>
         </div>
         <Button
-          variant="outline"
-          className="flex px-4 justify-center items-center gap-2.5 shrink-0"
+          variant="ghost"
+          className="flex px-4 justify-center items-center gap-2.5 shrink-0 text-primary"
+          onClick={() => setIsLike(!isLike)}
         >
-          <Heart className="size-12" />
+          <Heart className="size-12" fill={isLike ? "currentColor" : "none"} />
         </Button>
-        <Button className="flex h-12 px-4 justify-center items-center gap-2.5 rounded-full text-sm font-semibold text-secondary">
-          메세지 보내기
+        <Button
+          asChild
+          className="flex h-12 px-4 justify-center items-center gap-2.5 rounded-full text-sm font-semibold text-secondary"
+        >
+          <Link to={"/chats/1"}>메세지 보내기</Link>
         </Button>
       </div>
     </div>
