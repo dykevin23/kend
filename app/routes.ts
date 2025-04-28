@@ -18,5 +18,5 @@ export default [
     index("features/chats/pages/chats-page.tsx"),
     route("/:chatId", "features/chats/pages/chat-page.tsx"),
   ]),
-  route("/mypage", "features/mypage/pages/mypage-page.tsx"),
+  ...prefix("profile", [index("features/profile/pages/mypage-page.tsx")]),
 ] satisfies RouteConfig;

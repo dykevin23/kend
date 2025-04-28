@@ -11,7 +11,7 @@ export default function SubHeader({
   const navigate = useNavigate();
 
   return (
-    <div className="flex p-4 justify-between items-center self-stretch">
+    <div className="flex p-4 w-full z-10 justify-between items-center self-stretch absolute">
       <div className="flex items-center gap-4">
         <div className="flex size-7 justify-center items-center">
           <ArrowLeft onClick={() => navigate(-1)} />

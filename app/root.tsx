@@ -45,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { pathname } = useLocation();
-  const naviMenus = ["/products", "/children", "/chats", "mypage"];
+  const naviMenus = ["/products", "/children", "/chats", "/profile"];
   return (
     <div>
       <Outlet />

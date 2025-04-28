@@ -54,7 +54,7 @@ export default function ProductPage() {
         }
       />
 
-      <div className="size-[375px] shrink-0 aspect-square bg-muted-foreground/30"></div>
+      <div className="size-[375px] shrink-0 aspect-square bg-muted-foreground/30 relative"></div>
 
       <div className="flex flex-col items-start w-full">
         <div className="flex px-4 items-center gap-2 self-stretch">
