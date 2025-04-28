@@ -31,6 +31,7 @@ export default function ProductPage() {
   return (
     <div>
       <SubHeader
+        absolute
         rightComponent={
           <DropdownMenu>
             <DropdownMenuTrigger>
