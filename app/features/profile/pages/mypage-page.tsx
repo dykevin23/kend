@@ -12,20 +12,7 @@ export default function MypagePage() {
     <div>
       <Header title="마이페이지" />
 
-      <Profile />
-
-      <div className="flex w-full p-4 flex-col items-start gap-2.5">
-        <Button
-          variant="outline"
-          className="flex h-12 px-4 justify-center items-center gap-2 self-stretch rounded-full"
-          asChild
-        >
-          <Link to="/profile/modify">
-            <PencilLine className="size-5 aspect-square" />
-            프로필 수정하기
-          </Link>
-        </Button>
-      </div>
+      <Profile isMe />
 
       <div className="flex flex-col w-full h-[510px] shrink-0 bg-muted/50 rounded-t-md px-4 py-8 gap-8 mt-4 mb-8">
         <div className="flex w-full justify-center items-start gap-2 shrink-0">

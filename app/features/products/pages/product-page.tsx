@@ -58,16 +58,20 @@ export default function ProductPage() {
       <div className="size-[375px] shrink-0 aspect-square bg-muted-foreground/30 relative"></div>
 
       <div className="flex flex-col items-start w-full">
-        <div className="flex px-4 items-center gap-2 self-stretch">
-          <div className="flex py-3 items-center gap-2 grow shrink-0 basis-0 self-stretch">
-            <Avatar>
-              <AvatarFallback>N</AvatarFallback>
-              <AvatarImage src="https://github.com/facebook.png" />
-            </Avatar>
-            <div className="flex justify-between items-center grow shrink-0 basis-0">
-              <span className="grow shrink-0 basis-0 text-sm font-bold">
-                username
-              </span>
+        <div className="flex px-4 items-center gap-2 self-stretch ">
+          <div className="flex justify-between grow shrink-0 basis-0">
+            <Link to="/profile/1">
+              <div className="flex gap-2 py-3 items-center">
+                <Avatar>
+                  <AvatarFallback>N</AvatarFallback>
+                  <AvatarImage src="https://github.com/facebook.png" />
+                </Avatar>
+                <span className="grow shrink-0 basis-0 text-sm font-bold">
+                  username
+                </span>
+              </div>
+            </Link>
+            <div className="flex justify-center items-center">
               <Badge className="text-primary bg-primary-foreground rounded-sm font-normal">
                 4개월 사용가능
               </Badge>

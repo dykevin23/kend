@@ -21,5 +21,6 @@ export default [
   ...prefix("profile", [
     index("features/profile/pages/mypage-page.tsx"),
     route("/modify", "features/profile/pages/modify-profile-page.tsx"),
+    route("/:userId", "features/profile/pages/user-page.tsx"),
   ]),
 ] satisfies RouteConfig;
