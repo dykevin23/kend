@@ -13,7 +13,11 @@ export default [
     route("/:productId", "features/products/pages/product-page.tsx"),
     route("/likes", "features/products/pages/like-products-page.tsx"),
   ]),
-  route("/children", "features/children/pages/child-page.tsx"),
+  ...prefix("/children", [
+    index("features/children/pages/child-redirect-page.tsx"),
+    route("/:childId", "features/children/pages/child-page.tsx"),
+    route("/submit", "features/children/pages/submit-child-page.tsx"),
+  ]),
   ...prefix("chats", [
     index("features/chats/pages/chats-page.tsx"),
     route("/:chatId", "features/chats/pages/chat-page.tsx"),
