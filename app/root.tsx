@@ -49,7 +49,10 @@ export default function App() {
   return (
     <div>
       <Outlet />
-      {naviMenus.includes(pathname) && <BottomNavigation />}
+      {(naviMenus.includes(pathname) ||
+        (pathname.includes("/children")
+          ? !isNaN(Number(pathname.split("/children/").at(-1)))
+          : false)) && <BottomNavigation />}
     </div>
   );
 }
