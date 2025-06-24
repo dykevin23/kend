@@ -2,24 +2,57 @@ export default function CloseFloatingIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="56"
-      height="56"
-      viewBox="0 0 56 56"
+      width="76"
+      height="76"
+      viewBox="0 0 76 76"
       fill="none"
     >
-      <rect width="56" height="56" rx="28" fill="white" />
-      <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
-        d="M20.929 20.9289C21.3629 20.495 22.0664 20.495 22.5003 20.9289L35.0711 33.4997C35.505 33.9336 35.505 34.6372 35.0711 35.0711C34.6372 35.505 33.9337 35.505 33.4998 35.0711L20.929 22.5003C20.4951 22.0664 20.4951 21.3628 20.929 20.9289Z"
-        fill="black"
-      />
-      <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
-        d="M20.929 35.0711C20.4951 34.6372 20.4951 33.9336 20.929 33.4997L33.4998 20.9289C33.9337 20.495 34.6372 20.495 35.0711 20.9289C35.505 21.3628 35.505 22.0664 35.0711 22.5003L22.5003 35.0711C22.0664 35.505 21.3629 35.505 20.929 35.0711Z"
-        fill="black"
-      />
+      <g filter="url(#filter0_d)">
+        <rect x="10" y="10" width="56" height="56" rx="28" fill="white" />
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M32.3431 32.3431C32.7336 31.9526 33.3668 31.9526 33.7573 32.3431L38 36.5858L42.2426 32.3431C42.6332 31.9526 43.2663 31.9526 43.6569 32.3431C44.0474 32.7337 44.0474 33.3668 43.6569 33.7574L39.4142 38L43.6569 42.2426C44.0474 42.6332 44.0474 43.2663 43.6569 43.6569C43.2663 44.0474 42.6332 44.0474 42.2426 43.6569L38 39.4142L33.7573 43.6569C33.3668 44.0474 32.7336 44.0474 32.3431 43.6569C31.9526 43.2663 31.9526 42.6332 32.3431 42.2426L36.5858 38L32.3431 33.7574C31.9526 33.3668 31.9526 32.7337 32.3431 32.3431Z"
+          fill="black"
+        />
+      </g>
+      <defs>
+        <filter
+          id="filter0_d"
+          x="0"
+          y="0"
+          width="76"
+          height="76"
+          filterUnits="userSpaceOnUse"
+          color-interpolation-filters="sRGB"
+        >
+          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset />
+          <feGaussianBlur stdDeviation="5" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.25 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow"
+            result="shape"
+          />
+        </filter>
+      </defs>
     </svg>
   );
 }

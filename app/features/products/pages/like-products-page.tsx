@@ -5,7 +5,7 @@ export default function LikeProductsPage() {
   return (
     <div>
       <SubHeader title="좋아요" />
-      <div>
+      <div className="flex w-full flex-col gap-6 pb-10">
         {Array.from({ length: 10 }).map((_, index) => (
           <ProductCard
             key={`product-${index}`}

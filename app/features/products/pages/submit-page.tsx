@@ -16,12 +16,14 @@ export default function SubmitPage() {
           </div>
         }
       />
+
+      {/* 이미지 업로드 영역 start */}
       <div className="flex py-4 pl-4 items-center gap-2.5 shrink-0">
         <div className="flex size-18 p-2 flex-col justify-center items-center gap-1 shrink-0 rounded-xl border-solid border-1">
           <ImagePlus className="size-8 shrink-0 aspect-square" />
           <div className="flex py-1 px-2 justify-center items-center gap-2.5 bg-muted-foreground/20 rounded-full">
-            <span className="text-[10px] font-medium leading-[11px] -tracking-[0.4px]">
-              8 / 10
+            <span className="text-[10px] font-medium leading-2.75 -tracking-[0.4px] text-muted-foreground/50">
+              <span className="text-black">8</span> / 10
             </span>
           </div>
         </div>
@@ -33,6 +35,8 @@ export default function SubmitPage() {
           </div>
         </div>
       </div>
+      {/* 이미지 업로드 영역 end */}
+
       <div className="flex pb-4 flex-col items-start gap-4">
         <Form className="max-w-screen w-full">
           <InputPair

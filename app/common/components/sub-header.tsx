@@ -16,7 +16,7 @@ export default function SubHeader({
   return (
     <div
       className={cn([
-        "flex p-4 w-full z-10 justify-between items-center self-stretch",
+        "bg-amber-600 flex h-11 px-4 w-full justify-between items-center self-stretch",
         absolute && "absolute",
       ])}
     >

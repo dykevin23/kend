@@ -6,8 +6,10 @@ interface HeaderProps {
 }
 export default function Header({ title, rightComponent }: HeaderProps) {
   return (
-    <div className="flex p-4 justify-between items-center self-stretch">
-      <span className="text-2xl font-bold">{title}</span>
+    <div className="flex px-4 pt-4 justify-between items-center self-stretch">
+      <span className="text-2xl font-bold leading-6 tracking-tight">
+        {title}
+      </span>
       {rightComponent}
     </div>
   );

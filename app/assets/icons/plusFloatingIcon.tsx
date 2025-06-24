@@ -2,10 +2,11 @@ export default function PlusFloatingIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="76"
-      height="76"
+      width="56"
+      height="56"
       viewBox="0 0 76 76"
       fill="none"
+      preserveAspectRatio="xMidYMid meet"
     >
       <g filter="url(#filter0_d_1_396)">
         <rect x="10" y="10" width="56" height="56" rx="28" fill="#FFC020" />
@@ -36,7 +37,7 @@ export default function PlusFloatingIcon() {
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 127 0"
             result="hardAlpha"
           />
           <feOffset />
@@ -44,7 +45,7 @@ export default function PlusFloatingIcon() {
           <feComposite in2="hardAlpha" operator="out" />
           <feColorMatrix
             type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.25 0"
           />
           <feBlend
             mode="normal"

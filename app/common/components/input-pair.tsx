@@ -12,7 +12,6 @@ export default function InputPair({
   label: string;
   textArea?: boolean;
 } & InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement>) {
-  console.log(rest.value);
   return (
     <div className="flex px-4 py-2 flex-col justify-center items-start gap-2 self-stretch">
       <Label
