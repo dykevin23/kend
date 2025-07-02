@@ -9,9 +9,9 @@ as $$
 begin
     if new.raw_app_meta_data is not null then
         if new.raw_app_meta_data ? 'provider' AND new.raw_app_meta_data ->> 'provider' = 'email' then
-            if new.raw_app_meta_data ? 'nickname' AND new.raw_app_meta_data ? 'username' then
+            if new.raw_user_meta_data ? 'nickname' AND new.raw_user_meta_data ? 'username' then
                 insert into public.profiles (profile_id, nickname, username)
-                values (new.id, new.raw_app_meta_data ->> 'nickname', new.raw_app_meta_data ->> 'username');
+                values (new.id, new.raw_user_meta_data ->> 'nickname', new.raw_user_meta_data ->> 'username');
             else
                 insert into public.profiles (profile_id, nickname, username)
                 values (new.id, 'mr.' || substr(md5(random()::text), 1, 8),'Anonymous');
