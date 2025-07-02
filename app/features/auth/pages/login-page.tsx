@@ -1,10 +1,53 @@
-import { Form, Link } from "react-router";
+import { Form, Link, redirect } from "react-router";
 import FloatingLabelInput from "~/common/components/floatingLabelInput";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import SocialButtons from "../components/social-buttons";
+import type { Route } from "./+types/login-page";
+import { z } from "zod";
+import { makeSSRClient } from "~/supa-client";
 
-export default function LoginPage() {
+const formSchema = z.object({
+  email: z
+    .string({
+      required_error: "이메일을 입력해주세요.",
+    })
+    .email("이메일 형식이 아닙니다."),
+  password: z
+    .string({
+      required_error: "비밀번호를 입력해주세요.",
+    })
+    .min(8, { message: "비밀번호는 최소 8자리 이상 입력해야합니다." }),
+});
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const formData = await request.formData();
+  const { success, data, error } = formSchema.safeParse(
+    Object.fromEntries(formData)
+  );
+  if (!success) {
+    return {
+      formErrors: error.flatten().fieldErrors,
+      loginError: null,
+    };
+  }
+
+  const { email, password } = data;
+  const { client, headers } = makeSSRClient(request);
+  const { error: loginError } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (loginError) {
+    return {
+      formErrors: null,
+      loginError: loginError.message,
+    };
+  }
+  return redirect("/", { headers });
+};
+
+export default function LoginPage({ actionData }: Route.ComponentProps) {
   return (
     <div className="bg-primary h-full space-y-10 py-[50px]">
       {/* 상단 로고 영역 start */}
@@ -34,7 +77,10 @@ export default function LoginPage() {
       {/* 상단 로고 영역 end */}
 
       {/* 입력 area */}
-      <Form className="flex w-full px-6 flex-col items-center gap-8">
+      <Form
+        className="flex w-full px-6 flex-col items-center gap-8"
+        method="post"
+      >
         <div className="flex flex-col items-start gap-6 self-stretch">
           <div className="flex flex-col justify-center items-center gap-2 self-stretch">
             <div className="flex flex-col justify-center items-center gap-6 self-stretch">
@@ -80,6 +126,7 @@ export default function LoginPage() {
                 "rounded-full bg-secondary",
                 "font-pretendard text-base not-italic font-semibold leading-none tracking-[-0.3px] text-secondary-foreground"
               )}
+              type="submit"
             >
               로그인
             </Button>
