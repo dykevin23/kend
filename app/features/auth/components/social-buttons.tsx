@@ -3,7 +3,7 @@ import { Link } from "react-router";
 export default function SocialButtons() {
   return (
     <div className="flex px-6 justify-between items-center self-stretch">
-      <Link to="">
+      <Link to="/auth/social/naver/start">
         <div className="flex size-13.5 justify-center items-center rounded-full bg-white">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -26,7 +26,7 @@ export default function SocialButtons() {
           </svg>
         </div>
       </Link>
-      <Link to="">
+      <Link to="/auth/social/kakao/start">
         <div className="flex size-13.5 justify-center items-center rounded-full bg-white">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +51,7 @@ export default function SocialButtons() {
           </svg>
         </div>
       </Link>
-      <Link to="">
+      <Link to="/auth/social/apple/start">
         <div className="flex size-13.5 justify-center items-center rounded-full bg-white">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +67,7 @@ export default function SocialButtons() {
           </svg>
         </div>
       </Link>
-      <Link to="">
+      <Link to="/auth/social/google/start">
         <div className="flex size-13.5 justify-center items-center rounded-full bg-white">
           <svg
             xmlns="http://www.w3.org/2000/svg"
