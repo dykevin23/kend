@@ -7,7 +7,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { products } from "../products/schema";
-import { profiles } from "../profile/schema";
+import { profiles } from "../users/schema";
 
 /**
  * 채팅방(chatRooms) 테이블

@@ -8,6 +8,13 @@
       "when": 1747792742177,
       "tag": "0000_handy_scarlet_spider",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1751637912511,
+      "tag": "0001_bored_madame_web",
+      "breakpoints": true
     }
   ]
 }

@@ -264,7 +264,7 @@ export type Database = {
       products: {
         Row: {
           created_at: string
-          deal_location: string | null
+          deal_location: string
           description: string
           name: string
           price: number
@@ -275,18 +275,18 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          deal_location?: string | null
+          deal_location: string
           description: string
           name: string
           price: number
           product_id?: never
           profile_id: string
-          status: Database["public"]["Enums"]["product_status_type"]
+          status?: Database["public"]["Enums"]["product_status_type"]
           updated_at?: string
         }
         Update: {
           created_at?: string
-          deal_location?: string | null
+          deal_location?: string
           description?: string
           name?: string
           price?: number

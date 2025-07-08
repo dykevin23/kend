@@ -7,7 +7,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { profiles } from "../profile/schema";
+import { profiles } from "../users/schema";
 
 /**
  * 성별

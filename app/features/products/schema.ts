@@ -8,7 +8,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { profiles } from "../profile/schema";
+import { profiles } from "../users/schema";
 
 /**
  * 상품 상태(판매)
@@ -38,8 +38,8 @@ export const products = pgTable("products", {
   name: text().notNull(),
   price: integer().notNull(),
   description: text().notNull(),
-  deal_location: text(),
-  status: productStatusType().notNull(),
+  deal_location: text().notNull(),
+  status: productStatusType().notNull().default("sales"),
   profile_id: uuid()
     .references(() => profiles.profile_id, { onDelete: "cascade" })
     .notNull(),
