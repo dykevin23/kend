@@ -36,10 +36,18 @@ export const createProduct = async (
 
 export const createProductImages = async (
   client: SupabaseClient<Database>,
-  { image, productId }: { image: string; productId: number }
+  { images, productId }: { images: string[]; productId: number }
 ) => {
-  const { error } = await client
-    .from("product_images")
-    .insert({ image, product_id: productId });
+  const rows = images.map((img) => ({ image: img, product_id: productId }));
+  const { error } = await client.from("product_images").insert(rows);
+  if (error) throw error;
+};
+
+export const createProductHashTags = async (
+  client: SupabaseClient<Database>,
+  { productId, hashTags }: { productId: number; hashTags: string[] }
+) => {
+  const rows = hashTags.map((tag) => ({ hashtag: tag, product_id: productId }));
+  const { error } = await client.from("product_hashtags").insert(rows);
   if (error) throw error;
 };

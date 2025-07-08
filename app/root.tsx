@@ -7,12 +7,14 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
+  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
+import { cn } from "./lib/utils";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -65,9 +67,11 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export default function App() {
   const { pathname } = useLocation();
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
   const naviMenus = ["/products", "/children", "/chats", "/profile"];
   return (
-    <div>
+    <div className={cn({ "transition-opacity animate-pulse": isLoading })}>
       <Outlet />
       {(naviMenus.includes(pathname) ||
         (pathname.includes("/children")

@@ -1,6 +1,6 @@
-import { ImagePlus } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Form } from "react-router";
+import { Form, redirect } from "react-router";
 import InputPair from "~/common/components/input-pair";
 import SubHeader from "~/common/components/sub-header";
 import { Button } from "~/common/components/ui/button";
@@ -9,7 +9,17 @@ import type { Route } from "./+types/submit-page";
 import { makeSSRClient } from "~/supa-client";
 import { getLoggedInUserId } from "~/features/users/queries";
 import { z } from "zod";
-import { createProduct, createProductImages } from "../mutations";
+import {
+  createProduct,
+  createProductHashTags,
+  createProductImages,
+} from "../mutations";
+import { Badge } from "~/common/components/ui/badge";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "~/common/components/ui/alert";
 
 interface PreviewImage {
   url: string;
@@ -21,10 +31,14 @@ const formSchema = z.object({
   price: z.coerce.number(),
   description: z.string(),
   location: z.string(),
+  hashTags: z.string().transform((value) => {
+    const parsed = JSON.parse(value);
+    return parsed;
+  }),
 });
 
 export const action = async ({ request }: Route.ActionArgs) => {
-  const { client } = makeSSRClient(request);
+  const { client, headers } = makeSSRClient(request);
   const userId = await getLoggedInUserId(client);
   const formData = await request.formData();
 
@@ -34,7 +48,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
   if (!success) {
     return { formErrors: error.flatten().fieldErrors };
   }
-  const { title, price, description, location } = data;
+  const { title, price, description, location, hashTags } = data;
   const {
     data: { product_id },
   } = await createProduct(client, {
@@ -46,6 +60,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
   });
 
   const images = formData.getAll("images") as File[];
+  const imagePublicUrls: string[] = [];
   if (images) {
     for (const file of images) {
       if (file instanceof File) {
@@ -58,28 +73,37 @@ export const action = async ({ request }: Route.ActionArgs) => {
             });
 
           if (error) {
-            return { formErrors: { images: ["Invalid file size or type"] } };
+            console.warn("업로드 실패 : ", file.name);
+            continue;
           }
 
           const {
             data: { publicUrl },
           } = await client.storage.from("products").getPublicUrl(data.path);
 
-          await createProductImages(client, {
-            image: publicUrl,
-            productId: product_id,
-          });
-
-          return { ok: true };
+          imagePublicUrls.push(publicUrl);
         }
       }
     }
   }
+
+  await createProductImages(client, {
+    images: imagePublicUrls,
+    productId: product_id,
+  });
+
+  if (hashTags) {
+    await createProductHashTags(client, { hashTags, productId: product_id });
+  }
+
+  return redirect(`/`, { headers });
 };
 
-export default function SubmitPage() {
+export default function SubmitPage({ actionData }: Route.ComponentProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<PreviewImage[]>([]);
+  const [hashTag, setHashTag] = useState<string>("");
+  const [hashTags, setHashTags] = useState<string[]>([]);
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -99,6 +123,11 @@ export default function SubmitPage() {
 
   const handleDelete = (url: string) => () => {
     setImages((prev) => prev.filter((img) => img.url !== url));
+  };
+
+  const onClickDeleteHashTag = (tag: string) => {
+    console.log("### onClickDeleteHashTag => ", tag);
+    setHashTags((prev) => prev.filter((str) => str !== tag));
   };
 
   useEffect(() => {
@@ -182,6 +211,15 @@ export default function SubmitPage() {
             name="title"
             placeholder="제목을 입력해주세요."
           />
+          {actionData && "formErrors" in actionData ? (
+            <Alert>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {actionData?.formErrors.title}
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
           <InputPair
             label="금액"
             type="number"
@@ -189,6 +227,14 @@ export default function SubmitPage() {
             name="price"
             placeholder="가격을 입력해주세요."
           />
+          {actionData && "formErrors" in actionData ? (
+            <Alert>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {actionData?.formErrors.price}
+              </AlertDescription>
+            </Alert>
+          ) : null}
           <InputPair
             label="설명"
             id="description"
@@ -196,18 +242,70 @@ export default function SubmitPage() {
             textArea
             placeholder={`판매하는 제품의 설명을 작성해주세요.\n(판매를 금지하는 물품은 게시 후 삭제 될 수 있습니다.)\n\n우리 아이만을 위한 거래를 시작하세요.`}
           />
+          {actionData && "formErrors" in actionData ? (
+            <Alert>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {actionData?.formErrors.description}
+              </AlertDescription>
+            </Alert>
+          ) : null}
           <InputPair
             label="거래장소"
             id="location"
             name="location"
             placeholder="희망 거래 장소를 입력해주세요."
           />
+          {actionData && "formErrors" in actionData ? (
+            <Alert>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {actionData?.formErrors.location}
+              </AlertDescription>
+            </Alert>
+          ) : null}
           <InputPair
             label="해시태그"
-            id="hashtag"
-            name="hashtag"
+            value={hashTag}
             placeholder="#해시태그를 입력해주세요."
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              const {
+                target: { value },
+              } = event;
+              setHashTag(value);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && hashTag) {
+                if (!hashTags.includes(hashTag)) {
+                  setHashTags((prev) => [...prev, hashTag]);
+                  setHashTag("");
+                }
+              }
+            }}
           />
+          {hashTags ? (
+            <div className="flex px-4 gap-1">
+              {hashTags.map((hashTag: string, index: number) => (
+                <Badge variant="secondary" key={`hashTag_${index + 1}`}>
+                  {hashTag}
+                  <X onClick={() => onClickDeleteHashTag(hashTag)} />
+                </Badge>
+              ))}
+              <input
+                className="hidden"
+                name="hashTags"
+                value={JSON.stringify(hashTags)}
+              />
+            </div>
+          ) : null}
+          {actionData && "formErrors" in actionData ? (
+            <Alert>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {actionData?.formErrors.hashTags}
+              </AlertDescription>
+            </Alert>
+          ) : null}
         </div>
         {/* Floating Area */}
         <div className="flex w-full flex-col items-start">
