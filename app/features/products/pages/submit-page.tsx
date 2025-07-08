@@ -274,8 +274,9 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
               } = event;
               setHashTag(value);
             }}
-            onKeyDown={(event) => {
+            onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
               if (event.key === "Enter" && hashTag) {
+                event.preventDefault();
                 if (!hashTags.includes(hashTag)) {
                   setHashTags((prev) => [...prev, hashTag]);
                   setHashTag("");
