@@ -1,13 +1,14 @@
 import { Ellipsis, Heart, MapPin, MessageSquare } from "lucide-react";
 import { Link } from "react-router";
 import { Badge } from "~/common/components/ui/badge";
+import { DateTime } from "luxon";
 
 interface ProductCardProps {
-  id: string;
+  id: number;
   title: string;
   distance: string;
   postedAt: string;
-  price: string;
+  price: number;
   available: string;
   messagesCount: number;
   likesCount: number;
@@ -45,7 +46,7 @@ export default function ProductCard({
                 </div>
                 <Ellipsis className="size-0.5 aspect-square" />
                 <span className="text-xs font-normal leading-3">
-                  {postedAt}
+                  {DateTime.fromISO(postedAt).toRelative()}
                 </span>
               </div>
               <span className="text-[15px] font-bold leading-5.25 tracking-tight self-stretch">

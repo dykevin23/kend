@@ -64,7 +64,7 @@ export default function BottomNavigation() {
           </div>
         )}
       </NavLink>
-      <NavLink to="/profile">
+      <NavLink to="/users">
         {({ isActive }) => (
           <div className="flex flex-col w-[72px] items-center gap-2">
             <CircleUserRound

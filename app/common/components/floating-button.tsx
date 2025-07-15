@@ -14,7 +14,7 @@ export default function FloatingButton() {
   const [open, setOpen] = useState<boolean>(false);
   return (
     <div className={cn({ "w-full h-full fixed left-0 top-0 z-10": open })}>
-      <div className="w-full h-full absolute bg-black/40" />
+      {/* <div className="w-full h-full absolute bg-black/40" /> */}
       <DropdownMenu
         onOpenChange={(open) => {
           setOpen(open);

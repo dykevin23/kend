@@ -104,12 +104,13 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
   const [images, setImages] = useState<PreviewImage[]>([]);
   const [hashTag, setHashTag] = useState<string>("");
   const [hashTags, setHashTags] = useState<string[]>([]);
+  const isComposing = useRef(false); // 조합 중 여부
 
   const handleClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
 
@@ -121,8 +122,20 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
     setImages((prev) => [...prev, ...newImages]);
   };
 
-  const handleDelete = (url: string) => () => {
+  const handleDeleteImage = (url: string) => () => {
     setImages((prev) => prev.filter((img) => img.url !== url));
+  };
+
+  const handleKeyDownTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !isComposing.current) {
+      event.preventDefault();
+      if (hashTag.trim() !== "") {
+        if (!hashTags.includes(hashTag.trim())) {
+          setHashTags((prev) => [...prev, hashTag.trim()]);
+        }
+        setHashTag("");
+      }
+    }
   };
 
   const onClickDeleteHashTag = (tag: string) => {
@@ -153,7 +166,7 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
               className="hidden"
               multiple
               name="images"
-              onChange={handleChange}
+              onChange={handleChangeImage}
             />
 
             <div className="flex py-1 px-2 justify-center items-center gap-2.5 bg-muted-foreground/20 rounded-full">
@@ -180,7 +193,7 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
                     <Button
                       variant="ghost"
                       className="absolute -top-4 -right-4"
-                      onClick={handleDelete(image.url)}
+                      onClick={handleDeleteImage(image.url)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +217,7 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
         </div>
         {/* 이미지 업로드 영역 end */}
 
-        <div className="flex pb-4 flex-col items-start gap-4">
+        <div className="flex w-full pb-4 flex-col items-start gap-4">
           <InputPair
             label="제목"
             id="title"
@@ -268,24 +281,22 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
             label="해시태그"
             value={hashTag}
             placeholder="#해시태그를 입력해주세요."
+            onCompositionStart={() => {
+              isComposing.current = true;
+            }}
+            onCompositionEnd={() => {
+              isComposing.current = false;
+            }}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               const {
                 target: { value },
               } = event;
               setHashTag(value);
             }}
-            onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
-              if (event.key === "Enter" && hashTag) {
-                event.preventDefault();
-                if (!hashTags.includes(hashTag)) {
-                  setHashTags((prev) => [...prev, hashTag]);
-                  setHashTag("");
-                }
-              }
-            }}
+            onKeyDown={handleKeyDownTag}
           />
           {hashTags ? (
-            <div className="flex px-4 gap-1">
+            <div className="flex w-full px-4 gap-1 overflow-x-auto">
               {hashTags.map((hashTag: string, index: number) => (
                 <Badge variant="secondary" key={`hashTag_${index + 1}`}>
                   {hashTag}

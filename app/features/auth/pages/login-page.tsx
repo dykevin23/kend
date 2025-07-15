@@ -49,7 +49,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
 export default function LoginPage({ actionData }: Route.ComponentProps) {
   return (
-    <div className="bg-primary h-full space-y-10 py-[50px]">
+    <div className="bg-primary space-y-10 py-[50px] ">
       {/* 상단 로고 영역 start */}
       <div className="flex w-full flex-col items-center gap-4 pt-6">
         {/* 로고 */}

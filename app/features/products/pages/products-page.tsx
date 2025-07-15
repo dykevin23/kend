@@ -8,8 +8,23 @@ import {
   CarouselContent,
   CarouselItem,
 } from "~/common/components/ui/carousel";
+import type { Route } from "./+types/products-page";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { getProducts } from "../queries";
 
-export default function ProductsPage() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const url = new URL(request.url);
+  const products = await getProducts(client, {
+    page: Number(url.searchParams.get("page") || 1),
+  });
+  console.log(products);
+  return { products };
+};
+
+export default function ProductsPage({ loaderData }: Route.ComponentProps) {
   return (
     <div className="space-y-6">
       <Header
@@ -46,14 +61,14 @@ export default function ProductsPage() {
       </div>
 
       <div className="flex w-full flex-col gap-6 pb-10">
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.products.map((product) => (
           <ProductCard
-            key={`product-${index}`}
-            id={`product-${index}`}
-            title="몽클레어 키즈"
+            key={product.product_id}
+            id={product.product_id}
+            title={product.name}
             distance="2.1km 이내"
-            postedAt="3일전"
-            price="320,000원"
+            postedAt={product.created_at}
+            price={product.price}
             available="9개월 사용가능"
             messagesCount={3}
             likesCount={11}

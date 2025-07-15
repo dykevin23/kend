@@ -15,6 +15,7 @@ import "./app.css";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
 import { cn } from "./lib/utils";
+import { Settings } from "luxon";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -30,15 +31,20 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  Settings.defaultLocale = "ko";
+  Settings.defaultZone = "Asia/Seoul";
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
         <Meta />
         <Links />
       </head>
-      <body className="w-full max-w-lg mx-auto overflow-x-hidden">
+      <body>
         <main>{children}</main>
         <ScrollRestoration />
         <Scripts />
@@ -69,9 +75,13 @@ export default function App() {
   const { pathname } = useLocation();
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
-  const naviMenus = ["/products", "/children", "/chats", "/profile"];
+  const naviMenus = ["/products", "/children", "/chats", "/users"];
   return (
-    <div className={cn({ "transition-opacity animate-pulse": isLoading })}>
+    <div
+      className={cn("", {
+        "transition-opacity animate-pulse": isLoading,
+      })}
+    >
       <Outlet />
       {(naviMenus.includes(pathname) ||
         (pathname.includes("/children")
