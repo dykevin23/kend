@@ -12,6 +12,7 @@ interface ProductCardProps {
   available: string;
   messagesCount: number;
   likesCount: number;
+  image: string;
 }
 
 export default function ProductCard({
@@ -23,13 +24,16 @@ export default function ProductCard({
   available,
   messagesCount,
   likesCount,
+  image,
 }: ProductCardProps) {
   return (
     <Link to={`/products/${id}`}>
       <div className="flex px-4 flex-col items-start gap-4 self-stretch">
         <div className="flex pb-6 items-center gap-4 grow shrink-0 basis-0 self-stretch border-b border-b-muted">
           {/* 상품 이미지 영역 */}
-          <div className="flex size-28 justify-center items-center aspect-square rounded-[10px] bg-muted-foreground/30"></div>
+          <div className="flex size-28 justify-center items-center aspect-square rounded-[10px] overflow-hidden">
+            <img src={image} className="w-full h-full object-cover" />
+          </div>
 
           {/* 상품 정보 영역 */}
           <div className="flex flex-col justify-between items-start grow shrink-0 basis-0 self-stretch">

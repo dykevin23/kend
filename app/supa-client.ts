@@ -7,7 +7,20 @@ import {
 import type { MergeDeep, SetFieldType, SetNonNullable } from "type-fest";
 import type { Database as SupabaseDatabase } from "database.types";
 
-export type Database = MergeDeep<SupabaseDatabase, {}>;
+export type Database = MergeDeep<
+  SupabaseDatabase,
+  {
+    public: {
+      Views: {
+        products_view: {
+          Row: SetNonNullable<
+            SupabaseDatabase["public"]["Views"]["products_view"]["Row"]
+          >;
+        };
+      };
+    };
+  }
+>;
 
 export const browserClient = createBrowserClient<Database>(
   process.env.SUPABASE_URL!,
