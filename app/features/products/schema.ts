@@ -1,6 +1,7 @@
 import {
   bigint,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -30,6 +31,7 @@ export const productStatusType = pgEnum("product_status_type", [
  * profile_id       판매자(등록자)ID
  * created_at       등록일시
  * updated_at       수정일시
+ * stats            views: 조회수, chats: 채팅수, likes: 좋아요수
  */
 export const products = pgTable("products", {
   product_id: bigint({ mode: "number" })
@@ -45,6 +47,7 @@ export const products = pgTable("products", {
     .notNull(),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
+  stats: jsonb().notNull().default({ views: 0, chats: 0, likes: 0 }),
 });
 
 /**

@@ -13,5 +13,8 @@ SELECT
         FROM public.product_images i
         WHERE i.product_id = p.product_id
         LIMIT 1
-    ) as product_image
+    ) as product_image,
+    stats->>'views' AS views,
+    stats->>'chats' AS chats,
+    stats->>'likes' AS likes
 FROM public.products p

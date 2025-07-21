@@ -10,8 +10,8 @@ interface ProductCardProps {
   postedAt: string;
   price: number;
   available: string;
-  messagesCount: number;
-  likesCount: number;
+  messagesCount: string;
+  likesCount: string;
   image: string;
 }
 

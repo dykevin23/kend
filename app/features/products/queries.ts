@@ -36,16 +36,10 @@ export const getProductById = async (
   { product_id }: { product_id: number }
 ) => {
   const { data, error } = await client
-    .from("products")
+    .from("products_view")
     .select(
       `
-        product_id,
-        name,
-        price,
-        description,
-        deal_location,
-        status,
-        updated_at,
+        *,
         user:profiles!products_profile_id_profiles_profile_id_fk(
           profile_id, username, nickname, avatar
         )

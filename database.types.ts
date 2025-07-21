@@ -80,6 +80,27 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_id: string
+          event_type: Database["public"]["Enums"]["event_type"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_id?: string
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_id?: string
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -310,6 +331,7 @@ export type Database = {
           price: number
           product_id: number
           profile_id: string
+          stats: Json
           status: Database["public"]["Enums"]["product_status_type"]
           updated_at: string
         }
@@ -321,6 +343,7 @@ export type Database = {
           price: number
           product_id?: never
           profile_id: string
+          stats?: Json
           status?: Database["public"]["Enums"]["product_status_type"]
           updated_at?: string
         }
@@ -332,6 +355,7 @@ export type Database = {
           price?: number
           product_id?: never
           profile_id?: string
+          stats?: Json
           status?: Database["public"]["Enums"]["product_status_type"]
           updated_at?: string
         }
@@ -382,8 +406,10 @@ export type Database = {
     Views: {
       products_view: {
         Row: {
+          chats: string | null
           deal_location: string | null
           description: string | null
+          likes: string | null
           name: string | null
           price: number | null
           product_id: number | null
@@ -391,10 +417,13 @@ export type Database = {
           profile_id: string | null
           status: Database["public"]["Enums"]["product_status_type"] | null
           updated_at: string | null
+          views: string | null
         }
         Insert: {
+          chats?: never
           deal_location?: string | null
           description?: string | null
+          likes?: never
           name?: string | null
           price?: number | null
           product_id?: number | null
@@ -402,10 +431,13 @@ export type Database = {
           profile_id?: string | null
           status?: Database["public"]["Enums"]["product_status_type"] | null
           updated_at?: string | null
+          views?: never
         }
         Update: {
+          chats?: never
           deal_location?: string | null
           description?: string | null
+          likes?: never
           name?: string | null
           price?: number | null
           product_id?: number | null
@@ -413,6 +445,7 @@ export type Database = {
           profile_id?: string | null
           status?: Database["public"]["Enums"]["product_status_type"] | null
           updated_at?: string | null
+          views?: never
         }
         Relationships: [
           {
@@ -426,9 +459,16 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      track_event: {
+        Args: {
+          event_type: Database["public"]["Enums"]["event_type"]
+          event_data: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
+      event_type: "product_view"
       product_status_type: "sales" | "done"
     }
     CompositeTypes: {
@@ -557,6 +597,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      event_type: ["product_view"],
       product_status_type: ["sales", "done"],
     },
   },

@@ -46,6 +46,13 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     product_id: Number(params.productId),
   });
 
+  await client.rpc("track_event", {
+    event_type: "product_view",
+    event_data: {
+      product_id: params.productId,
+    },
+  });
+
   return { product, productImages };
 };
 
@@ -132,15 +139,15 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
             <div className="flex items-center gap-1">
               <div className="flex items-center gap-0.5">
                 <Eye className="size-4" />
-                <span className="text-xs">10</span>
+                <span className="text-xs">{loaderData.product.views}</span>
               </div>
               <div className="flex items-center gap-0.5">
                 <MessageSquare className="size-4" />
-                <span className="text-xs">20</span>
+                <span className="text-xs">{loaderData.product.chats}</span>
               </div>
               <div className="flex items-center gap-0.5">
                 <Heart className="size-4" />
-                <span className="text-xs">30</span>
+                <span className="text-xs">{loaderData.product.likes}</span>
               </div>
             </div>
           </div>

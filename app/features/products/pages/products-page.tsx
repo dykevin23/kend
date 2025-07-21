@@ -111,8 +111,8 @@ export default function ProductsPage({ loaderData }: Route.ComponentProps) {
             postedAt={product.updated_at}
             price={product.price}
             available="9개월 사용가능"
-            messagesCount={3}
-            likesCount={11}
+            messagesCount={product.chats}
+            likesCount={product.likes}
             image={product.product_image}
           />
         ))}
