@@ -24,8 +24,32 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "~/common/components/ui/dropdown-menu";
+import type { Route } from "./+types/product-page";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { getImagesByProductId, getProductById } from "../queries";
+import UserAvatar from "~/common/components/user-avatar";
+import { DateTime } from "luxon";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "~/common/components/ui/carousel";
 
-export default function ProductPage() {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const product = await getProductById(client, {
+    product_id: Number(params.productId),
+  });
+  const productImages = await getImagesByProductId(client, {
+    product_id: Number(params.productId),
+  });
+
+  return { product, productImages };
+};
+
+export default function ProductPage({ loaderData }: Route.ComponentProps) {
   const [isLike, setIsLike] = useState<boolean>(false);
 
   return (
@@ -55,19 +79,31 @@ export default function ProductPage() {
         }
       />
 
-      <div className="size-[375px] shrink-0 aspect-square bg-muted-foreground/30 relative"></div>
+      {/* <div className="size-[375px] shrink-0 aspect-square bg-muted-foreground/30 relative"></div> */}
+      <Carousel className="w-full">
+        <CarouselContent>
+          {loaderData.productImages.map((image) => (
+            <CarouselItem key={image.image}>
+              <img
+                src={image.image}
+                className="flex w-full aspect-square relative shrink-0"
+              />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
 
       <div className="flex flex-col items-start w-full">
         <div className="flex px-4 items-center gap-2 self-stretch ">
           <div className="flex justify-between grow shrink-0 basis-0">
-            <Link to="/profile/1">
+            <Link to={`/profile/${loaderData.product.user.profile_id}`}>
               <div className="flex gap-2 py-3 items-center">
-                <Avatar>
-                  <AvatarFallback>N</AvatarFallback>
-                  <AvatarImage src="https://github.com/facebook.png" />
-                </Avatar>
+                <UserAvatar
+                  name={loaderData.product.user.username}
+                  avatar={loaderData.product.user.avatar}
+                />
                 <span className="grow shrink-0 basis-0 text-sm font-bold">
-                  username
+                  {loaderData.product.user.username}
                 </span>
               </div>
             </Link>
@@ -80,7 +116,7 @@ export default function ProductPage() {
         </div>
         <div className="flex pt-6 px-4 flex-col justify-center items-start gap-4 self-stretch">
           <span className="text-xl font-semibold leading-7">
-            몽클레어 키즈 만약 문자가 길어지면 어떻게 될까 궁금하지 않으세요?
+            {loaderData.product.name}
           </span>
           <div className="flex items-start gap-2 self-stretch">
             <div className="flex items-center gap-1 grow shrink-0 basis-0 self-stretch">
@@ -88,7 +124,10 @@ export default function ProductPage() {
                 <MapPin className="size-3.5 aspect-square" />
                 <span className="text-xs">2.1km 이내</span>
               </div>
-              ·<span className="text-xs">3일전</span>
+              ·
+              <span className="text-xs">
+                {DateTime.fromISO(loaderData.product.updated_at).toRelative()}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <div className="flex items-center gap-0.5">
@@ -110,20 +149,21 @@ export default function ProductPage() {
               희망 직거래 장소
             </span>
             <span className="flex items-center gap-1 self-stretch text-sm leading-5.6">
-              2호선 사당역 1번 출구 파빠앞
+              {loaderData.product.deal_location}
             </span>
           </div>
         </div>
         <span className="flex py-6 px-4 items-center gap-2.5 self-stretch text-sm leading-5.6">
-          몽클레어 키즈 팝니다. 2022년에 현대백화점 몽클레어 매장에서 샀습니다.
-          영주증은 없습니다. 거의 입히지 못해 새제품이라고 봐도 되요.
+          {loaderData.product.description}
         </span>
       </div>
 
       <div className="flex w-full h-18 p-4 justify-center items-center gap-4 shrink-0 border-t-1">
         <div className="flex flex-col justify-center items-start gap-2 grow shrink-0 basis-0 self-stretch">
           <span className="text-xs font-medium">판매금액</span>
-          <span className="text-xl font-semibold">200,000원</span>
+          <span className="text-xl font-semibold">
+            {loaderData.product.price}
+          </span>
         </div>
         <Button
           variant="ghost"

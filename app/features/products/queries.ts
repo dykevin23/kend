@@ -30,3 +30,41 @@ export const getProductsPages = async (
   if (!count) return 1;
   return Math.ceil(count / PAGE_SIZE);
 };
+
+export const getProductById = async (
+  client: SupabaseClient<Database>,
+  { product_id }: { product_id: number }
+) => {
+  const { data, error } = await client
+    .from("products")
+    .select(
+      `
+        product_id,
+        name,
+        price,
+        description,
+        deal_location,
+        status,
+        updated_at,
+        user:profiles!products_profile_id_profiles_profile_id_fk(
+          profile_id, username, nickname, avatar
+        )
+      `
+    )
+    .eq("product_id", product_id)
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+export const getImagesByProductId = async (
+  client: SupabaseClient<Database>,
+  { product_id }: { product_id: number }
+) => {
+  const { data, error } = await client
+    .from("product_images")
+    .select("image")
+    .eq("product_id", product_id);
+  if (error) throw error;
+  return data;
+};
