@@ -8,14 +8,9 @@ import {
   MessageSquare,
   Share,
 } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useFetcher } from "react-router";
 import SubHeader from "~/common/components/sub-header";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "~/common/components/ui/avatar";
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
 import {
@@ -34,7 +29,9 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "~/common/components/ui/carousel";
+import { formatCurrency } from "~/lib/utils";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -57,7 +54,24 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 };
 
 export default function ProductPage({ loaderData }: Route.ComponentProps) {
-  const [isLike, setIsLike] = useState<boolean>(false);
+  const fetcher = useFetcher();
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState<number>(0);
+
+  const optimisticIsUpload =
+    fetcher.state === "idle"
+      ? loaderData.product.is_liked
+      : !loaderData.product.is_liked;
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
 
   return (
     <div>
@@ -87,23 +101,67 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
       />
 
       {/* <div className="size-[375px] shrink-0 aspect-square bg-muted-foreground/30 relative"></div> */}
-      <Carousel className="w-full">
-        <CarouselContent>
-          {loaderData.productImages.map((image) => (
-            <CarouselItem key={image.image}>
-              <img
-                src={image.image}
-                className="flex w-full aspect-square relative shrink-0"
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+      {loaderData.productImages.length > 1 ? (
+        <>
+          <Carousel className="w-full" setApi={setApi}>
+            <CarouselContent>
+              {loaderData.productImages.map((image) => (
+                <CarouselItem key={image.image}>
+                  <img
+                    src={image.image}
+                    className="flex w-full aspect-square relative shrink-0"
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+
+          <div className="flex justify-center items-center gap-2">
+            {loaderData.productImages.map((_, index) => (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="8"
+                height="8"
+                viewBox="0 0 8 8"
+                fill="none"
+                className="size-2 aspect-square"
+              >
+                <circle
+                  cx="4"
+                  cy="4"
+                  r="4"
+                  fill={index === current ? "white" : "#DEDEDE"}
+                />
+              </svg>
+            ))}
+          </div>
+        </>
+      ) : (
+        <img
+          src={loaderData.productImages[0].image}
+          className="flex w-full aspect-square relative shrink-0"
+        />
+      )}
 
       <div className="flex flex-col items-start w-full">
-        <div className="flex px-4 items-center gap-2 self-stretch ">
-          <div className="flex justify-between grow shrink-0 basis-0">
-            <Link to={`/profile/${loaderData.product.user.profile_id}`}>
+        {/* 등록자 프로필 정보 start */}
+        <div className="flex px-4 items-center gap-2 self-stretch">
+          <div className="flex py-3 items-center gap-2 grow shrink-0 basis-0 self-stretch border-b-1 border-b-accent">
+            <UserAvatar
+              name={loaderData.product.username}
+              avatar={loaderData.product.avatar}
+            />
+            <div className="flex justify-between items-center grow shrink-0 basis-0">
+              <div className="grow shrink-0 basis-0">
+                <span className="font-pretendard text-sm not-italic font-bold leading-3.5 tracking-[-0.4px]">
+                  {loaderData.product.username}
+                </span>
+              </div>
+              <Badge className="text-primary bg-accent rounded-sm font-normal">
+                4개월 사용가능
+              </Badge>
+            </div>
+            {/* <Link to={`/users/${loaderData.product.user.profile_id}`}>
               <div className="flex gap-2 py-3 items-center">
                 <UserAvatar
                   name={loaderData.product.user.username}
@@ -118,9 +176,11 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
               <Badge className="text-primary bg-primary-foreground rounded-sm font-normal">
                 4개월 사용가능
               </Badge>
-            </div>
+            </div> */}
           </div>
         </div>
+        {/* 등록자 프로필 정보 end */}
+
         <div className="flex pt-6 px-4 flex-col justify-center items-start gap-4 self-stretch">
           <span className="text-xl font-semibold leading-7">
             {loaderData.product.name}
@@ -169,16 +229,23 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
         <div className="flex flex-col justify-center items-start gap-2 grow shrink-0 basis-0 self-stretch">
           <span className="text-xs font-medium">판매금액</span>
           <span className="text-xl font-semibold">
-            {loaderData.product.price}
+            {`${formatCurrency(loaderData.product.price)}원`}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          className="flex px-4 justify-center items-center gap-2.5 shrink-0 text-primary"
-          onClick={() => setIsLike(!isLike)}
+        <fetcher.Form
+          method="post"
+          action={`/products/${loaderData.product.product_id}/like`}
         >
-          <Heart className="size-12" fill={isLike ? "currentColor" : "none"} />
-        </Button>
+          <Button
+            variant="ghost"
+            className="flex px-4 justify-center items-center gap-2.5 shrink-0 text-primary"
+          >
+            <Heart
+              className="size-12"
+              fill={optimisticIsUpload ? "currentColor" : "none"}
+            />
+          </Button>
+        </fetcher.Form>
         <Button
           asChild
           className="flex h-12 px-4 justify-center items-center gap-2.5 rounded-full text-sm font-semibold text-secondary"

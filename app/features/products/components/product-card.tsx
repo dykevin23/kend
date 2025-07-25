@@ -2,6 +2,7 @@ import { Ellipsis, Heart, MapPin, MessageSquare } from "lucide-react";
 import { Link } from "react-router";
 import { Badge } from "~/common/components/ui/badge";
 import { DateTime } from "luxon";
+import { formatCurrency } from "~/lib/utils";
 
 interface ProductCardProps {
   id: number;
@@ -54,7 +55,7 @@ export default function ProductCard({
                 </span>
               </div>
               <span className="text-[15px] font-bold leading-5.25 tracking-tight self-stretch">
-                {price}
+                {`${formatCurrency(price)}원`}
               </span>
             </div>
 

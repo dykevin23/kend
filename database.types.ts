@@ -406,46 +406,22 @@ export type Database = {
     Views: {
       products_view: {
         Row: {
+          avatar: string | null
           chats: string | null
           deal_location: string | null
           description: string | null
+          is_liked: boolean | null
           likes: string | null
           name: string | null
+          nickname: string | null
           price: number | null
           product_id: number | null
           product_image: string | null
           profile_id: string | null
           status: Database["public"]["Enums"]["product_status_type"] | null
           updated_at: string | null
+          username: string | null
           views: string | null
-        }
-        Insert: {
-          chats?: never
-          deal_location?: string | null
-          description?: string | null
-          likes?: never
-          name?: string | null
-          price?: number | null
-          product_id?: number | null
-          product_image?: never
-          profile_id?: string | null
-          status?: Database["public"]["Enums"]["product_status_type"] | null
-          updated_at?: string | null
-          views?: never
-        }
-        Update: {
-          chats?: never
-          deal_location?: string | null
-          description?: string | null
-          likes?: never
-          name?: string | null
-          price?: number | null
-          product_id?: number | null
-          product_image?: never
-          profile_id?: string | null
-          status?: Database["public"]["Enums"]["product_status_type"] | null
-          updated_at?: string | null
-          views?: never
         }
         Relationships: [
           {

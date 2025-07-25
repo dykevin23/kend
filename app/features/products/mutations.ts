@@ -51,3 +51,27 @@ export const createProductHashTags = async (
   const { error } = await client.from("product_hashtags").insert(rows);
   if (error) throw error;
 };
+
+export const likeProduct = async (
+  client: SupabaseClient<Database>,
+  { userId, productId }: { userId: string; productId: string }
+) => {
+  const { count } = await client
+    .from("product_likes")
+    .select("*", { count: "exact", head: true })
+    .eq("profile_id", userId)
+    .eq("product_id", Number(productId));
+
+  if (count === 0) {
+    await client.from("product_likes").insert({
+      product_id: Number(productId),
+      profile_id: userId,
+    });
+  } else {
+    await client
+      .from("product_likes")
+      .delete()
+      .eq("profile_id", userId)
+      .eq("product_id", Number(productId));
+  }
+};

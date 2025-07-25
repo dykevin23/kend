@@ -9,7 +9,7 @@ export const getProducts = async (
   const { data, error } = await client
     .from("products_view")
     .select("*")
-    // .neq("profile_id", userId)
+    .neq("profile_id", userId)
     .order("updated_at", { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
     .limit(PAGE_SIZE);
@@ -23,8 +23,8 @@ export const getProductsPages = async (
 ) => {
   const { count, error } = await client
     .from("products_view")
-    .select(`product_id`, { count: "exact", head: false });
-  // .neq("profile_id", userId);
+    .select(`product_id`, { count: "exact", head: false })
+    .neq("profile_id", userId);
 
   if (error) throw error;
   if (!count) return 1;
@@ -37,14 +37,7 @@ export const getProductById = async (
 ) => {
   const { data, error } = await client
     .from("products_view")
-    .select(
-      `
-        *,
-        user:profiles!products_profile_id_profiles_profile_id_fk(
-          profile_id, username, nickname, avatar
-        )
-      `
-    )
+    .select("*")
     .eq("product_id", product_id)
     .single();
   if (error) throw error;
