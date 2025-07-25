@@ -22,6 +22,41 @@
       "when": 1753064116122,
       "tag": "0002_tiny_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1753409718330,
+      "tag": "0003_nostalgic_shatterstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1753422137309,
+      "tag": "0004_chubby_marvel_zombies",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1753429813245,
+      "tag": "0005_cloudy_steel_serpent",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1753432190095,
+      "tag": "0006_easy_khan",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1753432274111,
+      "tag": "0007_ambiguous_cloak",
+      "breakpoints": true
     }
   ]
 }

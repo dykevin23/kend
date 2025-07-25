@@ -12,6 +12,10 @@ export default [
     route("/submit", "features/products/pages/submit-page.tsx"),
     route("/:productId", "features/products/pages/product-page.tsx"),
     route("/:productId/like", "features/products/pages/like-product-page.tsx"),
+    route(
+      "/:productId/chat",
+      "features/products/pages/create-product-chat-page.tsx"
+    ),
     route("/likes", "features/products/pages/like-products-page.tsx"),
   ]),
   ...prefix("/children", [

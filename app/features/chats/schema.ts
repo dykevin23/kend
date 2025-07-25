@@ -2,6 +2,7 @@ import {
   bigint,
   boolean,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uuid,
@@ -31,16 +32,21 @@ export const chatRooms = pgTable("chat_rooms", {
  * profile_id         사용자ID
  * created_at         등록일시
  */
-export const chatRoomMembers = pgTable("chat_room_members", {
-  chat_room_id: bigint({ mode: "number" }).references(
-    () => chatRooms.chat_room_id,
-    { onDelete: "cascade" }
-  ),
-  profile_id: uuid().references(() => profiles.profile_id, {
-    onDelete: "cascade",
-  }),
-  created_at: timestamp().notNull().defaultNow(),
-});
+export const chatRoomMembers = pgTable(
+  "chat_room_members",
+  {
+    chat_room_id: bigint({ mode: "number" }).references(
+      () => chatRooms.chat_room_id,
+      { onDelete: "cascade" }
+    ),
+    profile_id: uuid().references(() => profiles.profile_id, {
+      onDelete: "cascade",
+    }),
+    is_out: boolean().notNull().default(false),
+    created_at: timestamp().notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.chat_room_id, table.profile_id] })]
+);
 
 /**
  * 메세지(messages) 테이블

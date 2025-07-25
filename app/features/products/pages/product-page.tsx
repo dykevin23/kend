@@ -246,12 +246,14 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
             />
           </Button>
         </fetcher.Form>
-        <Button
-          asChild
-          className="flex h-12 px-4 justify-center items-center gap-2.5 rounded-full text-sm font-semibold text-secondary"
+        <fetcher.Form
+          method="post"
+          action={`/products/${loaderData.product.product_id}/chat`}
         >
-          <Link to={"/chats/1"}>메세지 보내기</Link>
-        </Button>
+          <Button className="flex h-12 px-4 justify-center items-center gap-2.5 rounded-full text-sm font-semibold text-secondary">
+            메세지 보내기
+          </Button>
+        </fetcher.Form>
       </div>
     </div>
   );

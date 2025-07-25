@@ -7,6 +7,11 @@ import {
 import Chat from "../components/chat";
 import { Plus, Send } from "lucide-react";
 import { Input } from "~/common/components/ui/input";
+import type { Route } from "./+types/chat-page";
+
+export const loader = async ({ params }: Route.LoaderArgs) => {
+  console.log("### params => ", params.chatId);
+};
 
 export default function ChatPage() {
   return (

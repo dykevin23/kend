@@ -16,19 +16,22 @@ export type Database = {
     Tables: {
       chat_room_members: {
         Row: {
-          chat_room_id: number | null
+          chat_room_id: number
           created_at: string
-          profile_id: string | null
+          is_out: boolean
+          profile_id: string
         }
         Insert: {
-          chat_room_id?: number | null
+          chat_room_id: number
           created_at?: string
-          profile_id?: string | null
+          is_out?: boolean
+          profile_id: string
         }
         Update: {
-          chat_room_id?: number | null
+          chat_room_id?: number
           created_at?: string
-          profile_id?: string | null
+          is_out?: boolean
+          profile_id?: string
         }
         Relationships: [
           {
@@ -404,6 +407,43 @@ export type Database = {
       }
     }
     Views: {
+      chats_view: {
+        Row: {
+          avatar: string | null
+          chat_room_id: number | null
+          created_at: string | null
+          is_out: boolean | null
+          last_message: string | null
+          nickname: string | null
+          not_seen_count: number | null
+          other_profile_id: string | null
+          product_id: number | null
+          profile_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_room_members_chat_room_id_chat_rooms_chat_room_id_fk"
+            columns: ["chat_room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["chat_room_id"]
+          },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["other_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       products_view: {
         Row: {
           avatar: string | null

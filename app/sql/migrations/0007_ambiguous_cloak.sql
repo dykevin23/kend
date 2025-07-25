@@ -1,0 +1,1 @@
+ALTER TABLE "chat_room_members" ALTER COLUMN "is_out" SET NOT NULL;
