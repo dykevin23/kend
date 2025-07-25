@@ -55,3 +55,12 @@ export const getImagesByProductId = async (
   if (error) throw error;
   return data;
 };
+
+export const getLikeProducts = async (client: SupabaseClient<Database>) => {
+  const { data, error } = await client
+    .from("products_view")
+    .select("*")
+    .eq("is_liked", true);
+  if (error) throw error;
+  return data;
+};
