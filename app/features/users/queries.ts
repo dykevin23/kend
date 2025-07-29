@@ -10,3 +10,22 @@ export const getLoggedInUserId = async (client: SupabaseClient<Database>) => {
 
   return data.user.id;
 };
+
+export const getProfileByUserId = async (
+  client: SupabaseClient<Database>,
+  { userId }: { userId: string }
+) => {
+  const { data, error } = await client
+    .from("profiles")
+    .select(
+      `
+      *,
+      followers:stats->>followers,
+      following:stats->>following
+    `
+    )
+    .eq("profile_id", userId)
+    .single();
+  if (error) throw error;
+  return data;
+};

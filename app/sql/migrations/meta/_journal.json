@@ -57,6 +57,13 @@
       "when": 1753432274111,
       "tag": "0007_ambiguous_cloak",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1753684785043,
+      "tag": "0008_daily_saracen",
+      "breakpoints": true
     }
   ]
 }

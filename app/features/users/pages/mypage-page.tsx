@@ -1,18 +1,35 @@
 import Header from "~/common/components/header";
 import Profile from "../components/profile";
 import { Button } from "~/common/components/ui/button";
-import { Link } from "react-router";
-import { BellDot, ChevronRight, PencilLine } from "lucide-react";
+import { BellDot, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
+import type { Route } from "./+types/mypage-page";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId, getProfileByUserId } from "../queries";
 
-export default function MypagePage() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const profile = await getProfileByUserId(client, { userId });
+  return { profile };
+};
+
+export default function MypagePage({ loaderData }: Route.ComponentProps) {
   const [tabStatus, setTabStatus] = useState<"sale" | "purchase">("sale");
   return (
     <div>
       <Header title="마이페이지" />
 
-      <Profile isMe />
+      <Profile
+        isMe
+        nickname={loaderData.profile.nickname}
+        avatar={loaderData.profile.avatar}
+        introduction={loaderData.profile.introduction}
+        comment={loaderData.profile.comment}
+        followers={loaderData.profile.followers}
+        following={loaderData.profile.following}
+      />
 
       <div className="flex flex-col w-full h-[510px] shrink-0 bg-muted/50 rounded-t-md px-4 py-8 gap-8 mt-4 mb-8">
         <div className="flex w-full justify-center items-start gap-2 shrink-0">

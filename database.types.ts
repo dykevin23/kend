@@ -380,6 +380,7 @@ export type Database = {
           introduction: string | null
           nickname: string
           profile_id: string
+          stats: Json | null
           updated_at: string
           username: string
         }
@@ -390,6 +391,7 @@ export type Database = {
           introduction?: string | null
           nickname: string
           profile_id: string
+          stats?: Json | null
           updated_at?: string
           username: string
         }
@@ -400,6 +402,7 @@ export type Database = {
           introduction?: string | null
           nickname?: string
           profile_id?: string
+          stats?: Json | null
           updated_at?: string
           username?: string
         }

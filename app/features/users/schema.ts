@@ -1,4 +1,11 @@
-import { pgSchema, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  jsonb,
+  pgSchema,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 const users = pgSchema("auth").table("users", {
   id: uuid().primaryKey(),
@@ -14,6 +21,7 @@ const users = pgSchema("auth").table("users", {
  * comment          기타 메세지
  * created_at       등록일시
  * updated_at       수정일시
+ * stats            followers(팔로워수), following(팔로잉수)
  */
 export const profiles = pgTable("profiles", {
   profile_id: uuid()
@@ -26,6 +34,10 @@ export const profiles = pgTable("profiles", {
   comment: text(),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
+  stats: jsonb().$type<{
+    followers: number;
+    following: number;
+  }>(),
 });
 
 /**
