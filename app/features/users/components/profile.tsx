@@ -1,11 +1,5 @@
 import { PencilLine } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "~/common/components/ui/avatar";
+import { Link, useFetcher } from "react-router";
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
 import UserAvatar from "~/common/components/user-avatar";
@@ -13,22 +7,26 @@ import { cn } from "~/lib/utils";
 
 export default function Profile({
   isMe = false,
+  profileId,
   nickname,
   avatar,
   introduction,
   comment,
   followers,
   following,
+  isFollowing,
 }: {
   isMe?: boolean;
+  profileId: string;
   nickname: string;
   avatar: string | null;
   introduction: string | null;
   comment: string | null;
   followers: string;
   following: string;
+  isFollowing: boolean;
 }) {
-  const [isFollow, setIsFollow] = useState<boolean>(false);
+  const fetcher = useFetcher();
   return (
     <div className="flex flex-col w-full py-4 justify-center items-start gap-4">
       <div className="flex pl-4 pr-6 items-center gap-6 self-stretch">
@@ -90,16 +88,18 @@ export default function Profile({
             </Link>
           </Button>
         ) : (
-          <Button
-            variant={isFollow ? "outline" : "default"}
-            className={cn([
-              "flex h-10 p-2.5 justify-center items-center gap-2.5 grow shrink-0 basis-0 rounded-md",
-              isFollow && "border-primary text-primary",
-            ])}
-            onClick={() => setIsFollow(!isFollow)}
-          >
-            {isFollow ? "팔로잉" : "팔로우"}
-          </Button>
+          <fetcher.Form method="post" action={`/users/${profileId}/follow`}>
+            <Button
+              variant={isFollowing ? "outline" : "default"}
+              className={cn([
+                "flex h-10 p-2.5 w-full justify-center items-center gap-2.5 grow shrink-0 basis-0 rounded-md",
+                isFollowing && "border-primary text-primary",
+              ])}
+              type="submit"
+            >
+              {isFollowing ? "팔로잉" : "팔로우"}
+            </Button>
+          </fetcher.Form>
         )}
       </div>
     </div>

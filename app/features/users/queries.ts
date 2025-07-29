@@ -16,14 +16,8 @@ export const getProfileByUserId = async (
   { userId }: { userId: string }
 ) => {
   const { data, error } = await client
-    .from("profiles")
-    .select(
-      `
-      *,
-      followers:stats->>followers,
-      following:stats->>following
-    `
-    )
+    .from("profiles_view")
+    .select("*")
     .eq("profile_id", userId)
     .single();
   if (error) throw error;

@@ -3,15 +3,34 @@ import Profile from "../components/profile";
 import { useSearchParams } from "react-router";
 import { cn } from "~/lib/utils";
 import { Ellipsis } from "lucide-react";
+import type { Route } from "./+types/user-page";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId, getProfileByUserId } from "../queries";
 
-export default function UserPage() {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const profile = await getProfileByUserId(client, { userId: params.userId });
+  return { profile };
+};
+
+export default function UserPage({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = searchParams.get("filter") || "ongoing";
   return (
     <div>
-      <SubHeader title="강남아메리카노" />
+      <SubHeader title={loaderData.profile.nickname} />
 
-      <Profile />
+      <Profile
+        profileId={loaderData.profile.profile_id}
+        nickname={loaderData.profile.nickname}
+        avatar={loaderData.profile.avatar}
+        introduction={loaderData.profile.introduction}
+        comment={loaderData.profile.comment}
+        followers={loaderData.profile.followers}
+        following={loaderData.profile.following}
+        isFollowing={loaderData.profile.is_following}
+      />
 
       <div className="flex flex-col w-full items-start gap-6">
         <div className="flex items-center self-stretch">

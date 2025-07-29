@@ -23,12 +23,14 @@ export default function MypagePage({ loaderData }: Route.ComponentProps) {
 
       <Profile
         isMe
+        profileId={loaderData.profile.profile_id}
         nickname={loaderData.profile.nickname}
         avatar={loaderData.profile.avatar}
         introduction={loaderData.profile.introduction}
         comment={loaderData.profile.comment}
         followers={loaderData.profile.followers}
         following={loaderData.profile.following}
+        isFollowing={false}
       />
 
       <div className="flex flex-col w-full h-[510px] shrink-0 bg-muted/50 rounded-t-md px-4 py-8 gap-8 mt-4 mb-8">

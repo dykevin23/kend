@@ -30,7 +30,10 @@ export default [
   ...prefix("/users", [
     index("features/users/pages/mypage-page.tsx"),
     route("/modify", "features/users/pages/modify-profile-page.tsx"),
-    route("/:userId", "features/users/pages/user-page.tsx"),
+    ...prefix("/:userId", [
+      index("features/users/pages/user-page.tsx"),
+      route("/follow", "features/users/pages/user-follow-page.tsx"),
+    ]),
   ]),
   ...prefix("/auth", [
     route("/login", "features/auth/pages/login-page.tsx"),

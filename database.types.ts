@@ -48,6 +48,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["profile_id"]
           },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       chat_rooms: {
@@ -129,10 +136,24 @@ export type Database = {
             referencedColumns: ["profile_id"]
           },
           {
+            foreignKeyName: "follows_follower_id_profiles_profile_id_fk"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
             foreignKeyName: "follows_following_id_profiles_profile_id_fk"
             columns: ["following_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_profiles_profile_id_fk"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
           },
         ]
@@ -175,6 +196,13 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_profiles_profile_id_fk"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
           },
         ]
@@ -286,6 +314,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["profile_id"]
           },
+          {
+            foreignKeyName: "product_likes_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       product_views: {
@@ -321,6 +356,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "product_views_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
           },
         ]
@@ -368,6 +410,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "products_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
           },
         ]
@@ -445,6 +494,20 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["profile_id"]
           },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["other_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       products_view: {
@@ -474,7 +537,53 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["profile_id"]
           },
+          {
+            foreignKeyName: "products_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
+      }
+      profiles_view: {
+        Row: {
+          avatar: string | null
+          comment: string | null
+          followers: string | null
+          following: string | null
+          introduction: string | null
+          is_following: boolean | null
+          nickname: string | null
+          profile_id: string | null
+          sales_product_count: number | null
+          username: string | null
+        }
+        Insert: {
+          avatar?: string | null
+          comment?: string | null
+          followers?: never
+          following?: never
+          introduction?: string | null
+          is_following?: never
+          nickname?: string | null
+          profile_id?: string | null
+          sales_product_count?: never
+          username?: string | null
+        }
+        Update: {
+          avatar?: string | null
+          comment?: string | null
+          followers?: never
+          following?: never
+          introduction?: string | null
+          is_following?: never
+          nickname?: string | null
+          profile_id?: string | null
+          sales_product_count?: never
+          username?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {

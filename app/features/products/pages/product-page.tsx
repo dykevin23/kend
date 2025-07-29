@@ -146,37 +146,24 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
       <div className="flex flex-col items-start w-full">
         {/* 등록자 프로필 정보 start */}
         <div className="flex px-4 items-center gap-2 self-stretch">
-          <div className="flex py-3 items-center gap-2 grow shrink-0 basis-0 self-stretch border-b-1 border-b-accent">
-            <UserAvatar
-              name={loaderData.product.username}
-              avatar={loaderData.product.avatar}
-            />
+          <div className="flex py-3 items-center grow shrink-0 basis-0 self-stretch border-b-1 border-b-accent">
             <div className="flex justify-between items-center grow shrink-0 basis-0">
-              <div className="grow shrink-0 basis-0">
+              <Link
+                to={`/users/${loaderData.product.profile_id}`}
+                className="flex grow shrink-0 basis-0 items-center gap-2"
+              >
+                <UserAvatar
+                  name={loaderData.product.username}
+                  avatar={loaderData.product.avatar}
+                />
                 <span className="font-pretendard text-sm not-italic font-bold leading-3.5 tracking-[-0.4px]">
                   {loaderData.product.username}
                 </span>
-              </div>
+              </Link>
               <Badge className="text-primary bg-accent rounded-sm font-normal">
                 4개월 사용가능
               </Badge>
             </div>
-            {/* <Link to={`/users/${loaderData.product.user.profile_id}`}>
-              <div className="flex gap-2 py-3 items-center">
-                <UserAvatar
-                  name={loaderData.product.user.username}
-                  avatar={loaderData.product.user.avatar}
-                />
-                <span className="grow shrink-0 basis-0 text-sm font-bold">
-                  {loaderData.product.user.username}
-                </span>
-              </div>
-            </Link>
-            <div className="flex justify-center items-center">
-              <Badge className="text-primary bg-primary-foreground rounded-sm font-normal">
-                4개월 사용가능
-              </Badge>
-            </div> */}
           </div>
         </div>
         {/* 등록자 프로필 정보 end */}
