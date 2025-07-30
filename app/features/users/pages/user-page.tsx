@@ -1,12 +1,12 @@
 import SubHeader from "~/common/components/sub-header";
 import Profile from "../components/profile";
-import { useSearchParams } from "react-router";
 import { cn } from "~/lib/utils";
 import type { Route } from "./+types/user-page";
 import { makeSSRClient } from "~/supa-client";
 import { getLoggedInUserId, getProfileByUserId } from "../queries";
 import { getProductsByUserId } from "~/features/products/queries";
 import UserProductCard from "../components/user-product-card";
+import { useState } from "react";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -24,10 +24,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 };
 
 export default function UserPage({ loaderData }: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const filter = (searchParams.get("filter") || "ongoing") as
-    | "ongoing"
-    | "done";
+  const [tabKey, setTabKey] = useState<"ongoing" | "done">("ongoing");
 
   return (
     <div>
@@ -52,14 +49,11 @@ export default function UserPage({ loaderData }: Route.ComponentProps) {
           <div
             className={cn([
               "flex h-12 justify-center items-center gap-2 grow shrink-0 basis-0 text-base font-semibold",
-              filter === "ongoing"
+              tabKey === "ongoing"
                 ? "border-b-2 border-primary"
                 : "text-muted-foreground",
             ])}
-            onClick={() => {
-              searchParams.set("filter", "ongoing");
-              setSearchParams(searchParams);
-            }}
+            onClick={() => setTabKey("ongoing")}
           >
             <span>판매중</span>
             <span>{loaderData.salesProducts.length}</span>
@@ -68,14 +62,11 @@ export default function UserPage({ loaderData }: Route.ComponentProps) {
           <div
             className={cn([
               "flex h-12 justify-center items-center gap-2 grow shrink-0 basis-0 text-base font-semibold",
-              filter === "done"
+              tabKey === "done"
                 ? "border-b-2 border-primary"
                 : "text-muted-foreground",
             ])}
-            onClick={() => {
-              searchParams.set("filter", "done");
-              setSearchParams(searchParams);
-            }}
+            onClick={() => setTabKey("done")}
           >
             <span>판매완료</span>
             <span>{loaderData.doneProducts.length}</span>
@@ -83,7 +74,7 @@ export default function UserPage({ loaderData }: Route.ComponentProps) {
         </div>
 
         <div className="flex px-4 items-start gap-4 self-stretch">
-          {(filter === "ongoing"
+          {(tabKey === "ongoing"
             ? loaderData.salesProducts
             : loaderData.doneProducts
           ).map((product) => (
@@ -93,7 +84,7 @@ export default function UserPage({ loaderData }: Route.ComponentProps) {
               title={product.name}
               postedAt={product.updated_at}
               price={product.price}
-              status={filter}
+              status={tabKey}
               isMe={false}
             />
           ))}
