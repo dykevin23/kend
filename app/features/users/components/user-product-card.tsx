@@ -9,6 +9,7 @@ interface UserProductCardProps {
   price: number;
   status: "ongoing" | "done";
   isMe: boolean;
+  image: string;
 }
 
 export default function UserProductCard({
@@ -18,10 +19,14 @@ export default function UserProductCard({
   price,
   status,
   isMe,
+  image,
 }: UserProductCardProps) {
   return (
     <div className="flex pb-6 items-start gap-4 grow shrink-0 basis-0 self-stretch">
-      <div className="flex size-28 justify-center items-center aspect-square bg-accent-foreground/50 rounded-md"></div>
+      {/* 상품 이미지 영역 */}
+      <div className="flex size-28 justify-center items-center aspect-square rounded-[10px] overflow-hidden">
+        <img src={image} className="w-full h-full object-cover" />
+      </div>
 
       <div className="flex flex-col justify-between items-start grow shrink-0 basis-0 self-stretch">
         <div className="flex flex-col items-start gap-4 grow shrink-0 basis-0 self-stretch">

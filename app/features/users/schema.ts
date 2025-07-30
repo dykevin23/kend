@@ -42,8 +42,8 @@ export const profiles = pgTable("profiles", {
 
 /**
  * 팔로우(follows) 테이블
- * follower_id      팔로우 사용자 ID(팔로우 당한 사람, 본인이 팔로우한)
- * following_id     팔로잉 사용자 ID(팔로우 한 사람, 본인)
+ * follower_id      팔로우 사용자 ID(팔로우 하는 사람)
+ * following_id     팔로잉 사용자 ID(팔로우 당하는 사람)
  */
 export const follows = pgTable("follows", {
   follower_id: uuid().references(() => profiles.profile_id, {

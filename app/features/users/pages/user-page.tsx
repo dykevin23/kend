@@ -12,7 +12,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
   const userId = await getLoggedInUserId(client);
   const profile = await getProfileByUserId(client, { userId: params.userId });
-  const products = await getProductsByUserId(client, { userId });
+  const products = await getProductsByUserId(client, { userId: params.userId });
 
   const salesProducts = products.filter((item) => item.status === "sales");
   const doneProducts = products.filter((item) => item.status === "done");
@@ -73,7 +73,7 @@ export default function UserPage({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
 
-        <div className="flex px-4 items-start gap-4 self-stretch">
+        <div className="flex flex-col px-4 items-start gap-4 self-stretch">
           {(tabKey === "ongoing"
             ? loaderData.salesProducts
             : loaderData.doneProducts
@@ -86,6 +86,7 @@ export default function UserPage({ loaderData }: Route.ComponentProps) {
               price={product.price}
               status={tabKey}
               isMe={false}
+              image={product.product_image}
             />
           ))}
         </div>

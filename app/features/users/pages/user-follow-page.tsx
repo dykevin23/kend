@@ -1,7 +1,7 @@
 import { makeSSRClient } from "~/supa-client";
 import type { Route } from "./+types/user-follow-page";
 import { getLoggedInUserId } from "../queries";
-import { followUser } from "./mutations";
+import { followUser } from "../mutations";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
   if (request.method !== "POST") {
@@ -10,5 +10,5 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
 
   const { client } = makeSSRClient(request);
   const userId = await getLoggedInUserId(client);
-  await followUser(client, { followerId: params.userId, followingId: userId });
+  await followUser(client, { followerId: userId, followingId: params.userId });
 };
