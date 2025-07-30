@@ -58,7 +58,7 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState<number>(0);
 
-  const optimisticIsUpload =
+  const optimisticIsLike =
     fetcher.state === "idle"
       ? loaderData.product.is_liked
       : !loaderData.product.is_liked;
@@ -229,7 +229,7 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
           >
             <Heart
               className="size-12"
-              fill={optimisticIsUpload ? "currentColor" : "none"}
+              fill={optimisticIsLike ? "currentColor" : "none"}
             />
           </Button>
         </fetcher.Form>

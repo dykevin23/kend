@@ -15,6 +15,7 @@ export default function Profile({
   followers,
   following,
   isFollowing,
+  productsCount,
 }: {
   isMe?: boolean;
   profileId: string;
@@ -25,8 +26,13 @@ export default function Profile({
   followers: string;
   following: string;
   isFollowing: boolean;
+  productsCount: number;
 }) {
   const fetcher = useFetcher();
+
+  const optimisticIsFollowing =
+    fetcher.state === "idle" ? isFollowing : !isFollowing;
+
   return (
     <div className="flex flex-col w-full py-4 justify-center items-start gap-4">
       <div className="flex pl-4 pr-6 items-center gap-6 self-stretch">
@@ -44,7 +50,7 @@ export default function Profile({
           <div className="flex justify-between items-center self-stretch">
             <div className="flex flex-col items-center gap-2">
               <div className="flex h-6 px-2 justify-center items-center gap-2.5 rounded-full bg-muted-foreground/10">
-                <span className="text-sm font-semibold">8,865</span>
+                <span className="text-sm font-semibold">{productsCount}</span>
               </div>
               <span className="text-sm">판매글</span>
             </div>
@@ -75,7 +81,7 @@ export default function Profile({
         </div>
       )}
 
-      <div className="flex px-4 items-start gap-2 self-stretch">
+      <div className="flex px-4 justify-between gap-2 self-stretch">
         {isMe ? (
           <Button
             variant="outline"
@@ -88,18 +94,36 @@ export default function Profile({
             </Link>
           </Button>
         ) : (
-          <fetcher.Form method="post" action={`/users/${profileId}/follow`}>
-            <Button
-              variant={isFollowing ? "outline" : "default"}
+          <>
+            <fetcher.Form
+              method="post"
+              action={`/users/${profileId}/follow`}
               className={cn([
-                "flex h-10 p-2.5 w-full justify-center items-center gap-2.5 grow shrink-0 basis-0 rounded-md",
-                isFollowing && "border-primary text-primary",
+                "flex",
+                optimisticIsFollowing ? "w-1/2" : "w-full",
               ])}
-              type="submit"
             >
-              {isFollowing ? "팔로잉" : "팔로우"}
-            </Button>
-          </fetcher.Form>
+              <Button
+                variant={optimisticIsFollowing ? "outline" : "default"}
+                className={cn([
+                  "flex h-10 p-2.5 justify-center items-center gap-2.5 grow shrink-0 basis-0 rounded-md",
+                  optimisticIsFollowing && "border-primary text-primary",
+                ])}
+                type="submit"
+              >
+                {optimisticIsFollowing ? "팔로잉" : "팔로우"}
+              </Button>
+            </fetcher.Form>
+            {optimisticIsFollowing && (
+              <Button
+                variant="outline"
+                className="flex h-10 p-2.5 w-full justify-center items-center gap-2.5 grow shrink-0 basis-0 rounded-md border-primary text-primary"
+                type="submit"
+              >
+                메세지
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>

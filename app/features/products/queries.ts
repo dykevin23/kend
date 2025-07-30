@@ -64,3 +64,17 @@ export const getLikeProducts = async (client: SupabaseClient<Database>) => {
   if (error) throw error;
   return data;
 };
+
+export const getProductsByUserId = async (
+  client: SupabaseClient<Database>,
+  { userId }: { userId: string }
+) => {
+  const { data, error } = await client
+    .from("products_view")
+    .select("*")
+    .eq("profile_id", userId)
+    .order("updated_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+};

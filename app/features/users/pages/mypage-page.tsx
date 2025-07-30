@@ -31,6 +31,7 @@ export default function MypagePage({ loaderData }: Route.ComponentProps) {
         followers={loaderData.profile.followers}
         following={loaderData.profile.following}
         isFollowing={false}
+        productsCount={0}
       />
 
       <div className="flex flex-col w-full h-[510px] shrink-0 bg-muted/50 rounded-t-md px-4 py-8 gap-8 mt-4 mb-8">
