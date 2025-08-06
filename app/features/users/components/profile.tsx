@@ -88,7 +88,7 @@ export default function Profile({
             className="flex h-10 p-2.5 justify-center items-center gap-2.5 grow shrink-0 basis-0 self-stretch rounded-md"
             asChild
           >
-            <Link to="/profile/modify">
+            <Link to="/users/modify">
               <PencilLine className="size-5 aspect-square" />
               프로필 수정하기
             </Link>

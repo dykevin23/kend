@@ -31,3 +31,31 @@ export const followUser = async (
       .eq("following_id", followingId);
   }
 };
+
+export const updateProfile = async (
+  client: SupabaseClient<Database>,
+  {
+    userId,
+    nickname,
+    avatar,
+    introduction,
+    comment,
+  }: {
+    userId: string;
+    nickname: string;
+    avatar?: string;
+    introduction: string;
+    comment: string;
+  }
+) => {
+  console.log("### mutation => ", avatar);
+  const { error } = await client
+    .from("profiles")
+    .update(
+      avatar
+        ? { nickname, avatar, introduction, comment }
+        : { nickname, introduction, comment }
+    )
+    .eq("profile_id", userId);
+  if (error) throw error;
+};
