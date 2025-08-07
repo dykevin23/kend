@@ -469,7 +469,13 @@ export type Database = {
           nickname: string | null
           not_seen_count: number | null
           other_profile_id: string | null
+          owner_profile_id: string | null
           product_id: number | null
+          product_image: string | null
+          product_name: string | null
+          product_status:
+            | Database["public"]["Enums"]["product_status_type"]
+            | null
           profile_id: string | null
         }
         Relationships: [
@@ -504,6 +510,34 @@ export type Database = {
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
             columns: ["other_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "chat_rooms_product_id_products_product_id_fk"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "chat_rooms_product_id_products_product_id_fk"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_view"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "products_profile_id_profiles_profile_id_fk"
+            columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "products_profile_id_profiles_profile_id_fk"
+            columns: ["owner_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]

@@ -1,26 +1,67 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "~/common/components/header";
 import Filter from "../components/Filter";
 import ChatCard from "../components/chat-card";
+import type { Route } from "./+types/chats-page";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { getChatRooms } from "../queries";
+import type { ChatFilterType } from "../constrants";
 
-export default function ChatsPage() {
-  const [filter, setFilter] = useState<string>("");
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const chats = await getChatRooms(client, { userId });
+  return { chats, userId };
+};
+
+export default function ChatsPage({ loaderData }: Route.ComponentProps) {
+  const [filter, setFilter] = useState<ChatFilterType>("");
+  const [chats, setChats] = useState(loaderData.chats);
+
+  useEffect(() => {
+    if (filter === "") {
+      setChats(loaderData.chats);
+    } else if (filter === "purchase") {
+      setChats(
+        loaderData.chats.filter(
+          (chat) =>
+            chat.product_status === "sales" &&
+            chat.owner_profile_id !== loaderData.userId
+        )
+      );
+    } else if (filter === "sale") {
+      setChats(
+        loaderData.chats.filter(
+          (chat) =>
+            chat.product_status === "sales" &&
+            chat.owner_profile_id === loaderData.userId
+        )
+      );
+    } else if (filter === "done") {
+      setChats(
+        loaderData.chats.filter((chat) => chat.product_status === "done")
+      );
+    }
+  }, [filter, loaderData.chats]);
+
   return (
     <div>
       <Header title="메세지" />
       <Filter filter={filter} onChange={setFilter} />
 
       <div className="flex w-full flex-col items-start">
-        {Array.from({ length: 20 }).map((_, index) => (
+        {chats.map((chat) => (
           <ChatCard
-            key={`chatId-${index}`}
-            id={`chatId-${index}`}
-            title="몽클레어 키즈 현대백화점 영수증"
+            key={chat.chat_room_id}
+            id={chat.chat_room_id}
+            title={chat.product_name}
             location="2.1km 이내"
-            postedAt="1분 전"
-            status="판매중"
-            avatarUrl="https://github.com/brunomars.png"
-            username="강남아메리카노"
+            postedAt={chat.created_at}
+            avatarUrl={chat.avatar}
+            username={chat.nickname}
+            productImage={chat.product_image}
+            status={chat.product_status}
           />
         ))}
       </div>
