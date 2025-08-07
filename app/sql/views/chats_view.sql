@@ -37,7 +37,8 @@ SELECT
     WHERE pi.product_id = product.product_id
     ORDER BY pi.image_id ASC
     LIMIT 1
-  ) as product_image
+  ) as product_image,
+  product.price
 FROM chat_room_members crm1
 INNER JOIN chat_room_members crm2
 ON crm1.chat_room_id = crm2.chat_room_id

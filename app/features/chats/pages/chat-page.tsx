@@ -1,44 +1,63 @@
 import SubHeader from "~/common/components/sub-header";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "~/common/components/ui/avatar";
 import Chat from "../components/chat";
 import { Plus, Send } from "lucide-react";
 import { Input } from "~/common/components/ui/input";
 import type { Route } from "./+types/chat-page";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { getChatRoomById } from "../queries";
+import UserAvatar from "~/common/components/user-avatar";
+import { formatCurrency } from "~/lib/utils";
+import { Link } from "react-router";
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  console.log("### params => ", params.chatId);
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const chatRoom = await getChatRoomById(client, {
+    chatRoomId: params.chatId,
+    userId,
+  });
+  return { chatRoom };
 };
 
-export default function ChatPage() {
+export default function ChatPage({ loaderData }: Route.ComponentProps) {
   return (
     <div>
       <SubHeader title="강남아메리카노" />
       {/* 판매정보 */}
       <div className="flex py-2 px-4 items-center gap-4 self-stretch border-b-1 border-b-muted">
         <div className="flex items-center gap-3 grow shrink-0 basis-0">
-          <div className="flex items-start gap-3 grow shrink-0 basis-0">
-            <div className="flex size-12 justify-center items-center aspect-square bg-muted-foreground/30 rounded-xl"></div>
+          <Link
+            to={`/products/${loaderData.chatRoom.product_id}`}
+            className="flex items-start gap-3 grow shrink-0 basis-0"
+          >
+            {/* 상품이미지 영역 */}
+            <div className="flex size-12 justify-center items-center aspect-square rounded-xl">
+              <img src={loaderData.chatRoom.product_image} />
+            </div>
+
             <div className="flex flex-col justify-center items-start gap-2 grow shrink-0 basis-0">
               <div className="flex flex-col justify-center items-start gap-1 self-stretch">
                 <div className="flex flex-col items-start gap-1 self-stretch">
-                  <span className="text-[15px] leading-5.2 text-ellipsis overflow-hidden web">
-                    몽클레어 키즈 현대백화점 영수증 더 길어지면 이렇게 되어야
-                    한다.
+                  <span className="font-pretendard text-[15px] not-italic font-normal leading-5.25 overflow-ellipsis overflow-hidden">
+                    {loaderData.chatRoom.product_name}
                   </span>
                 </div>
 
-                <span className="text-base font-medium">320,000원</span>
+                <span className="font-pretendard text-base not-italic font-medium leading-4 tracking-[-0.4px]">
+                  {`${formatCurrency(loaderData.chatRoom.price)}원`}
+                </span>
               </div>
             </div>
-          </div>
-          <Avatar className="size-10 rounded-full">
-            <AvatarFallback>N</AvatarFallback>
-            <AvatarImage src="https://github.com/microsoft.png" />
-          </Avatar>
+          </Link>
+          <Link to={`/users/${loaderData.chatRoom.other_profile_id}`}>
+            <UserAvatar
+              name={loaderData.chatRoom.nickname}
+              avatar={loaderData.chatRoom.avatar}
+              mode="view"
+              className="size-10 aspect-square"
+            />
+          </Link>
         </div>
       </div>
 

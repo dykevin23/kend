@@ -155,6 +155,7 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
                 <UserAvatar
                   name={loaderData.product.username}
                   avatar={loaderData.product.avatar}
+                  mode="view"
                 />
                 <span className="font-pretendard text-sm not-italic font-bold leading-3.5 tracking-[-0.4px]">
                   {loaderData.product.username}

@@ -470,6 +470,7 @@ export type Database = {
           not_seen_count: number | null
           other_profile_id: string | null
           owner_profile_id: string | null
+          price: number | null
           product_id: number | null
           product_image: string | null
           product_name: string | null
@@ -488,13 +489,6 @@ export type Database = {
           },
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
             columns: ["other_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -503,13 +497,20 @@ export type Database = {
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
             columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["other_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
-            columns: ["other_profile_id"]
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
