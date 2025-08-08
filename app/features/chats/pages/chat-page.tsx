@@ -1,14 +1,16 @@
 import SubHeader from "~/common/components/sub-header";
-import Chat from "../components/chat";
 import { Plus, Send } from "lucide-react";
 import { Input } from "~/common/components/ui/input";
 import type { Route } from "./+types/chat-page";
 import { makeSSRClient } from "~/supa-client";
 import { getLoggedInUserId } from "~/features/users/queries";
-import { getChatRoomById } from "../queries";
+import { getChatRoomById, getMessages } from "../queries";
 import UserAvatar from "~/common/components/user-avatar";
 import { formatCurrency } from "~/lib/utils";
 import { Link } from "react-router";
+import ChatRoom from "../components/chatRoom";
+import type { MessagesType } from "../components/chatRoom";
+import { useEffect, useState } from "react";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -17,10 +19,76 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     chatRoomId: params.chatId,
     userId,
   });
-  return { chatRoom };
+  const messages = await getMessages(client, { chatRoomId: params.chatId });
+  return { chatRoom, messages, userId };
 };
 
 export default function ChatPage({ loaderData }: Route.ComponentProps) {
+  const [messages, setMessages] = useState<MessagesType | null>(null);
+
+  useEffect(() => {
+    const messageDates = [
+      ...new Set(loaderData.messages.map((message) => message.created_date)),
+    ];
+
+    let object: MessagesType = {};
+    messageDates.forEach((item) => {
+      const filter = loaderData.messages.filter(
+        (message) => message.created_date === item
+      );
+      Object.assign(object, {
+        [item]:
+          filter.length > 1
+            ? filter.map((message, index) => {
+                const convertObject = {
+                  messageId: message.message_id,
+                  message: message.content,
+                  reverse: message.reverse,
+                  username: message.nickname,
+                  avatar: message.avatar,
+                };
+
+                if (index === 0) {
+                  const nextMessage = filter[index + 1];
+                  const skipShowTime =
+                    nextMessage.sender_id === message.sender_id &&
+                    nextMessage.created_time === message.created_time;
+                  return Object.assign({}, convertObject, {
+                    postedAt: skipShowTime ? "" : message.created_time,
+                    isFirst: true,
+                  });
+                } else if (index === filter.length - 1) {
+                  return Object.assign({}, convertObject, {
+                    postedAt: message.created_time,
+                    isFirst: filter[index - 1].sender_id !== message.sender_id,
+                  });
+                } else {
+                  const nextMessage = filter[index + 1];
+                  const prevMessage = filter[index - 1];
+                  const skipShowTime =
+                    nextMessage.sender_id === message.sender_id &&
+                    nextMessage.created_time === message.created_time;
+                  return Object.assign({}, convertObject, {
+                    postedAt: skipShowTime ? "" : message.created_time,
+                    isFirst: prevMessage.sender_id !== message.sender_id,
+                  });
+                }
+              })
+            : filter.map((message) => ({
+                messageId: message.message_id,
+                message: message.content,
+                reverse: message.reverse,
+                username: message.nickname,
+                avatar: message.avatar,
+                postedAt: message.created_time,
+                isFirst: true,
+              })),
+      });
+
+      setMessages(object);
+    });
+  }, [loaderData.messages]);
+
   return (
     <div>
       <SubHeader title="강남아메리카노" />
@@ -62,49 +130,8 @@ export default function ChatPage({ loaderData }: Route.ComponentProps) {
       </div>
 
       {/* 채팅창 */}
-      <div className="flex w-full py-6 px-4 flex-col items-center gap-6">
-        <span className="text-xs leading-3 text-primary">
-          2025년 2월 11일 목요일
-        </span>
-
-        <Chat message="안녕하세요" postedAt="오후 3:40" />
-        <Chat
-          message="안녕하세요"
-          postedAt="오후 3:42"
-          reverse
-          avatarUrl="https://github.com/facebook.png"
-        />
-        <Chat
-          message="제품 구매희망 합니다. 위치가 어디쯤 되시나요 제가 찾아가겠습니다."
-          postedAt="오후 3:53"
-        />
-        <Chat
-          message="강남구 압구정동 현대아파트 109동 903호  입니다. 차량번호 말씀해주세요"
-          postedAt="오후 3:54"
-          reverse
-          avatarUrl="https://github.com/facebook.png"
-        />
-
-        <div className="flex p-3 justify-center items-center gap-2.5 self-stretch rounded-full bg-secondary">
-          <div className="grow shrink-0 basis-0">
-            <span className="text-xs leading-4.75">
-              주소, 전화번호, 계좌 등 민감한 개인정보가 공유되었어요. 개인 정보
-              유출 피해 방지를 위해 택배 보다 대면으로 거래하세요.
-            </span>
-          </div>
-        </div>
-
-        <Chat
-          message="341나 9680입니다 내일 모레 오후 7시 쯤 시간 되시나요? 아마도 그전에 도착하긴 할것 같은데 혹시 몰라서요."
-          postedAt="오후 3:59"
-        />
-
-        <Chat
-          message="네, 차량등록은 해두었고, 내일 오시면 될듯합니다 내일은 계속 집에 있을 예정이니 7시 이후 아무때나 오셔도 됩니다 감사합니다"
-          postedAt="오후 4:04"
-          reverse
-          avatarUrl="https://github.com/facebook.png"
-        />
+      <div className="flex w-full pt-6 pb-20 px-4 flex-col items-center gap-6">
+        {messages ? <ChatRoom messages={messages} /> : null}
 
         <div className="flex flex-col w-full items-start fixed bottom-0 bg-white">
           <div className="flex h-18 py-2 px-4 justify-center items-center gap-4 self-stretch border-t-1 border-t-muted-foreground/30">

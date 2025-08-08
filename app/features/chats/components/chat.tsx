@@ -1,33 +1,39 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "~/common/components/ui/avatar";
 import Message from "./message";
+import UserAvatar from "~/common/components/user-avatar";
+import type { MessageProps } from "./chatRoom";
 
 interface ChatProps {
   message: string;
-  reverse?: boolean;
-  avatarUrl?: string;
-  username?: string;
+  reverse: boolean;
+  avatar: string;
+  username: string;
   postedAt: string;
 }
 
 export default function Chat({
+  messageId,
   message,
   reverse,
-  avatarUrl,
   username,
+  avatar,
   postedAt,
-}: ChatProps) {
+  isFirst,
+}: MessageProps) {
   return reverse ? (
-    <div className="flex flex-col items-start gap-2 self-stretch">
-      <Avatar className="size-8.5 rounded-xl">
-        <AvatarFallback>N</AvatarFallback>
-        <AvatarImage src={avatarUrl} />
-      </Avatar>
+    <>
+      {isFirst ? (
+        <div className="flex justify-center items-center gap-2">
+          <UserAvatar
+            name={username}
+            avatar={avatar}
+            mode="view"
+            className="size-8.5"
+          />
+          <span>{username}</span>
+        </div>
+      ) : null}
       <Message message={message} reverse postedAt={postedAt} />
-    </div>
+    </>
   ) : (
     <Message message={message} postedAt={postedAt} />
   );

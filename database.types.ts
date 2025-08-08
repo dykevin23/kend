@@ -489,13 +489,6 @@ export type Database = {
           },
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
-            columns: ["other_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -504,13 +497,20 @@ export type Database = {
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
             columns: ["other_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
-            columns: ["profile_id"]
+            columns: ["other_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
@@ -539,6 +539,43 @@ export type Database = {
           {
             foreignKeyName: "products_profile_id_profiles_profile_id_fk"
             columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      messages_view: {
+        Row: {
+          avatar: string | null
+          chat_room_id: number | null
+          content: string | null
+          created_at: string | null
+          created_date: string | null
+          created_time: string | null
+          message_id: number | null
+          nickname: string | null
+          reverse: boolean | null
+          sender_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_room_id_chat_rooms_chat_room_id_fk"
+            columns: ["chat_room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["chat_room_id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_profiles_profile_id_fk"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_profiles_profile_id_fk"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
