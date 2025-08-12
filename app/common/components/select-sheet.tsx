@@ -56,6 +56,7 @@ export default function SelectSheet({
           </div>
           {options.map((option) => (
             <div
+              key={option.value}
               className="flex h-14 py-2.5 px-6 items-center justify-between gap-2.5 self-stretch border-b-1 grow shrink-0 basis-0"
               onClick={() => onSelect(option.value)}
             >

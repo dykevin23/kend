@@ -10,8 +10,8 @@ export default function CloseFloatingIcon() {
       <g filter="url(#filter0_d)">
         <rect x="10" y="10" width="56" height="56" rx="28" fill="white" />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M32.3431 32.3431C32.7336 31.9526 33.3668 31.9526 33.7573 32.3431L38 36.5858L42.2426 32.3431C42.6332 31.9526 43.2663 31.9526 43.6569 32.3431C44.0474 32.7337 44.0474 33.3668 43.6569 33.7574L39.4142 38L43.6569 42.2426C44.0474 42.6332 44.0474 43.2663 43.6569 43.6569C43.2663 44.0474 42.6332 44.0474 42.2426 43.6569L38 39.4142L33.7573 43.6569C33.3668 44.0474 32.7336 44.0474 32.3431 43.6569C31.9526 43.2663 31.9526 42.6332 32.3431 42.2426L36.5858 38L32.3431 33.7574C31.9526 33.3668 31.9526 32.7337 32.3431 32.3431Z"
           fill="black"
         />
@@ -24,9 +24,9 @@ export default function CloseFloatingIcon() {
           width="76"
           height="76"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"

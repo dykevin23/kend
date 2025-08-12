@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Form } from "react-router";
 import BottomFloatingArea from "~/common/components/bottom-floating-area";
 import InputPair from "~/common/components/input-pair";
+import { ProfileInput } from "~/common/components/profile-input";
 import SelectPair from "~/common/components/select-pair";
 import SelectSheet from "~/common/components/select-sheet";
 import SubHeader from "~/common/components/sub-header";
@@ -13,6 +14,12 @@ export default function SubmitChildPage() {
     <div>
       <SubHeader title="아이 추가하기" />
       <Form>
+        <div className="flex justify-center items-center py-10">
+          <div className="size-26 flex-shrink-0 aspect-square rounded-full relative">
+            <ProfileInput />
+          </div>
+        </div>
+
         <div className="flex flex-col w-full justify-center items-start p-4 gap-2 self-stretch">
           <SelectPair
             label="출생정보"

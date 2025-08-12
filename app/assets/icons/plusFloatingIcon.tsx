@@ -11,14 +11,14 @@ export default function PlusFloatingIcon() {
       <g filter="url(#filter0_d_1_396)">
         <rect x="10" y="10" width="56" height="56" rx="28" fill="#FFC020" />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M38 28C38.6136 28 39.1111 28.4975 39.1111 29.1111V46.8889C39.1111 47.5025 38.6136 48 38 48C37.3864 48 36.8889 47.5025 36.8889 46.8889V29.1111C36.8889 28.4975 37.3864 28 38 28Z"
           fill="#163E64"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M28 38C28 37.3864 28.4975 36.8889 29.1111 36.8889H46.8889C47.5025 36.8889 48 37.3864 48 38C48 38.6136 47.5025 39.1111 46.8889 39.1111H29.1111C28.4975 39.1111 28 38.6136 28 38Z"
           fill="#163E64"
         />
@@ -31,9 +31,9 @@ export default function PlusFloatingIcon() {
           width="76"
           height="76"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
