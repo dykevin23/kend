@@ -22,6 +22,7 @@ export default function Filter({
         <div className="flex pr-2 items-center gap-2 self-stretch">
           {filters.map((item) => (
             <Button
+              key={`filterBtn_${item.value}`}
               className={cn([
                 "flex h-8 px-3 justify-center items-center gap-2.5 rounded-full",
                 "font-pretendard text-sm not-italic font-medium leading-3.5 tracking-[-0.2px]",

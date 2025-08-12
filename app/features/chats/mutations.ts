@@ -51,3 +51,21 @@ export const createChatRoom = async (
     }
   }
 };
+
+export const sendMessage = async (
+  client: SupabaseClient<Database>,
+  {
+    chatRoomId,
+    message,
+    userId,
+  }: { chatRoomId: string; message: string; userId: string }
+) => {
+  const { error } = await client.from("messages").insert({
+    chat_room_id: Number(chatRoomId),
+    sender_id: userId,
+    content: message,
+    seen: false,
+  });
+
+  if (error) throw error;
+};

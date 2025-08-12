@@ -10,6 +10,7 @@ export const getChatRooms = async (
     .from("chats_view")
     .select("*")
     .eq("profile_id", userId)
+    .not("last_message", "is", null)
     .order("created_at", { ascending: false });
 
   if (error) throw error;

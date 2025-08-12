@@ -7,10 +7,12 @@ import { getLoggedInUserId } from "~/features/users/queries";
 import { getChatRoomById, getMessages } from "../queries";
 import UserAvatar from "~/common/components/user-avatar";
 import { formatCurrency } from "~/lib/utils";
-import { Link } from "react-router";
+import { Form, Link } from "react-router";
 import ChatRoom from "../components/chatRoom";
 import type { MessagesType } from "../components/chatRoom";
 import { useEffect, useState } from "react";
+import { Button } from "~/common/components/ui/button";
+import { sendMessage } from "../mutations";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -21,6 +23,21 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   });
   const messages = await getMessages(client, { chatRoomId: params.chatId });
   return { chatRoom, messages, userId };
+};
+
+export const action = async ({ request, params }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const formData = await request.formData();
+  const message = formData.get("message");
+
+  if (message) {
+    await sendMessage(client, {
+      chatRoomId: params.chatId,
+      message: message as string,
+      userId,
+    });
+  }
 };
 
 export default function ChatPage({ loaderData }: Route.ComponentProps) {
@@ -136,10 +153,18 @@ export default function ChatPage({ loaderData }: Route.ComponentProps) {
         <div className="flex flex-col w-full items-start fixed bottom-0 bg-white">
           <div className="flex h-18 py-2 px-4 justify-center items-center gap-4 self-stretch border-t-1 border-t-muted-foreground/30">
             <Plus className="size-10 bg-muted-foreground/50 rounded-full shrink-0" />
-            <div className="flex h-12 p-4 items-center gap-2.5 grow shrink-0 basis-0">
-              <Input className="rounded-[200px]" />
-            </div>
-            <Send className="size-7 aspect-square" />
+            <Form method="post" className="flex items-center">
+              <div className="flex h-12 p-4 items-center gap-2.5 grow shrink-0 basis-0">
+                <Input
+                  id="message"
+                  name="message"
+                  className="rounded-[200px]"
+                />
+              </div>
+              <Button type="submit">
+                <Send className="size-7 aspect-square" />
+              </Button>
+            </Form>
           </div>
         </div>
       </div>

@@ -14,6 +14,8 @@ interface ChatCardProps {
   avatarUrl: string;
   username: string;
   productImage: string;
+  notSeenCount: number;
+  lastMessage: string;
 }
 
 export default function ChatCard({
@@ -25,22 +27,25 @@ export default function ChatCard({
   avatarUrl,
   username,
   productImage,
+  notSeenCount,
+  lastMessage,
 }: ChatCardProps) {
   return (
     <Link to={`/chats/${id}`} className="w-full">
       <div className="flex pt-2 px-4 items-start gap-4 self-stretch">
-        <div className="flex pb-6 items-center gap-3 grow shrink-0 basis-0 self-stretch border-b-1">
+        <div className="flex pb-6 items-center gap-3 self-stretch border-b-1">
           {/* 이미지 영역 */}
           <div className="flex size-20 justify-center items-center aspect-square rounded-xl">
             <img src={productImage} />
           </div>
 
           {/* 중앙 컨텐츠 영역 */}
-          <div className="flex flex-col justify-between items-start grow shrink-0 basis-0 self-stretch">
-            <div className="flex flex-col items-start gap-4 grow shrink-0 basis-0 self-stretch">
-              <div className="flex flex-col items-start gap-1 self-stretch">
-                <span className="font-pretendard text-[15px] overflow-hidden overflow-ellipsis not-italic font-medium leading-5.25">
-                  {title}
+          <div className="flex flex-col justify-between items-start grow min-w-0 self-stretch">
+            <div className="flex flex-col min-w-0 items-start gap-4 grow self-stretch">
+              <div className="flex flex-col min-w-0 items-start gap-1 self-stretch">
+                <span className="font-pretendard text-[15px] line-clamp-1 not-italic font-medium leading-5.25">
+                  {/* {title} */}
+                  {lastMessage}
                 </span>
                 <div className="flex items-center gap-1 self-stretch">
                   <div className="flex items-center gap-0.5">
@@ -67,14 +72,14 @@ export default function ChatCard({
             </div>
           </div>
 
-          <div className="flex w-18 flex-col items-center gap-2">
+          <div className="flex w-18 flex-col items-center gap-2 flex-shrink-0">
             <UserAvatar
               name={username}
               avatar={avatarUrl}
               mode="view"
               className="size-10 aspect-square"
             />
-            <span className="font-pretendard overflow-ellipsis overflow-hidden text-black text-sm not-italic font-medium leading-3.5 tracking-[-0.4px]">
+            <span className="font-pretendard truncate text-black text-sm not-italic font-medium leading-3.5 tracking-[-0.4px]">
               {username}
             </span>
           </div>

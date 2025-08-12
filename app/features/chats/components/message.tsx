@@ -4,12 +4,14 @@ interface MessageProps {
   message: string;
   reverse?: boolean;
   postedAt: string;
+  seen: boolean;
 }
 
 export default function Message({
   message,
   reverse = false,
   postedAt,
+  seen,
 }: MessageProps) {
   return (
     <div
@@ -18,9 +20,16 @@ export default function Message({
         reverse && "flex-row-reverse",
       ])}
     >
-      <span className="text-xs leading-3 text-right text-muted-foreground">
-        {postedAt}
-      </span>
+      <div className="flex flex-col">
+        {!reverse && (
+          <span className="text-xs text-secondary text-right font-semibold">
+            1
+          </span>
+        )}
+        <span className="text-xs leading-3 text-right text-muted-foreground">
+          {postedAt}
+        </span>
+      </div>
       <div className="flex flex-col justify-center items-end gap-1 max-w-68">
         <div
           className={cn([

@@ -8,6 +8,7 @@ export interface MessageProps {
   avatar: string;
   postedAt: string;
   isFirst: boolean;
+  seen: boolean;
 }
 
 export interface MessagesType {
@@ -15,7 +16,7 @@ export interface MessagesType {
 }
 
 export default function ChatRoom({ messages }: { messages: MessagesType }) {
-  console.log("### messages => ", messages);
+  // console.log("### messages => ", messages);
   return Object.keys(messages).map((date) => (
     <>
       <span className="text-xs leading-3 text-primary">

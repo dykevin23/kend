@@ -62,6 +62,8 @@ export default function ChatsPage({ loaderData }: Route.ComponentProps) {
             username={chat.nickname}
             productImage={chat.product_image}
             status={chat.product_status}
+            notSeenCount={chat.not_seen_count}
+            lastMessage={chat.last_message}
           />
         ))}
       </div>

@@ -2,14 +2,6 @@ import Message from "./message";
 import UserAvatar from "~/common/components/user-avatar";
 import type { MessageProps } from "./chatRoom";
 
-interface ChatProps {
-  message: string;
-  reverse: boolean;
-  avatar: string;
-  username: string;
-  postedAt: string;
-}
-
 export default function Chat({
   messageId,
   message,
@@ -18,6 +10,7 @@ export default function Chat({
   avatar,
   postedAt,
   isFirst,
+  seen,
 }: MessageProps) {
   return reverse ? (
     <>
@@ -32,9 +25,9 @@ export default function Chat({
           <span>{username}</span>
         </div>
       ) : null}
-      <Message message={message} reverse postedAt={postedAt} />
+      <Message message={message} reverse postedAt={postedAt} seen={seen} />
     </>
   ) : (
-    <Message message={message} postedAt={postedAt} />
+    <Message message={message} postedAt={postedAt} seen={seen} />
   );
 }
