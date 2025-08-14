@@ -3,8 +3,25 @@ import { Link, NavLink, Outlet } from "react-router";
 import Header from "~/common/components/header";
 import { buttonVariants } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
+import type { Route } from "./+types/child-overview-layout";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { getChildren } from "../queries";
 
-export default function ChildOverviewLayout() {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const children = await getChildren(client, { userId });
+
+  return {
+    children,
+    child: children.find((child) => child.child_id === Number(params.childId)),
+  };
+};
+
+export default function ChildOverviewLayout({
+  loaderData,
+}: Route.ComponentProps) {
   return (
     <div>
       <Header title="데이터" />
@@ -17,13 +34,9 @@ export default function ChildOverviewLayout() {
           </div>
           <div className="flex flex-col items-start gap-2.5 grow shrink-0 basis-0">
             <div className="flex pr-2 items-center gap-2 self-stretch">
-              {[
-                { id: 1, name: "첫째" },
-                { id: 2, name: "둘째" },
-                { id: 3, name: "셋째" },
-              ].map((item) => (
+              {loaderData.children.map((child) => (
                 <NavLink
-                  key={item.id}
+                  key={child.child_id}
                   className={({ isActive }) =>
                     cn(
                       buttonVariants(),
@@ -33,16 +46,16 @@ export default function ChildOverviewLayout() {
                         : "bg-muted text-primary"
                     )
                   }
-                  to={`/children/${item.id}`}
+                  to={`/children/${child.child_id}`}
                 >
-                  {item.name}
+                  {child.nickname}
                 </NavLink>
               ))}
             </div>
           </div>
         </div>
 
-        <Outlet />
+        <Outlet context={{ child: loaderData.child }} />
       </div>
     </div>
   );

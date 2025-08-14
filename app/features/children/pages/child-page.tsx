@@ -1,4 +1,6 @@
 import { ChevronRight, Settings } from "lucide-react";
+import { DateTime } from "luxon";
+import { useOutletContext } from "react-router";
 import { Area, AreaChart, CartesianGrid } from "recharts";
 import {
   Avatar,
@@ -18,6 +20,11 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "~/common/components/ui/chart";
+import UserAvatar from "~/common/components/user-avatar";
+import type { Route } from "./+types/child-page";
+import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { getGrowthDataByChildId } from "../queries";
 
 const chartData = [
   { height: 27 },
@@ -35,25 +42,37 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const userId = await getLoggedInUserId(client);
+  const growthData = await getGrowthDataByChildId(client, {
+    childId: params.childId,
+  });
+};
+
 export default function ChildPage() {
+  const { child } = useOutletContext<{ child: any }>();
   return (
     <>
       <div className="flex w-full p-4 items-center gap-2">
         <div className="flex items-center gap-2 grow shrink-0 basis-0 self-stretch">
-          <Avatar className="size-12 aspect-square">
-            <AvatarFallback>N</AvatarFallback>
-            <AvatarImage src="http://github.com/messi.png" />
-          </Avatar>
+          <UserAvatar
+            name={child.nickname}
+            mode="view"
+            avatar={null}
+            className="size-12"
+          />
+
           <div className="flex flex-col justify-center items-start gap-2 grow shrink-0 basis-0">
             <div className="flex justify-between items-center self-stretch grow shrink-0 basis-0">
-              <span className="text-base font-bold">첫째아이닉네임</span>
+              <span className="text-base font-bold">{child.nickname}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-muted-foreground/50">
-                김로운
+                {child.name}
               </span>
               <span className="text-sm font-medium text-muted-foreground/50">
-                2022. 01. 06
+                {DateTime.fromISO(child.birthday).toFormat("yyyy.MM.dd")}
               </span>
             </div>
           </div>
