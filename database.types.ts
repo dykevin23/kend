@@ -90,6 +90,95 @@ export type Database = {
           },
         ]
       }
+      child_growth: {
+        Row: {
+          child_id: number | null
+          created_at: string
+          growth_id: number
+          head_circumference: number | null
+          height: number | null
+          recorded_at: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          child_id?: number | null
+          created_at?: string
+          growth_id?: never
+          head_circumference?: number | null
+          height?: number | null
+          recorded_at: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          child_id?: number | null
+          created_at?: string
+          growth_id?: never
+          head_circumference?: number | null
+          height?: number | null
+          recorded_at?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_growth_child_id_children_child_id_fk"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["child_id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          birthday: string
+          child_id: number
+          created_at: string
+          gender: Database["public"]["Enums"]["gender_type"]
+          name: string | null
+          nickname: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          birthday: string
+          child_id?: never
+          created_at?: string
+          gender: Database["public"]["Enums"]["gender_type"]
+          name?: string | null
+          nickname: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birthday?: string
+          child_id?: never
+          created_at?: string
+          gender?: Database["public"]["Enums"]["gender_type"]
+          name?: string | null
+          nickname?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_parent_id_profiles_profile_id_fk"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "children_parent_id_profiles_profile_id_fk"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string | null
@@ -489,13 +578,6 @@ export type Database = {
           },
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
             columns: ["other_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -504,13 +586,20 @@ export type Database = {
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
             columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
+            columns: ["other_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "chat_room_members_profile_id_profiles_profile_id_fk"
-            columns: ["other_profile_id"]
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles_view"
             referencedColumns: ["profile_id"]
@@ -669,6 +758,7 @@ export type Database = {
     }
     Enums: {
       event_type: "product_view"
+      gender_type: "male" | "female"
       product_status_type: "sales" | "done"
     }
     CompositeTypes: {
@@ -798,6 +888,7 @@ export const Constants = {
   public: {
     Enums: {
       event_type: ["product_view"],
+      gender_type: ["male", "female"],
       product_status_type: ["sales", "done"],
     },
   },

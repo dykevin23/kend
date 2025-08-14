@@ -1,6 +1,7 @@
 import {
   type RouteConfig,
   index,
+  layout,
   prefix,
   route,
 } from "@react-router/dev/routes";
@@ -20,7 +21,9 @@ export default [
   ]),
   ...prefix("/children", [
     index("features/children/pages/child-redirect-page.tsx"),
-    route("/:childId", "features/children/pages/child-page.tsx"),
+    layout("features/children/layouts/child-overview-layout.tsx", [
+      route("/:childId", "features/children/pages/child-page.tsx"),
+    ]),
     route("/submit", "features/children/pages/submit-child-page.tsx"),
   ]),
   ...prefix("chats", [
