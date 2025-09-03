@@ -28,7 +28,7 @@ const chartConfig = {
 
 export default function GrowthChart() {
   return (
-    <div className="flex flex-col w-full px-4 pb-8 items-start gap-2.5 border-b-1 border-b-muted-foreground">
+    <div className="flex flex-col w-full pb-8 items-start gap-2.5 border-b-1">
       <div className="flex w-full flex-col pt-6 items-start gap-12 rounded-2xl border-1 bg-white">
         <div className="flex flex-col items-start gap-6 self-stretch">
           <div className="flex px-4 items-center gap-2.5 self-stretch">
@@ -61,16 +61,17 @@ export default function GrowthChart() {
                 margin={{
                   left: 12,
                   right: 12,
+                  bottom: 30,
                 }}
               >
                 <CartesianGrid vertical={false} />
-                <XAxis
+                {/* <XAxis
                   dataKey="month"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
                   tickFormatter={(value) => value.slice(0, 3)}
-                />
+                /> */}
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}

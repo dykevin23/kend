@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Heart, Plus, Search } from "lucide-react";
 import { Link, NavLink, Outlet } from "react-router";
 import Header from "~/common/components/header";
 import { buttonVariants } from "~/common/components/ui/button";
@@ -23,11 +23,21 @@ export default function ChildOverviewLayout({
   loaderData,
 }: Route.ComponentProps) {
   return (
-    <div>
-      <Header title="데이터" />
+    <div className="space-y-6">
+      <Header
+        title="데이터"
+        rightComponent={
+          <div className="flex items-center gap-6">
+            <Search className="size-7 aspect-square" />
+            <Link to="likes">
+              <Heart className="size-7 aspect-square" />
+            </Link>
+          </div>
+        }
+      />
       <div className="bg-muted/70">
         <div className="flex w-full py-4 pl-4 items-start gap-2">
-          <div className="flex h-8 px-3 justify-center items-center gap-2.5 rounded-full bg-muted">
+          <div className="flex h-8 px-3 justify-center items-center gap-2.5 rounded-full bg-muted-foreground/10">
             <Link to="/children/submit">
               <Plus className="size-4 aspect-square" />
             </Link>
@@ -43,7 +53,7 @@ export default function ChildOverviewLayout({
                       "flex h-8 px-3 justify-center items-center gap-2.5 rounded-full",
                       isActive
                         ? "bg-primary text-white"
-                        : "bg-muted text-primary"
+                        : "bg-muted-foreground/10 text-primary"
                     )
                   }
                   to={`/children/${child.child_id}`}
