@@ -25,7 +25,7 @@ export default function ChildOverviewLayout({
   return (
     <div>
       <Header title="데이터" />
-      <div className="bg-muted/30">
+      <div className="bg-muted/70">
         <div className="flex w-full py-4 pl-4 items-start gap-2">
           <div className="flex h-8 px-3 justify-center items-center gap-2.5 rounded-full bg-muted">
             <Link to="/children/submit">

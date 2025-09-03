@@ -13,7 +13,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
   if (!success) return redirect("/auth/login");
 
   const { provider } = data;
-  const redirectTo = `http://localhost:5173/auth/social/${provider}/complete`;
+  const redirectTo = `${process.env.REDIRECT_LOGIN_URL}/auth/social/${provider}/complete`;
   const { client, headers } = makeSSRClient(request);
 
   if (provider === "google" || provider === "kakao") {
