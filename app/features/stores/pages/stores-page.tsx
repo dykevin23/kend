@@ -1,8 +1,5 @@
-import { Heart } from "lucide-react";
 import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
-import { Badge } from "~/common/components/ui/badge";
-import { cn } from "~/lib/utils";
 import StoreCard from "../components/store-card";
 import StoreCategoryTab from "../components/store-category-tab";
 

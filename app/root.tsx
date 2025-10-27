@@ -3,17 +3,13 @@ import {
   Links,
   Meta,
   Outlet,
-  redirect,
   Scripts,
   ScrollRestoration,
-  useLocation,
-  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
 // import { makeSSRClient } from "./supa-client";
-import { cn } from "./lib/utils";
 import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
 

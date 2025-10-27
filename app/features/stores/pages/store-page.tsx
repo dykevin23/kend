@@ -1,7 +1,6 @@
 import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
 import { StoreInfo } from "../components/store-card";
-import { cn } from "~/lib/utils";
 import StoreCategoryTab from "../components/store-category-tab";
 import ProductCard from "~/features/products/components/product-card";
 
