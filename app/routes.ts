@@ -6,4 +6,10 @@ import {
   route,
 } from "@react-router/dev/routes";
 
-export default [index("common/pages/home-page.tsx")] satisfies RouteConfig;
+export default [
+  index("common/pages/home-page.tsx"),
+  ...prefix("stores", [
+    index("features/stores/pages/stores-page.tsx"),
+    route("/:storeId", "features/stores/pages/store-page.tsx"),
+  ]),
+] satisfies RouteConfig;

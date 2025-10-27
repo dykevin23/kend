@@ -12,9 +12,10 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { makeSSRClient } from "./supa-client";
+// import { makeSSRClient } from "./supa-client";
 import { cn } from "./lib/utils";
 import { Settings } from "luxon";
+import BottomNavigation from "./common/components/bottom-navigation";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -71,7 +72,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 // };
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <div>
+      <Outlet />
+      <BottomNavigation />
+    </div>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

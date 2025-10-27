@@ -13,6 +13,7 @@
     "db:typegen": "supabase gen types typescript --project-id spnuqbpwxgojhoonidrx > database.types.ts"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
     "@react-router/node": "^7.0.1",
     "@react-router/serve": "^7.0.1",
     "@supabase/ssr": "^0.5.2",
