@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -68,10 +69,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 // };
 
 export default function App() {
+  const { pathname } = useLocation();
+  const naviMenus = ["/products", "/children", "/chats", "/users"];
+
   return (
     <div>
       <Outlet />
-      <BottomNavigation />
+      {naviMenus.includes(pathname) && <BottomNavigation />}
     </div>
   );
 }

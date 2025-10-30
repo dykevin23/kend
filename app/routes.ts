@@ -12,4 +12,7 @@ export default [
     index("features/stores/pages/stores-page.tsx"),
     route("/:storeId", "features/stores/pages/store-page.tsx"),
   ]),
+  ...prefix("products", [
+    route("/:productId", "features/products/pages/product-page.tsx"),
+  ]),
 ] satisfies RouteConfig;

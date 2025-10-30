@@ -1,10 +1,15 @@
+import { Link } from "react-router";
+
 interface ProductCardProps {
   productId: string;
 }
 
 export default function ProductCard({ productId }: ProductCardProps) {
   return (
-    <div className="flex w-full h-60 flex-col items-center gap-2 shrink-0">
+    <Link
+      to={`/products/${productId}`}
+      className="flex w-full h-60 flex-col items-center gap-2 shrink-0"
+    >
       <div className="w-full h-37 shrink-0 bg-gray-500"></div>
       <div className="flex w-full h-3.5 px-2.5 justify-between items-center shrink-0">
         <span className="text-xs leading-3 tracking-[-0.4px]">
@@ -23,6 +28,6 @@ export default function ProductCard({ productId }: ProductCardProps) {
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
