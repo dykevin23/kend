@@ -14,6 +14,7 @@ import {
 import { Button } from "~/common/components/ui/button";
 import { Dialog, DialogContent } from "~/common/components/ui/dialog";
 import { cn } from "~/lib/utils";
+import DeliveryAddress from "../components/delivery-address";
 
 export default function ProductPage() {
   const [isActiveTab, setIsActiveTab] = useState<string>("home");
@@ -250,20 +251,20 @@ export default function ProductPage() {
           )}
       </BottomSheet>
 
-      <Modal open={isOpen2}>
-        <div className="flex w-full p-4 h-54.5 flex-col items-start gap-2.5 shrink-0 bg-white border-b-4 border-b-muted/10">
-          <div className="flex h-12 pt-2.5 px-4 items-center gap-2 shrink-0 self-stretch">
-            <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
-              배송주소
-            </span>
-          </div>
-          <div className="flex flex-col h-30 px-4 justify-center items-center gap-5 shrink-0 self-stretch rounded-md border-1">
-            <span className="text-sm leading-3.5 tracking-[-0.4px]">
-              등록된 배송 주소가 없습니다.
-            </span>
-            <Button variant="secondary">배송 주소 추가</Button>
-          </div>
-        </div>
+      <Modal
+        open={isOpen2}
+        title="결제"
+        onClose={() => setIsOpen2(false)}
+        footer={
+          <Button
+            variant="secondary"
+            className="flex w-full h-12.5 rounded-full"
+          >
+            결제하기
+          </Button>
+        }
+      >
+        <DeliveryAddress address="123" />
 
         <div className="flex w-full flex-col pt-5.5 pb-4 px-4 items-start gap-5 bg-white">
           <div className="flex px-4 items-center gap-2.5 self-stretch">

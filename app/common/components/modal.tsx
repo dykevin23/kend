@@ -3,10 +3,19 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader } from "./ui/dialog";
 
 interface ModalProps {
   open: boolean;
+  title: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
+  onClose: () => void;
 }
 
-export default function Modal({ open, children }: ModalProps) {
+export default function Modal({
+  open,
+  title,
+  children,
+  footer,
+  onClose,
+}: ModalProps) {
   return (
     <Dialog open={open}>
       <DialogContent
@@ -14,7 +23,7 @@ export default function Modal({ open, children }: ModalProps) {
         showCloseButton={false}
       >
         <DialogHeader className="flex h-11 self-stretch px-4">
-          <div className="aspect-square">
+          <div className="aspect-square" onClick={onClose}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="28"
@@ -30,7 +39,7 @@ export default function Modal({ open, children }: ModalProps) {
           </div>
           <div className="flex h-9 px-3 justify-center items-center gap-2.5">
             <span className="text-base font-bold leading-4 tracking-[-0.4px]">
-              결제
+              {title}
             </span>
           </div>
           <div className="size-7"></div>
@@ -38,14 +47,11 @@ export default function Modal({ open, children }: ModalProps) {
 
         <div className="flex flex-col">{children}</div>
 
-        <DialogFooter className="fixed bottom-0 flex w-full h-18 p-4 justify-center items-center gap-1.5 shrink-0 bg-white border-t-1 border-t-muted/10">
-          <Button
-            variant="secondary"
-            className="flex w-full h-12.5 rounded-full"
-          >
-            결제하기
-          </Button>
-        </DialogFooter>
+        {footer && (
+          <DialogFooter className="fixed bottom-0 flex w-full h-18 p-4 justify-center items-center gap-1.5 shrink-0 bg-white border-t-1 border-t-muted/10">
+            {footer}
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
