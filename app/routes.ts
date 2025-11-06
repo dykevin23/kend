@@ -15,4 +15,5 @@ export default [
   ...prefix("products", [
     route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
+  ...prefix("carts", [index("features/carts/pages/shopping-cart-page.tsx")]),
 ] satisfies RouteConfig;
