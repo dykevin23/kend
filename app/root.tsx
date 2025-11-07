@@ -3,6 +3,7 @@ import {
   Links,
   Meta,
   Outlet,
+  redirect,
   Scripts,
   ScrollRestoration,
   useLocation,
@@ -51,6 +52,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 // export const loader = async ({ request }: Route.LoaderArgs) => {
+//   return redirect("/auth/login");
 //   const { client, headers } = makeSSRClient(request);
 //   const {
 //     data: { user },

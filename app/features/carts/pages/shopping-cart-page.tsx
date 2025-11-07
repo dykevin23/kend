@@ -8,7 +8,7 @@ import Divider from "~/common/components/divider";
 import RecommendProducts from "~/features/products/components/recommend-products";
 
 export default function ShoppingCartPage() {
-  const list = ["1", "2"];
+  const list = [];
 
   const [checkAll, setCheckAll] = useState<boolean>(false);
 
