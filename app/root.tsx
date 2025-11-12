@@ -14,6 +14,7 @@ import "./app.css";
 // import { makeSSRClient } from "./supa-client";
 import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
+import { makeSSRClient } from "./supa-client";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -51,24 +52,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-// export const loader = async ({ request }: Route.LoaderArgs) => {
-//   return redirect("/auth/login");
-//   const { client, headers } = makeSSRClient(request);
-//   const {
-//     data: { user },
-//   } = await client.auth.getUser();
-//   if (user) {
-//     // const profile = await getUserById(client, { id: user.id });
-//     // return { user, profile };
-//   } else {
-//     const url = new URL(request.url);
-//     const pathname = url.pathname;
-//     if (!pathname.startsWith("/auth")) {
-//       return redirect("/auth/login", { headers });
-//     }
-//   }
-//   return { user: null, profile: null };
-// };
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+  if (user) {
+    // const profile = await getUserById(client, { id: user.id });
+    // return { user, profile };
+  } else {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    if (!pathname.startsWith("/auth")) {
+      return redirect("/auth/login", { headers });
+    }
+  }
+  return { user: null, profile: null };
+};
 
 export default function App() {
   const { pathname } = useLocation();

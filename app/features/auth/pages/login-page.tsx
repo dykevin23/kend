@@ -6,7 +6,7 @@ import { Link } from "react-router";
 
 export default function LoginPage() {
   return (
-    <div className="flex flex-col pt-12.5">
+    <div className="flex flex-col h-max max-h-full pt-12.5 bg-primary/50">
       {/* LOGO start */}
       <div className="flex w-full flex-col items-center gap-4">
         <div className="flex flex-col justify-center items-center gap-1 self-stretch">

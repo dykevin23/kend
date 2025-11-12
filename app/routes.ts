@@ -19,5 +19,14 @@ export default [
   ...prefix("auth", [
     route("/login", "features/auth/pages/login-page.tsx"),
     route("/join", "features/auth/pages/join-page.tsx"),
+    ...prefix("/social/:provider", [
+      route("/start", "features/auth/pages/social-start-page.tsx"),
+      route("/complete", "features/auth/pages/social-complete-page.tsx"),
+    ]),
+    ...prefix("/naver", [
+      route("/start", "features/auth/pages/naver-start-page.tsx"),
+      route("/complete", "features/auth/pages/naver-complete-page.tsx"),
+      route("/callback", "features/auth/pages/naver-callback-page.tsx"),
+    ]),
   ]),
 ] satisfies RouteConfig;
