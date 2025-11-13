@@ -16,6 +16,7 @@ export default [
     route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
   ...prefix("carts", [index("features/carts/pages/shopping-cart-page.tsx")]),
+  ...prefix("search", [index("features/search/pages/search-page.tsx")]),
   ...prefix("auth", [
     route("/login", "features/auth/pages/login-page.tsx"),
     route("/join", "features/auth/pages/join-page.tsx"),

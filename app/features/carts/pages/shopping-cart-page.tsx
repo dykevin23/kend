@@ -129,7 +129,9 @@ export default function ShoppingCartPage() {
         /* 장바구니 비어있을경우 end */
       )}
 
-      <RecommendProducts />
+      <div className="flex pt-4 flex-col items-start gap-1">
+        <RecommendProducts />
+      </div>
     </Content>
   );
 }

@@ -32,7 +32,9 @@ export default function Header({ title, useRight = true }: HeaderProps) {
       ) : null}
       {useRight ? (
         <div className="flex items-center gap-6">
-          <Search className="size-7" />
+          <Link to="/search">
+            <Search className="size-7" />
+          </Link>
           <Link to="/carts">
             <ShoppingBag className="size-7" />
           </Link>
