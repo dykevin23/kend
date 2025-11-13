@@ -9,12 +9,17 @@ as $$
 begin
     if new.raw_app_meta_data is not null then
         if new.raw_app_meta_data ? 'provider' AND new.raw_app_meta_data ->> 'provider' = 'email' then
-            if new.raw_user_meta_data ? 'nickname' AND new.raw_user_meta_data ? 'username' then
-                insert into public.profiles (profile_id, nickname, username)
-                values (new.id, new.raw_user_meta_data ->> 'nickname', new.raw_user_meta_data ->> 'username');
-            else
-                insert into public.profiles (profile_id, nickname, username)
-                values (new.id, 'mr.' || substr(md5(random()::text), 1, 8),'Anonymous');
+            if new.raw_user_meta_data ? 'provider' AND new.raw_user_meta_data ->> 'provider' = 'naver' then
+                insert into public.profiles (profile_id, username, nickname, avatar)
+                values (new.id, new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'nickname' || substr(md5(random()::text), 1, 5), new.raw_user_meta_data ->> 'profile_image');
+            else 
+                if new.raw_user_meta_data ? 'nickname' AND new.raw_user_meta_data ? 'username' then
+                    insert into public.profiles (profile_id, nickname, username)
+                    values (new.id, new.raw_user_meta_data ->> 'nickname', new.raw_user_meta_data ->> 'username');
+                else
+                    insert into public.profiles (profile_id, nickname, username)
+                    values (new.id, 'mr.' || substr(md5(random()::text), 1, 8),'Anonymous');
+                end if;
             end if;
         end if;
 

@@ -7,15 +7,14 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
-  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+// import { makeSSRClient } from "./supa-client";
+import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
-import { cn } from "./lib/utils";
-import { Settings } from "luxon";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -73,20 +72,12 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export default function App() {
   const { pathname } = useLocation();
-  const navigation = useNavigation();
-  const isLoading = navigation.state === "loading";
-  const naviMenus = ["/products", "/children", "/chats", "/users"];
+  const naviMenus = ["/stores", "/children", "/chats", "/users"];
+
   return (
-    <div
-      className={cn("", {
-        "transition-opacity animate-pulse": isLoading,
-      })}
-    >
+    <div>
       <Outlet />
-      {(naviMenus.includes(pathname) ||
-        (pathname.includes("/children")
-          ? !isNaN(Number(pathname.split("/children/").at(-1)))
-          : false)) && <BottomNavigation />}
+      {naviMenus.includes(pathname) && <BottomNavigation />}
     </div>
   );
 }

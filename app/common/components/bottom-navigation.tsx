@@ -1,87 +1,49 @@
-import {
-  ChartPie,
-  CircleUserRound,
-  House,
-  MessageCircleMore,
-} from "lucide-react";
-import { NavLink } from "react-router";
+import { House } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 export default function BottomNavigation() {
   return (
-    <nav className="flex justify-between w-full h-[56px] items-start self-stretch py-2.5 px-6 fixed bottom-0 border-t-1 bg-white">
-      <NavLink to="/products">
-        {({ isActive }) => (
-          <div className="flex flex-col w-[72px] items-center gap-2">
-            <House
-              fill={isActive ? "black" : "gray"}
-              stroke={isActive ? "black" : "gray"}
-            />
-            <span
-              className={cn([
-                "text-xs leading-3",
-                isActive ? "text-black" : "text-muted-foreground",
-              ])}
-            >
-              거래하기
-            </span>
-          </div>
-        )}
-      </NavLink>
-      <NavLink to="/children">
-        {({ isActive }) => (
-          <div className="flex flex-col w-[72px] items-center gap-2">
-            <ChartPie
-              fill={isActive ? "black" : "gray"}
-              stroke={isActive ? "black" : "gray"}
-            />
-            <span
-              className={cn([
-                "text-xs leading-3",
-                isActive ? "text-black" : "text-muted-foreground",
-              ])}
-            >
-              데이터
-            </span>
-          </div>
-        )}
-      </NavLink>
-      <NavLink to="/chats">
-        {({ isActive }) => (
-          <div className="flex flex-col w-[72px] items-center gap-2">
-            <MessageCircleMore
-              fill={isActive ? "black" : "gray"}
-              stroke={isActive ? "black" : "gray"}
-            />
-            <span
-              className={cn([
-                "text-xs leading-3",
-                isActive ? "text-black" : "text-muted-foreground",
-              ])}
-            >
-              메세지
-            </span>
-          </div>
-        )}
-      </NavLink>
-      <NavLink to="/users">
-        {({ isActive }) => (
-          <div className="flex flex-col w-[72px] items-center gap-2">
-            <CircleUserRound
-              fill={isActive ? "black" : "gray"}
-              stroke={isActive ? "black" : "gray"}
-            />
-            <span
-              className={cn([
-                "text-xs leading-3",
-                isActive ? "text-black" : "text-muted-foreground",
-              ])}
-            >
-              마이페이지
-            </span>
-          </div>
-        )}
-      </NavLink>
+    <nav
+      className={cn(
+        "flex w-full h-14 py-2.5 px-6 justify-between items-start self-stretch fixed bottom-0",
+        "border-t-1 border-t-muted/30 bg-white"
+      )}
+    >
+      <div className="flex flex-col w-18 items-center gap-1">
+        <div className="flex flex-col items-center">
+          <House className="size-7" />
+        </div>
+        <span className="text-center text-xs leading-3 tracking-[-0.4px]">
+          스토어
+        </span>
+      </div>
+
+      <div className="flex flex-col w-18 items-center gap-1">
+        <div className="flex flex-col items-center">
+          <House className="size-7" />
+        </div>
+        <span className="text-center text-xs leading-3 tracking-[-0.4px]">
+          스토어
+        </span>
+      </div>
+
+      <div className="flex flex-col w-18 items-center gap-1">
+        <div className="flex flex-col items-center">
+          <House className="size-7" />
+        </div>
+        <span className="text-center text-xs leading-3 tracking-[-0.4px]">
+          스토어
+        </span>
+      </div>
+
+      <div className="flex flex-col w-18 items-center gap-1">
+        <div className="flex flex-col items-center">
+          <House className="size-7" />
+        </div>
+        <span className="text-center text-xs leading-3 tracking-[-0.4px]">
+          스토어
+        </span>
+      </div>
     </nav>
   );
 }

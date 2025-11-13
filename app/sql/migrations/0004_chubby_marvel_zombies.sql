@@ -1,1 +1,0 @@
-ALTER TABLE "chat_room_members" RENAME COLUMN "isOut" TO "is_out";

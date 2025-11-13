@@ -1,1 +1,0 @@
-ALTER TABLE "chat_room_members" ADD CONSTRAINT "chat_room_members_chat_room_id_profile_id_pk" PRIMARY KEY("chat_room_id","profile_id");

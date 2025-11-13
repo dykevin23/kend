@@ -1,1 +1,0 @@
-ALTER TABLE "chat_room_members" ADD COLUMN "isOut" boolean DEFAULT false NOT NULL;

@@ -11,28 +11,7 @@ export type Database = MergeDeep<
   SupabaseDatabase,
   {
     public: {
-      Views: {
-        products_view: {
-          Row: SetNonNullable<
-            SupabaseDatabase["public"]["Views"]["products_view"]["Row"]
-          >;
-        };
-        chats_view: {
-          Row: SetNonNullable<
-            SupabaseDatabase["public"]["Views"]["chats_view"]["Row"]
-          >;
-        };
-        profiles_view: {
-          Row: SetNonNullable<
-            SupabaseDatabase["public"]["Views"]["profiles_view"]["Row"]
-          >;
-        };
-        messages_view: {
-          Row: SetNonNullable<
-            SupabaseDatabase["public"]["Views"]["messages_view"]["Row"]
-          >;
-        };
-      };
+      Views: {};
     };
   }
 >;

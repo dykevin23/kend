@@ -4,7 +4,7 @@ import { makeSSRClient } from "~/supa-client";
 import type { Route } from "./+types/social-start-page";
 
 const paramsSchema = z.object({
-  provider: z.enum(["naver", "kakao", "google"]),
+  provider: z.enum(["kakao", "google"]),
 });
 
 export const loader = async ({ params, request }: Route.LoaderArgs) => {
@@ -32,6 +32,5 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
     }
 
     if (error) throw error;
-  } else {
   }
 };
