@@ -1,12 +1,6 @@
 import { ArrowLeft, Search, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-import {
-  Link,
-  useLocation,
-  useMatch,
-  useMatches,
-  useNavigate,
-} from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 
 export interface HeaderProps {
   title?: string;
