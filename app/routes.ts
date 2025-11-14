@@ -15,6 +15,12 @@ export default [
   ...prefix("products", [
     route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
+  ...prefix("children", [
+    index("features/children/pages/children-redirect-page.tsx"),
+    layout("features/children/layouts/children-overview-layout.tsx", [
+      route("/:childId", "features/children/pages/children-page.tsx"),
+    ]),
+  ]),
   ...prefix("likes", [index("features/likes/pages/likes-page.tsx")]),
   ...prefix("carts", [index("features/carts/pages/shopping-cart-page.tsx")]),
   ...prefix("search", [index("features/search/pages/search-page.tsx")]),
