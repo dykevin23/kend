@@ -49,7 +49,7 @@ export default function BottomNavigation() {
         )}
       </NavLink>
 
-      <NavLink to="/like">
+      <NavLink to="/likes">
         {({ isActive }) => (
           <div className="flex flex-col w-18 items-center gap-1">
             <div className="flex flex-col items-center">

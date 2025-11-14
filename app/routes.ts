@@ -15,6 +15,7 @@ export default [
   ...prefix("products", [
     route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
+  ...prefix("likes", [index("features/likes/pages/likes-page.tsx")]),
   ...prefix("carts", [index("features/carts/pages/shopping-cart-page.tsx")]),
   ...prefix("search", [index("features/search/pages/search-page.tsx")]),
   ...prefix("auth", [

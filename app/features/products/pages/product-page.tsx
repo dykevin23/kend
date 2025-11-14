@@ -1,18 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { productSample1, productSample2 } from "~/assets/images";
 import BottomSheet from "~/common/components/bottom-sheet";
 import Content from "~/common/components/content";
 import Modal from "~/common/components/modal";
 import { SelectAccordion } from "~/common/components/select-accordion";
 import { Tab, Tabs } from "~/common/components/tabs";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/common/components/ui/accordion";
 import { Button } from "~/common/components/ui/button";
-import { Dialog, DialogContent } from "~/common/components/ui/dialog";
 import { cn } from "~/lib/utils";
 import DeliveryAddress from "../components/delivery-address";
 
