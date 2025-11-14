@@ -46,13 +46,15 @@ function SheetContent({
   className,
   children,
   side = "right",
+  onClose,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left";
+  onClose: () => void;
 }) {
   return (
     <SheetPortal>
-      <SheetOverlay />
+      <SheetOverlay onClick={() => onClose()} />
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(

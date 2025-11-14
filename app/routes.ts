@@ -20,6 +20,7 @@ export default [
     layout("features/children/layouts/children-overview-layout.tsx", [
       route("/:childId", "features/children/pages/children-page.tsx"),
     ]),
+    route("/submit", "features/children/pages/submit-child-page.tsx"),
   ]),
   ...prefix("likes", [index("features/likes/pages/likes-page.tsx")]),
   ...prefix("carts", [index("features/carts/pages/shopping-cart-page.tsx")]),
