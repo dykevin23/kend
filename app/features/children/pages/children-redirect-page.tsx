@@ -10,5 +10,5 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   //     const [child] = children;
   //     return redirect(`/children/${child.child_id}`);
   //   }
-  return redirect(`/children/child-1`);
+  return redirect(`/children/1`);
 };

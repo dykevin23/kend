@@ -12,7 +12,10 @@ export default function Header({ title, useRight = true }: HeaderProps) {
   const { pathname } = useLocation();
   const naviMenus = ["/stores", "/children", "/chats", "/users"];
 
-  const [isNaviMenu] = useState<boolean>(naviMenus.includes(pathname));
+  const [isNaviMenu] = useState<boolean>(
+    naviMenus.includes(pathname) ||
+      !isNaN(Number(pathname.split("/children/").at(-1)))
+  );
 
   return (
     <div className="flex p-4 justify-between items-center self-stretch">

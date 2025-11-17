@@ -72,12 +72,15 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export default function App() {
   const { pathname } = useLocation();
-  const naviMenus = ["/stores", "/children", "/likes", "/users"];
+  const naviMenus = ["/stores", "/children/:childId", "/likes", "/users"];
 
   return (
     <div>
       <Outlet />
-      {naviMenus.includes(pathname) && <BottomNavigation />}
+      {(naviMenus.includes(pathname) ||
+        (pathname.includes("/children")
+          ? !isNaN(Number(pathname.split("/children/").at(-1)))
+          : false)) && <BottomNavigation />}
     </div>
   );
 }
