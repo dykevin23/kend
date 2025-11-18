@@ -5,8 +5,8 @@ import { cn } from "~/lib/utils";
 
 export default function ChildrenOverviewLayout() {
   const children = [
-    { child_id: "child-1", nickname: "첫째" },
-    { child_id: "child-2", nickname: "둘째" },
+    { child_id: "1", nickname: "첫째" },
+    { child_id: "2", nickname: "둘째" },
   ];
   return (
     <Content headerPorps={{ title: "데이터" }}>
