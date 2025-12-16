@@ -1,5 +1,6 @@
 import {
   jsonb,
+  pgEnum,
   pgSchema,
   pgTable,
   text,
@@ -10,6 +11,8 @@ import {
 const users = pgSchema("auth").table("users", {
   id: uuid().primaryKey(),
 });
+
+export const roles = pgEnum("role", ["customer", "seller", "administrator"]);
 
 /**
  * 사용자(profiles) 테이블
@@ -32,6 +35,7 @@ export const profiles = pgTable("profiles", {
   avatar: text(),
   introduction: text(),
   comment: text(),
+  role: roles().default("customer").notNull(),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
   stats: jsonb().$type<{
