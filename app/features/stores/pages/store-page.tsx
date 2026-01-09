@@ -51,7 +51,7 @@ export default function StorePage() {
           />
         </Tabs>
 
-        <div className="grid grid-cols-3 gap-1 px-0.5">
+        <div className="grid grid-cols-3 gap-1 px-1 w-full box-border">
           {Array.from({ length: 15 }).map((_, index) => (
             <ProductCard
               key={`product-${index}`}

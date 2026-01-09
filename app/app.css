@@ -125,3 +125,9 @@
 @utility flex-gsb {
   flex: 1 0 0;
 }
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}

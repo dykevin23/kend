@@ -15,7 +15,7 @@ export default function Content({
   footer,
 }: ContentProps) {
   return (
-    <div>
+    <div className="w-full box-border overflow-x-hidden">
       <Header {...headerPorps} />
       <div className={cn({ "mb-20": footer })}>{children}</div>
       {footer && <BottomButtonArea>{footer}</BottomButtonArea>}
