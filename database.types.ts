@@ -56,6 +56,13 @@ export type Database = {
             referencedRelation: "admin_sellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admin_seller_address_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_information_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       admin_seller_members: {
@@ -86,6 +93,13 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "admin_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_seller_members_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_information_view"
             referencedColumns: ["id"]
           },
           {
@@ -143,6 +157,68 @@ export type Database = {
             columns: ["domain_id"]
             isOneToOne: false
             referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      common_code_group: {
+        Row: {
+          code: string
+          created_at: string
+          id: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: never
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: never
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      common_codes: {
+        Row: {
+          code: string
+          created_at: string
+          group_code: number | null
+          id: number
+          name: string
+          updated_at: string
+          use_yn: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          group_code?: number | null
+          id?: never
+          name: string
+          updated_at?: string
+          use_yn?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          group_code?: number | null
+          id?: never
+          name?: string
+          updated_at?: string
+          use_yn?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "common_codes_group_code_common_code_group_id_fk"
+            columns: ["group_code"]
+            isOneToOne: false
+            referencedRelation: "common_code_group"
             referencedColumns: ["id"]
           },
         ]
@@ -211,7 +287,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          domain_id: number | null
+          domain_id: number
           id: number
           name: string
           updated_at: string
@@ -219,7 +295,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
-          domain_id?: number | null
+          domain_id: number
           id?: never
           name: string
           updated_at?: string
@@ -227,7 +303,7 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
-          domain_id?: number | null
+          domain_id?: number
           id?: never
           name?: string
           updated_at?: string
@@ -238,6 +314,69 @@ export type Database = {
             columns: ["domain_id"]
             isOneToOne: false
             referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_deliveries: {
+        Row: {
+          address_id: number
+          bundle_delivery: Database["public"]["Enums"]["bundle_delivery_type"]
+          courier_company: Database["public"]["Enums"]["courier_company"]
+          created_at: string
+          delivery_method: Database["public"]["Enums"]["delivery_method_type"]
+          free_shipping_condition: number | null
+          id: number
+          island_delivery: Database["public"]["Enums"]["island_delivery_type"]
+          product_id: number
+          shipping_days: number
+          shipping_fee: number
+          shipping_fee_type: Database["public"]["Enums"]["shipping_fee_type"]
+          updated_at: string
+        }
+        Insert: {
+          address_id: number
+          bundle_delivery?: Database["public"]["Enums"]["bundle_delivery_type"]
+          courier_company?: Database["public"]["Enums"]["courier_company"]
+          created_at?: string
+          delivery_method?: Database["public"]["Enums"]["delivery_method_type"]
+          free_shipping_condition?: number | null
+          id?: never
+          island_delivery?: Database["public"]["Enums"]["island_delivery_type"]
+          product_id: number
+          shipping_days?: number
+          shipping_fee?: number
+          shipping_fee_type?: Database["public"]["Enums"]["shipping_fee_type"]
+          updated_at?: string
+        }
+        Update: {
+          address_id?: number
+          bundle_delivery?: Database["public"]["Enums"]["bundle_delivery_type"]
+          courier_company?: Database["public"]["Enums"]["courier_company"]
+          created_at?: string
+          delivery_method?: Database["public"]["Enums"]["delivery_method_type"]
+          free_shipping_condition?: number | null
+          id?: never
+          island_delivery?: Database["public"]["Enums"]["island_delivery_type"]
+          product_id?: number
+          shipping_days?: number
+          shipping_fee?: number
+          shipping_fee_type?: Database["public"]["Enums"]["shipping_fee_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_deliveries_address_id_admin_seller_address_id_fk"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "admin_seller_address"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_deliveries_product_id_products_id_fk"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -399,6 +538,51 @@ export type Database = {
           },
         ]
       }
+      product_returns: {
+        Row: {
+          address_id: number
+          created_at: string
+          id: number
+          initial_shipping_fee: number
+          product_id: number
+          return_shipping_fee: number
+          updated_at: string
+        }
+        Insert: {
+          address_id: number
+          created_at?: string
+          id?: never
+          initial_shipping_fee?: number
+          product_id: number
+          return_shipping_fee?: number
+          updated_at?: string
+        }
+        Update: {
+          address_id?: number
+          created_at?: string
+          id?: never
+          initial_shipping_fee?: number
+          product_id?: number
+          return_shipping_fee?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_returns_address_id_admin_seller_address_id_fk"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "admin_seller_address"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_returns_product_id_products_id_fk"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_stock_keepings: {
         Row: {
           created_at: string
@@ -452,6 +636,7 @@ export type Database = {
           main_category: string
           name: string
           seller_id: number | null
+          storage_folder: string
           sub_category: string
           updated_at: string
         }
@@ -463,6 +648,7 @@ export type Database = {
           main_category: string
           name: string
           seller_id?: number | null
+          storage_folder: string
           sub_category: string
           updated_at?: string
         }
@@ -474,6 +660,7 @@ export type Database = {
           main_category?: string
           name?: string
           seller_id?: number | null
+          storage_folder?: string
           sub_category?: string
           updated_at?: string
         }
@@ -490,6 +677,13 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "admin_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_information_view"
             referencedColumns: ["id"]
           },
         ]
@@ -538,7 +732,7 @@ export type Database = {
           code: string
           created_at: string
           id: number
-          main_category_code: number | null
+          main_category_code: number
           name: string
           updated_at: string
         }
@@ -546,7 +740,7 @@ export type Database = {
           code: string
           created_at?: string
           id?: never
-          main_category_code?: number | null
+          main_category_code: number
           name: string
           updated_at?: string
         }
@@ -554,7 +748,7 @@ export type Database = {
           code?: string
           created_at?: string
           id?: never
-          main_category_code?: number | null
+          main_category_code?: number
           name?: string
           updated_at?: string
         }
@@ -572,27 +766,24 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          domain_id: number | null
+          domain_id: number
           id: number
-          key: string
           name: string
           updated_at: string
         }
         Insert: {
           code: string
           created_at?: string
-          domain_id?: number | null
+          domain_id: number
           id?: never
-          key: string
           name: string
           updated_at?: string
         }
         Update: {
           code?: string
           created_at?: string
-          domain_id?: number | null
+          domain_id?: number
           id?: never
-          key?: string
           name?: string
           updated_at?: string
         }
@@ -608,18 +799,62 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      seller_information_view: {
+        Row: {
+          address: string | null
+          address_detail: string | null
+          bizr_no: string | null
+          business: string | null
+          created_at: string | null
+          domain_id: number | null
+          domain_name: string | null
+          id: number | null
+          name: string | null
+          representative_name: string | null
+          updated_at: string | null
+          zone_code: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_sellers_domain_id_domains_id_fk"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
       admin_address_type: "SHIPPING" | "RETURN"
+      bundle_delivery_type: "AVAILABLE" | "UNAVAILABLE"
+      courier_company:
+        | "CJ"
+        | "POST"
+        | "HANJIN"
+        | "LOGEN"
+        | "LOTTE"
+        | "KDEXP"
+        | "DAESIN"
+        | "GSM"
+        | "ILYANG"
+        | "HDEXP"
+      delivery_method_type:
+        | "STANDARD"
+        | "FRESH_FROZEN"
+        | "CUSTOM_ORDER"
+        | "PURCHASE_AGENCY"
+        | "INSTALLATION_DIRECT"
       description_type: "IMAGE" | "HTML"
       gender_type: "MALE" | "FEMALE" | "UNISEX"
       image_type: "MAIN" | "ADDITIONAL"
+      island_delivery_type: "AVAILABLE" | "UNAVAILABLE"
       role: "customer" | "seller" | "administrator"
       sales_status: "PREPARE" | "SALE" | "SOLD_OUT" | "STOP" | "COMPLETE"
+      shipping_fee_type: "FREE" | "PAID" | "COD" | "CONDITIONAL"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -748,11 +983,33 @@ export const Constants = {
   public: {
     Enums: {
       admin_address_type: ["SHIPPING", "RETURN"],
+      bundle_delivery_type: ["AVAILABLE", "UNAVAILABLE"],
+      courier_company: [
+        "CJ",
+        "POST",
+        "HANJIN",
+        "LOGEN",
+        "LOTTE",
+        "KDEXP",
+        "DAESIN",
+        "GSM",
+        "ILYANG",
+        "HDEXP",
+      ],
+      delivery_method_type: [
+        "STANDARD",
+        "FRESH_FROZEN",
+        "CUSTOM_ORDER",
+        "PURCHASE_AGENCY",
+        "INSTALLATION_DIRECT",
+      ],
       description_type: ["IMAGE", "HTML"],
       gender_type: ["MALE", "FEMALE", "UNISEX"],
       image_type: ["MAIN", "ADDITIONAL"],
+      island_delivery_type: ["AVAILABLE", "UNAVAILABLE"],
       role: ["customer", "seller", "administrator"],
       sales_status: ["PREPARE", "SALE", "SOLD_OUT", "STOP", "COMPLETE"],
+      shipping_fee_type: ["FREE", "PAID", "COD", "CONDITIONAL"],
     },
   },
 } as const
