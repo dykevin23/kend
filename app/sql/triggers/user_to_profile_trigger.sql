@@ -22,13 +22,13 @@ begin
                     new.raw_user_meta_data ->> 'username', 
                     new.raw_user_meta_data ->> 'role'
                 );
-            else 
-                if new.raw_user_meta_data ? 'nickname' AND new.raw_user_meta_data ? 'username' then
+            else
+                if new.raw_user_meta_data ? 'nickname' then
                     insert into public.profiles (profile_id, nickname, username)
-                    values (new.id, new.raw_user_meta_data ->> 'nickname', new.raw_user_meta_data ->> 'username');
+                    values (new.id, new.raw_user_meta_data ->> 'nickname', coalesce(new.raw_user_meta_data ->> 'username', new.raw_user_meta_data ->> 'nickname'));
                 else
                     insert into public.profiles (profile_id, nickname, username)
-                    values (new.id, 'mr.' || substr(md5(random()::text), 1, 8),'Anonymous');
+                    values (new.id, 'mr.' || substr(md5(random()::text), 1, 8), 'Anonymous');
                 end if;
             end if;
         end if;

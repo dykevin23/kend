@@ -2,9 +2,41 @@ import InputInnerLabel from "~/common/components/input-inner-label";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import SocialButtons from "../components/social-buttons";
-import { Form, Link } from "react-router";
+import { Form, Link, redirect, useActionData } from "react-router";
+import { makeSSRClient } from "~/supa-client";
+import type { Route } from "./+types/login-page";
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    return {
+      error: "이메일과 비밀번호를 입력해주세요.",
+    };
+  }
+
+  const { client, headers } = makeSSRClient(request);
+
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return {
+      error: "이메일 또는 비밀번호가 올바르지 않습니다.",
+    };
+  }
+
+  return redirect("/", {
+    headers,
+  });
+}
 
 export default function LoginPage() {
+  const actionData = useActionData<typeof action>();
   return (
     <div
       className="flex flex-col min-h-screen bg-primary/50"
@@ -47,23 +79,32 @@ export default function LoginPage() {
             </div>
 
             {/* 입력 필드 & 로그인 버튼 */}
-            <Form method="post" className="flex flex-col items-start gap-6 self-stretch">
+            <Form
+              method="post"
+              className="flex flex-col items-start gap-6 self-stretch"
+            >
               <div className="flex flex-col items-start self-stretch rounded-2xl">
                 <InputInnerLabel
                   label="이메일 주소"
                   name="email"
                   type="email"
-                  placeholder="KEND@gmail.com"
                   className="rounded-t-2xl rounded-b-none -mb-px"
                 />
                 <InputInnerLabel
                   label="비밀번호"
                   name="password"
                   type="password"
-                  placeholder="●●●●●●"
                   className="rounded-b-2xl rounded-t-none"
                 />
               </div>
+
+              {actionData?.error && (
+                <div className="flex w-full px-4 py-3 rounded-lg bg-red-100 border border-red-400">
+                  <span className="text-sm text-red-700">
+                    {actionData.error}
+                  </span>
+                </div>
+              )}
 
               {/* 로그인 버튼 & 찾기 링크 */}
               <div className="flex flex-col items-center gap-6 self-stretch">
