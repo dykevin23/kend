@@ -1,4 +1,3 @@
-import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from "./ui/dialog";
 
 interface ModalProps {
@@ -48,7 +47,13 @@ export default function Modal({
         <div className="flex flex-col">{children}</div>
 
         {footer && (
-          <DialogFooter className="fixed bottom-0 flex w-full h-18 p-4 justify-center items-center gap-1.5 shrink-0 bg-white border-t-1 border-t-muted/10">
+          <DialogFooter
+            className="flex w-full min-h-18 p-4 justify-center items-center gap-1.5 shrink-0 bg-white border-t-1 border-t-muted/10 pb-[max(1rem,var(--safe-area-inset-bottom))]"
+            style={{
+              position: "sticky",
+              bottom: 0,
+            }}
+          >
             {footer}
           </DialogFooter>
         )}

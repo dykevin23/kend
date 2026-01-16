@@ -115,7 +115,7 @@ export default function ProductPage() {
   return (
     <>
       <Content footer={<Footer />}>
-        <div className="w-full h-94 shrink-0 aspect-square bg-gray-400"></div>
+        <div className="w-full aspect-square bg-gray-400"></div>
 
         <div className="flex pt-3 px-4 flex-col justify-center items-start gap-4 self-stretch">
           <span className="text-xl font-bold leading-7.5 tracking-[-0.4px]">

@@ -22,7 +22,7 @@ export default function ChildrenPage() {
             <Badge variant="secondary">100명 중 10등</Badge>
           </div>
           <div className="flex flex-col items-start gap-4 self-stretch">
-            <div className="h-20 self-stretch px-5">
+            <div className="min-h-20 self-stretch px-5 flex items-center">
               <div className="w-full h-3.5 shrink-0 rounded-full bg-secondary/10"></div>
             </div>
             <div className="flex p-4 flex-col items-start gap-2 self-stretch">
