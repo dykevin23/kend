@@ -18,9 +18,10 @@ begin
                     new.id, 
                     coalesce(
                         new.raw_user_meta_data ->> 'nickname',
-                        'seller_' || coalesce(new.raw_user_meta_data ->> 'username',substr(md5(new.id::text), 1, 8))),
+                        new.raw_user_meta_data ->> 'username',
+                        substr(md5(new.id::text), 1, 8)),
                     new.raw_user_meta_data ->> 'username', 
-                    new.raw_user_meta_data ->> 'role'
+                    (new.raw_user_meta_data ->> 'role')::public.role
                 );
             else
                 if new.raw_user_meta_data ? 'nickname' then

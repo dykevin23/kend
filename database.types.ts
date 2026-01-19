@@ -21,8 +21,8 @@ export type Database = {
           address_name: string
           address_type: Database["public"]["Enums"]["admin_address_type"]
           created_at: string
-          id: number
-          seller_id: number | null
+          id: string
+          seller_id: string | null
           updated_at: string
           zone_code: string
         }
@@ -32,8 +32,8 @@ export type Database = {
           address_name: string
           address_type: Database["public"]["Enums"]["admin_address_type"]
           created_at?: string
-          id?: never
-          seller_id?: number | null
+          id?: string
+          seller_id?: string | null
           updated_at?: string
           zone_code: string
         }
@@ -43,8 +43,8 @@ export type Database = {
           address_name?: string
           address_type?: Database["public"]["Enums"]["admin_address_type"]
           created_at?: string
-          id?: never
-          seller_id?: number | null
+          id?: string
+          seller_id?: string | null
           updated_at?: string
           zone_code?: string
         }
@@ -68,22 +68,22 @@ export type Database = {
       admin_seller_members: {
         Row: {
           created_at: string
-          id: number
-          seller_id: number | null
+          id: string
+          seller_id: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
           created_at?: string
-          id?: never
-          seller_id?: number | null
+          id?: string
+          seller_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
           created_at?: string
-          id?: never
-          seller_id?: number | null
+          id?: string
+          seller_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -118,10 +118,11 @@ export type Database = {
           bizr_no: string
           business: string
           created_at: string
-          domain_id: number | null
-          id: number
+          domain_id: string | null
+          id: string
           name: string
           representative_name: string
+          seller_code: string
           updated_at: string
           zone_code: string
         }
@@ -131,10 +132,11 @@ export type Database = {
           bizr_no: string
           business: string
           created_at?: string
-          domain_id?: number | null
-          id?: never
+          domain_id?: string | null
+          id?: string
           name: string
           representative_name: string
+          seller_code: string
           updated_at?: string
           zone_code: string
         }
@@ -144,10 +146,11 @@ export type Database = {
           bizr_no?: string
           business?: string
           created_at?: string
-          domain_id?: number | null
-          id?: never
+          domain_id?: string | null
+          id?: string
           name?: string
           representative_name?: string
+          seller_code?: string
           updated_at?: string
           zone_code?: string
         }
@@ -165,21 +168,21 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          id: number
+          id: string
           name: string
           updated_at: string
         }
         Insert: {
           code: string
           created_at?: string
-          id?: never
+          id?: string
           name: string
           updated_at?: string
         }
         Update: {
           code?: string
           created_at?: string
-          id?: never
+          id?: string
           name?: string
           updated_at?: string
         }
@@ -189,8 +192,8 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          group_code: number | null
-          id: number
+          group_id: string | null
+          id: string
           name: string
           updated_at: string
           use_yn: string
@@ -198,8 +201,8 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
-          group_code?: number | null
-          id?: never
+          group_id?: string | null
+          id?: string
           name: string
           updated_at?: string
           use_yn?: string
@@ -207,16 +210,16 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
-          group_code?: number | null
-          id?: never
+          group_id?: string | null
+          id?: string
           name?: string
           updated_at?: string
           use_yn?: string
         }
         Relationships: [
           {
-            foreignKeyName: "common_codes_group_code_common_code_group_id_fk"
-            columns: ["group_code"]
+            foreignKeyName: "common_codes_group_id_common_code_group_id_fk"
+            columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "common_code_group"
             referencedColumns: ["id"]
@@ -227,7 +230,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          id: number
+          id: string
           name: string
           updated_at: string
           use_yn: string
@@ -235,7 +238,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
-          id?: never
+          id?: string
           name: string
           updated_at?: string
           use_yn: string
@@ -243,7 +246,7 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
-          id?: never
+          id?: string
           name?: string
           updated_at?: string
           use_yn?: string
@@ -287,24 +290,24 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          domain_id: number
-          id: number
+          domain_id: string
+          id: string
           name: string
           updated_at: string
         }
         Insert: {
           code: string
           created_at?: string
-          domain_id: number
-          id?: never
+          domain_id: string
+          id?: string
           name: string
           updated_at?: string
         }
         Update: {
           code?: string
           created_at?: string
-          domain_id?: number
-          id?: never
+          domain_id?: string
+          id?: string
           name?: string
           updated_at?: string
         }
@@ -320,45 +323,45 @@ export type Database = {
       }
       product_deliveries: {
         Row: {
-          address_id: number
+          address_id: string
           bundle_delivery: Database["public"]["Enums"]["bundle_delivery_type"]
           courier_company: Database["public"]["Enums"]["courier_company"]
           created_at: string
           delivery_method: Database["public"]["Enums"]["delivery_method_type"]
           free_shipping_condition: number | null
-          id: number
+          id: string
           island_delivery: Database["public"]["Enums"]["island_delivery_type"]
-          product_id: number
+          product_id: string
           shipping_days: number
           shipping_fee: number
           shipping_fee_type: Database["public"]["Enums"]["shipping_fee_type"]
           updated_at: string
         }
         Insert: {
-          address_id: number
+          address_id: string
           bundle_delivery?: Database["public"]["Enums"]["bundle_delivery_type"]
           courier_company?: Database["public"]["Enums"]["courier_company"]
           created_at?: string
           delivery_method?: Database["public"]["Enums"]["delivery_method_type"]
           free_shipping_condition?: number | null
-          id?: never
+          id?: string
           island_delivery?: Database["public"]["Enums"]["island_delivery_type"]
-          product_id: number
+          product_id: string
           shipping_days?: number
           shipping_fee?: number
           shipping_fee_type?: Database["public"]["Enums"]["shipping_fee_type"]
           updated_at?: string
         }
         Update: {
-          address_id?: number
+          address_id?: string
           bundle_delivery?: Database["public"]["Enums"]["bundle_delivery_type"]
           courier_company?: Database["public"]["Enums"]["courier_company"]
           created_at?: string
           delivery_method?: Database["public"]["Enums"]["delivery_method_type"]
           free_shipping_condition?: number | null
-          id?: never
+          id?: string
           island_delivery?: Database["public"]["Enums"]["island_delivery_type"]
-          product_id?: number
+          product_id?: string
           shipping_days?: number
           shipping_fee?: number
           shipping_fee_type?: Database["public"]["Enums"]["shipping_fee_type"]
@@ -385,24 +388,24 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string
-          id: number
-          product_id: number | null
+          id: string
+          product_id: string | null
           type: Database["public"]["Enums"]["description_type"]
           updated_at: string
         }
         Insert: {
           content?: string | null
           created_at?: string
-          id?: never
-          product_id?: number | null
+          id?: string
+          product_id?: string | null
           type?: Database["public"]["Enums"]["description_type"]
           updated_at?: string
         }
         Update: {
           content?: string | null
           created_at?: string
-          id?: never
-          product_id?: number | null
+          id?: string
+          product_id?: string | null
           type?: Database["public"]["Enums"]["description_type"]
           updated_at?: string
         }
@@ -420,25 +423,25 @@ export type Database = {
         Row: {
           brand: string | null
           created_at: string
-          id: number
+          id: string
           maker: string
-          product_id: number | null
+          product_id: string | null
           updated_at: string
         }
         Insert: {
           brand?: string | null
           created_at?: string
-          id?: never
+          id?: string
           maker: string
-          product_id?: number | null
+          product_id?: string | null
           updated_at?: string
         }
         Update: {
           brand?: string | null
           created_at?: string
-          id?: never
+          id?: string
           maker?: string
-          product_id?: number | null
+          product_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -454,27 +457,27 @@ export type Database = {
       product_images: {
         Row: {
           created_at: string
-          id: number
-          product_id: number | null
-          sku_id: number | null
+          id: string
+          product_id: string | null
+          sku_id: string | null
           type: Database["public"]["Enums"]["image_type"]
           updated_at: string
           url: string
         }
         Insert: {
           created_at?: string
-          id?: never
-          product_id?: number | null
-          sku_id?: number | null
+          id?: string
+          product_id?: string | null
+          sku_id?: string | null
           type?: Database["public"]["Enums"]["image_type"]
           updated_at?: string
           url: string
         }
         Update: {
           created_at?: string
-          id?: never
-          product_id?: number | null
-          sku_id?: number | null
+          id?: string
+          product_id?: string | null
+          sku_id?: string | null
           type?: Database["public"]["Enums"]["image_type"]
           updated_at?: string
           url?: string
@@ -499,26 +502,26 @@ export type Database = {
       product_options: {
         Row: {
           created_at: string
-          id: number
+          id: string
           option: string
-          product_id: number | null
-          system_option_id: number
+          product_id: string | null
+          system_option_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          id?: never
+          id?: string
           option: string
-          product_id?: number | null
-          system_option_id: number
+          product_id?: string | null
+          system_option_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          id?: never
+          id?: string
           option?: string
-          product_id?: number | null
-          system_option_id?: number
+          product_id?: string | null
+          system_option_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -540,29 +543,29 @@ export type Database = {
       }
       product_returns: {
         Row: {
-          address_id: number
+          address_id: string
           created_at: string
-          id: number
+          id: string
           initial_shipping_fee: number
-          product_id: number
+          product_id: string
           return_shipping_fee: number
           updated_at: string
         }
         Insert: {
-          address_id: number
+          address_id: string
           created_at?: string
-          id?: never
+          id?: string
           initial_shipping_fee?: number
-          product_id: number
+          product_id: string
           return_shipping_fee?: number
           updated_at?: string
         }
         Update: {
-          address_id?: number
+          address_id?: string
           created_at?: string
-          id?: never
+          id?: string
           initial_shipping_fee?: number
-          product_id?: number
+          product_id?: string
           return_shipping_fee?: number
           updated_at?: string
         }
@@ -586,8 +589,8 @@ export type Database = {
       product_stock_keepings: {
         Row: {
           created_at: string
-          id: number
-          product_id: number | null
+          id: string
+          product_id: string | null
           regular_price: number | null
           sale_price: number | null
           sku_code: string
@@ -597,8 +600,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: never
-          product_id?: number | null
+          id?: string
+          product_id?: string | null
           regular_price?: number | null
           sale_price?: number | null
           sku_code: string
@@ -608,8 +611,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          id?: never
-          product_id?: number | null
+          id?: string
+          product_id?: string | null
           regular_price?: number | null
           sale_price?: number | null
           sku_code?: string
@@ -630,36 +633,42 @@ export type Database = {
       products: {
         Row: {
           created_at: string
-          domain_id: number | null
+          domain_id: string | null
           gender: Database["public"]["Enums"]["gender_type"]
-          id: number
+          id: string
           main_category: string
           name: string
-          seller_id: number | null
+          product_code: string
+          seller_id: string | null
+          status: Database["public"]["Enums"]["sales_status"]
           storage_folder: string
           sub_category: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          domain_id?: number | null
+          domain_id?: string | null
           gender?: Database["public"]["Enums"]["gender_type"]
-          id?: never
+          id?: string
           main_category: string
           name: string
-          seller_id?: number | null
+          product_code: string
+          seller_id?: string | null
+          status?: Database["public"]["Enums"]["sales_status"]
           storage_folder: string
           sub_category: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          domain_id?: number | null
+          domain_id?: string | null
           gender?: Database["public"]["Enums"]["gender_type"]
-          id?: never
+          id?: string
           main_category?: string
           name?: string
-          seller_id?: number | null
+          product_code?: string
+          seller_id?: string | null
+          status?: Database["public"]["Enums"]["sales_status"]
           storage_folder?: string
           sub_category?: string
           updated_at?: string
@@ -731,31 +740,31 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          id: number
-          main_category_code: number
+          id: string
+          main_category_id: string
           name: string
           updated_at: string
         }
         Insert: {
           code: string
           created_at?: string
-          id?: never
-          main_category_code: number
+          id?: string
+          main_category_id: string
           name: string
           updated_at?: string
         }
         Update: {
           code?: string
           created_at?: string
-          id?: never
-          main_category_code?: number
+          id?: string
+          main_category_id?: string
           name?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "sub_categories_main_category_code_main_categories_id_fk"
-            columns: ["main_category_code"]
+            foreignKeyName: "sub_categories_main_category_id_main_categories_id_fk"
+            columns: ["main_category_id"]
             isOneToOne: false
             referencedRelation: "main_categories"
             referencedColumns: ["id"]
@@ -766,24 +775,24 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          domain_id: number
-          id: number
+          domain_id: string
+          id: string
           name: string
           updated_at: string
         }
         Insert: {
           code: string
           created_at?: string
-          domain_id: number
-          id?: never
+          domain_id: string
+          id?: string
           name: string
           updated_at?: string
         }
         Update: {
           code?: string
           created_at?: string
-          domain_id?: number
-          id?: never
+          domain_id?: string
+          id?: string
           name?: string
           updated_at?: string
         }
@@ -806,11 +815,12 @@ export type Database = {
           bizr_no: string | null
           business: string | null
           created_at: string | null
-          domain_id: number | null
+          domain_id: string | null
           domain_name: string | null
-          id: number | null
+          id: string | null
           name: string | null
           representative_name: string | null
+          seller_code: string | null
           updated_at: string | null
           zone_code: string | null
         }
@@ -853,7 +863,13 @@ export type Database = {
       image_type: "MAIN" | "ADDITIONAL"
       island_delivery_type: "AVAILABLE" | "UNAVAILABLE"
       role: "customer" | "seller" | "administrator"
-      sales_status: "PREPARE" | "SALE" | "SOLD_OUT" | "STOP" | "COMPLETE"
+      sales_status:
+        | "REGISTERED"
+        | "PREPARE"
+        | "SALE"
+        | "SOLD_OUT"
+        | "STOP"
+        | "END"
       shipping_fee_type: "FREE" | "PAID" | "COD" | "CONDITIONAL"
     }
     CompositeTypes: {
@@ -1008,7 +1024,14 @@ export const Constants = {
       image_type: ["MAIN", "ADDITIONAL"],
       island_delivery_type: ["AVAILABLE", "UNAVAILABLE"],
       role: ["customer", "seller", "administrator"],
-      sales_status: ["PREPARE", "SALE", "SOLD_OUT", "STOP", "COMPLETE"],
+      sales_status: [
+        "REGISTERED",
+        "PREPARE",
+        "SALE",
+        "SOLD_OUT",
+        "STOP",
+        "END",
+      ],
       shipping_fee_type: ["FREE", "PAID", "COD", "CONDITIONAL"],
     },
   },
