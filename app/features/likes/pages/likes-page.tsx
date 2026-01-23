@@ -2,7 +2,6 @@ import { useState } from "react";
 import Content from "~/common/components/content";
 import { Tab, Tabs } from "~/common/components/tabs";
 import LikeProductCard from "../components/like-product-card";
-import StoreCard from "~/features/stores/components/store-card";
 
 export default function LikesPage() {
   const [isActiveTab, setIsActiveTab] = useState<string>("product");
@@ -10,6 +9,7 @@ export default function LikesPage() {
   const handleClickTab = (key: string) => () => {
     setIsActiveTab(key);
   };
+
   return (
     <Content headerPorps={{ title: "좋아요" }}>
       <div className="flex w-full items-center">
@@ -28,15 +28,19 @@ export default function LikesPage() {
       </div>
 
       <div className="flex w-full flex-col items-start gap-4 mt-1">
-        {Array.from({ length: 15 }).map((_, index) =>
-          isActiveTab === "product" ? (
+        {isActiveTab === "product" ? (
+          // TODO: likes 테이블 구현 후 실제 데이터로 교체
+          Array.from({ length: 5 }).map((_, index) => (
             <LikeProductCard
               key={`product-${index}`}
               productId={`product-${index}`}
             />
-          ) : (
-            <StoreCard storeId={`store-${index}`} key={`store-${index}`} />
-          )
+          ))
+        ) : (
+          // TODO: store_follows 테이블 구현 후 실제 데이터로 교체
+          <div className="flex w-full py-10 justify-center items-center">
+            <span className="text-muted">찜한 스토어가 없습니다.</span>
+          </div>
         )}
       </div>
     </Content>
