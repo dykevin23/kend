@@ -149,6 +149,7 @@ Rules:
 - Application 코드는 항상 최신 typegen 결과를 기준으로 한다.
 
 **IMPORTANT: Database 변경 작업 순서**
+
 1. `/app/features/**/schema.ts` 파일 수정
 2. `npm run db:generate` - migration 파일 생성
 3. `npm run db:migrate` - migration 실행
@@ -164,11 +165,13 @@ Rules:
 **언제 매핑이 필요한가?**
 
 ✅ **매핑 필요 (Query에서 snake_case → camelCase 변환)**
+
 - Array 데이터를 컴포넌트 props로 전달하는 경우
 - 타입 추론이 안 되어 `/app/types/*.d.ts`에 별도 타입을 정의하는 경우
 - 여러 컴포넌트에서 props drilling으로 전달되는 경우
 
 ❌ **매핑 불필요**
+
 - loader/action에서 데이터를 가져와 바로 화면에 렌더링하는 경우
 - Object 데이터를 개별 props로 분해하여 전달하는 경우 (컴포넌트 props 타입만 camelCase로 선언)
 
@@ -180,9 +183,9 @@ export const getSystemOptionsByDomain = async (client, domainId) => {
   const { data } = await client.from("system_options").select("*");
 
   // ✅ Array는 Query에서 매핑
-  return data.map(item => ({
+  return data.map((item) => ({
     id: item.id,
-    domainId: item.domain_id,  // snake_case → camelCase
+    domainId: item.domain_id, // snake_case → camelCase
     code: item.code,
   }));
 };
@@ -195,7 +198,7 @@ export type SystemOption = {
 };
 
 // 컴포넌트에서 사용
-<ProductCard systemOptions={systemOptions} />
+<ProductCard systemOptions={systemOptions} />;
 
 // Case 2: Object를 개별 props로 전달 → 컴포넌트 타입만 camelCase
 // Query는 그대로
@@ -206,28 +209,79 @@ export const getSeller = async (client) => {
 
 // 컴포넌트 props는 camelCase
 interface SellerCardProps {
-  domainId: number;  // camelCase
+  domainId: number; // camelCase
 }
 
 // 사용 시 직접 연결
-<SellerCard domainId={seller.domain_id} />
+<SellerCard domainId={seller.domain_id} />;
 ```
 
 **적용 원칙:**
+
 - 화면 레벨(컴포넌트)에서 매핑 작업을 하지 않는다.
 - 매핑이 필요하면 Query 함수에서 수행한다.
 - `/app/types/*.d.ts`의 모든 타입은 camelCase로 작성한다.
 
-## 8. Query Code Convention
+## 8. ID vs Code 사용 규칙
+
+### 원칙
+
+- **PK(Primary Key)**: 모든 테이블의 PK는 `UUID`를 사용한다.
+- **code 컬럼**: 외부 노출용 식별자로 사용한다. (예: `product_code`, `seller_code`, `category.code`)
+
+### URL 및 화면 노출
+
+- **URL path에는 UUID를 사용하지 않는다.**
+  - ❌ `/system/categories/550e8400-e29b-41d4-a716-446655440000`
+  - ✅ `/system/categories/FASHION`
+- **화면에 표시되는 모든 식별자는 code 값을 사용한다.**
+  - 가독성이 좋고, 사용자가 이해하기 쉬움
+  - URL 공유/북마크에 유리함
+
+### 데이터베이스 조회 패턴
+
+```typescript
+// 1. URL에서 code 값을 받아서
+const { categoryCode } = params;
+
+// 2. code로 해당 레코드를 조회하여 id를 획득
+const category = await getCategoryByCode(client, categoryCode);
+
+// 3. FK 관계가 필요한 경우 id를 사용
+const subCategories = await getSubCategoriesByMainCategoryId(
+  client,
+  category.id,
+);
+```
+
+### FK(Foreign Key) 참조
+
+- FK는 항상 `UUID(id)`로 연결한다.
+- code는 조회 진입점으로만 사용하고, 내부 조인/참조는 id를 사용한다.
+
+### code 컬럼 규칙
+
+- 모든 code 컬럼은 `UNIQUE` 제약조건을 가진다.
+- code는 사람이 읽을 수 있는 형태로 작성한다. (예: `FASHION`, `SIZE`, `COLOR`)
+- 자동 채번이 필요한 경우 Trigger + Sequence를 사용한다.
+  - `product_code`: PR00000001 형식
+  - `seller_code`: SL0001 형식
+  - `sku_code`: sku-1 형식
+
+---
+
+## 10. Query Code Convention
 
 각 feature 폴더에는 데이터베이스 쿼리를 담당하는 파일들을 다음과 같이 분리하여 작성한다.
 
 ### queries.ts
+
 - **목적**: 조회(Read) 쿼리만 작성
 - **함수 네이밍**: `get` 접두어 사용
 - **예시**: `getProductById`, `getProductsByCategory`
 
 ### mutations.ts
+
 - **목적**: 생성(Create), 수정(Update), 삭제(Delete) 쿼리 작성
 - **함수 네이밍**:
   - 생성: `create` 접두어 (예: `createProduct`)
@@ -235,6 +289,7 @@ interface SellerCardProps {
   - 삭제: `delete` 접두어 (예: `deleteProduct`)
 
 **파일 구조 예시:**
+
 ```
 /app/features/products/
   ├── schema.ts
@@ -242,7 +297,7 @@ interface SellerCardProps {
   ├── mutations.ts    # createProduct, updateProduct, deleteProduct 등
 ```
 
-## 9. Notes for AI Assistants
+## 11. Notes for AI Assistants
 
 - 실제 컬럼 정의는 항상 `/app/features/**/schema.ts` 를 우선 참고한다.
 - 이 문서는 **의도(Intent)와 책임 경계(Boundary)** 를 설명하기 위한 것이다.
