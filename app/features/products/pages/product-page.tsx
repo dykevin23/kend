@@ -1,36 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { redirect, useLoaderData, useFetcher } from "react-router";
 import type { Route } from "./+types/product-page";
-import {
-  productSample1,
-  productSample2,
-  productSample3,
-  productSample4,
-  productSample5,
-  productSize1,
-} from "~/assets/images";
 import BottomSheet from "~/common/components/bottom-sheet";
 import Content from "~/common/components/content";
-import Modal from "~/common/components/modal";
 import { SelectAccordion } from "~/common/components/select-accordion";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
-import DeliveryAddress from "../components/delivery-address";
-import BottomButtonArea from "~/common/components/bottom-button-area";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/common/components/ui/table";
-import ProductSizeDescription from "../components/product-size-description";
-import StarRating from "~/common/components/star-rating";
 import Divider from "~/common/components/divider";
-import { ChevronRight } from "lucide-react";
-import RecommendProducts from "../components/recommend-products";
 import { makeSSRClient } from "~/supa-client";
 import { getProductByCode } from "../queries";
 import {
@@ -39,6 +16,12 @@ import {
   CarouselItem,
 } from "~/common/components/ui/carousel";
 import { addToCart } from "~/features/carts/mutations";
+import ProductInformationSection from "../components/product-information-section";
+import ProductSizeDescription from "../components/product-size-description";
+import ProductRatingSection from "../components/product-rating-section";
+import ProductReviewSection from "../components/product-review-section";
+import ProductPurchaseModal from "../components/product-purchase-modal";
+import RecommendProducts from "../components/recommend-products";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -59,7 +42,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const skuId = formData.get("skuId") as string;
     const quantity = Number(formData.get("quantity") ?? 1);
 
-    // 로그인 사용자 확인
     const {
       data: { user },
     } = await client.auth.getUser();
@@ -76,41 +58,49 @@ export const action = async ({ request }: Route.ActionArgs) => {
   return { success: false, message: "알 수 없는 요청입니다." };
 };
 
+type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
+
 export default function ProductPage() {
   const { product } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const [isActiveTab, setIsActiveTab] = useState<string>("home");
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isOpen2, setIsOpen2] = useState<boolean>(false);
-  const [buyOption, setBuyOption] = useState<{ [key: string]: string }>({});
-  const [cartQuantity, setCartQuantity] = useState<number>(1);
 
-  const handleClickTab = (key: string) => () => {
-    setIsActiveTab(key);
+  const [activeTab, setActiveTab] = useState<TabKey>("information");
+  const [isOptionSheetOpen, setIsOptionSheetOpen] = useState(false);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [buyOption, setBuyOption] = useState<Record<string, string>>({});
+  const [cartQuantity, setCartQuantity] = useState(1);
+
+  // 섹션 refs
+  const informationRef = useRef<HTMLDivElement>(null);
+  const sizeRef = useRef<HTMLDivElement>(null);
+  const reviewRef = useRef<HTMLDivElement>(null);
+
+  // 탭 클릭 시 해당 섹션으로 스크롤 이동
+  const handleTabClick = (key: TabKey) => () => {
+    setActiveTab(key);
+
+    const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
+      information: informationRef,
+      size: sizeRef,
+      review: reviewRef,
+    };
+
+    const targetRef = refMap[key];
+    if (targetRef?.current) {
+      targetRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
-  const handleBuy = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setIsOpen(true);
+  const handleBuyClick = () => {
+    setIsOptionSheetOpen(true);
   };
 
-  const handleChangeBuyOption = (value: string, parent: string) => {
-    setBuyOption((prev) => {
-      return Object.assign({}, prev, { [parent]: value });
-    });
+  const handleOptionChange = (value: string, parent: string) => {
+    setBuyOption((prev) => ({ ...prev, [parent]: value }));
   };
-
-  useEffect(() => {
-    console.log(
-      "### buyOption => ",
-      buyOption,
-      Object.keys(buyOption),
-      Object.values(buyOption),
-    );
-  }, [buyOption]);
 
   // SKU에서 옵션 항목 추출
   const optionItems = useMemo(() => {
-    // 모든 SKU의 options에서 고유한 키(코드) 추출
     const optionKeysSet = new Set<string>();
     product.skus.forEach((sku) => {
       if (sku.options) {
@@ -119,26 +109,20 @@ export default function ProductPage() {
     });
     const optionKeys = Array.from(optionKeysSet);
 
-    // 숫자 추출 함수 (문자열에서 숫자 부분만 추출)
     const extractNumber = (str: string): number | null => {
       const match = str.match(/\d+/);
       return match ? parseInt(match[0], 10) : null;
     };
 
-    // 오름차순 정렬 함수 (숫자/문자 모두 처리)
     const sortAscending = (a: string, b: string): number => {
       const numA = extractNumber(a);
       const numB = extractNumber(b);
-
-      // 둘 다 숫자가 있으면 숫자로 비교
       if (numA !== null && numB !== null) {
         return numA - numB;
       }
-      // 그 외에는 문자열로 비교
       return a.localeCompare(b, "ko");
     };
 
-    // 각 옵션 키별로 고유한 값들 추출
     return optionKeys.map((key) => {
       const valuesSet = new Set<string>();
       product.skus.forEach((sku) => {
@@ -146,36 +130,28 @@ export default function ProductPage() {
           valuesSet.add(sku.options[key]);
         }
       });
-      // 오름차순 정렬
       const values = Array.from(valuesSet).sort(sortAscending);
-
-      // 코드를 이름으로 변환 (없으면 코드 그대로 사용)
       const displayName = product.optionCodeToName[key] ?? key;
 
       return {
         triggerLabel: displayName,
-        value: key, // 내부적으로는 코드 사용
-        options: values.map((val) => ({
-          label: val,
-          value: val,
-        })),
+        value: key,
+        options: values.map((val) => ({ label: val, value: val })),
       };
     });
   }, [product.skus, product.optionCodeToName]);
 
   // 선택한 옵션으로 SKU 찾기
   const findMatchingSku = (selectedOptions: Record<string, string>) => {
-    const matchedSku = product.skus.find((sku) => {
+    return product.skus.find((sku) => {
       if (!sku.options) return false;
-      // 모든 선택된 옵션이 SKU의 옵션과 일치하는지 확인
       return Object.entries(selectedOptions).every(
-        ([key, value]) => sku.options?.[key] === value,
+        ([key, value]) => sku.options?.[key] === value
       );
     });
-    return matchedSku;
   };
 
-  // 장바구니 담기 핸들러
+  // 장바구니 담기
   const handleAddToCart = () => {
     const matchedSku = findMatchingSku(buyOption);
     if (matchedSku) {
@@ -185,30 +161,19 @@ export default function ProductPage() {
           skuId: matchedSku.id,
           quantity: cartQuantity.toString(),
         },
-        { method: "POST" },
+        { method: "POST" }
       );
-      setIsOpen(false);
+      setIsOptionSheetOpen(false);
       setBuyOption({});
       setCartQuantity(1);
     }
   };
 
-  // 구매하기 버튼 핸들러
+  // 바로 구매
   const handlePurchase = () => {
     const matchedSku = findMatchingSku(buyOption);
     if (matchedSku) {
-      console.log("=== SKU 매핑 결과 ===");
-      console.log("선택한 옵션:", buyOption);
-      console.log("매칭된 SKU:", matchedSku);
-      console.log("SKU Code:", matchedSku.skuCode);
-      console.log("가격:", matchedSku.salePrice);
-      console.log("재고:", matchedSku.stock);
-      // TODO: 결제 페이지로 이동
-      setIsOpen2(true);
-    } else {
-      console.log("=== SKU 매핑 실패 ===");
-      console.log("선택한 옵션:", buyOption);
-      console.log("일치하는 SKU를 찾을 수 없습니다.");
+      setIsPurchaseModalOpen(true);
     }
   };
 
@@ -219,64 +184,14 @@ export default function ProductPage() {
     }
   }, [fetcher.data]);
 
-  const Footer = () => {
-    return (
-      <>
-        <div className="flex flex-col justify-center items-start gap-1 flex-gsb">
-          <div
-            className={cn(
-              "flex h-3.5 gap-1 self-stretch",
-              "text-sm leading-3.5 tracking-[-0.4px]",
-            )}
-          >
-            <span>{product.discountRate}%</span>
-            <span className="text-muted line-through">
-              {product.regularPrice.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
-            <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
-              {product.salePrice.toLocaleString()}원
-            </span>
-          </div>
-          <div className="flex h-5 pr-4 justify-center items-center gap-0.25">
-            <div className="flex w-37 shrink-0 self-stretch">
-              <span className="text-xl font-bold leading-5 tracking-[-0.4px] text-accent">
-                690,000원
-              </span>
-              <div className="flex items-end">
-                <span className="text-xs font-bold leading-3 tracking-[-0.4px] text-accent">
-                  쿠폰할인가
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex size-12 px-4 justify-center items-center gap-2.5 shrink-0 rounded-full bg-secondary/20">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            className="aspect-square shrink-0"
-          >
-            <path
-              d="M20.1766 4.90686C19.1163 3.82835 17.7108 3.17009 16.2139 3.05098C14.7171 2.93188 13.2276 3.35978 12.0145 4.2574C10.7419 3.29704 9.15781 2.86157 7.58133 3.03867C6.00486 3.21578 4.55308 3.99231 3.51835 5.21189C2.48362 6.43147 1.9428 8.00351 2.0048 9.61143C2.06679 11.2194 2.727 12.7437 3.85246 13.8776L10.064 20.1896C10.5842 20.7089 11.2847 21 12.0145 21C12.7443 21 13.4449 20.7089 13.965 20.1896L20.1766 13.8776C21.3445 12.6855 22 11.073 22 9.39223C22 7.71146 21.3445 6.09897 20.1766 4.90686ZM18.7663 12.4772L12.5547 18.779C12.484 18.8514 12.3999 18.9089 12.3072 18.9481C12.2144 18.9874 12.115 19.0076 12.0145 19.0076C11.9141 19.0076 11.8146 18.9874 11.7219 18.9481C11.6292 18.9089 11.5451 18.8514 11.4744 18.779L5.26282 12.4467C4.47838 11.6332 4.03912 10.5404 4.03912 9.40237C4.03912 8.26432 4.47838 7.17152 5.26282 6.35801C6.06218 5.55733 7.14027 5.10837 8.26359 5.10837C9.3869 5.10837 10.465 5.55733 11.2643 6.35801C11.3573 6.45312 11.468 6.52862 11.5899 6.58014C11.7117 6.63166 11.8425 6.65818 11.9745 6.65818C12.1066 6.65818 12.2373 6.63166 12.3592 6.58014C12.4811 6.52862 12.5917 6.45312 12.6847 6.35801C13.4841 5.55733 14.5622 5.10837 15.6855 5.10837C16.8088 5.10837 17.8869 5.55733 18.6862 6.35801C19.4815 7.16086 19.9351 8.24774 19.9501 9.38582C19.9651 10.5239 19.5401 11.6227 18.7663 12.4467V12.4772Z"
-              fill="black"
-            />
-          </svg>
-        </div>
-        <Button variant="secondary" size="lg" onClick={handleBuy}>
-          구매하기
-        </Button>
-      </>
-    );
-  };
+  const isOptionSelected =
+    Object.keys(buyOption).length > 0 &&
+    !Object.values(buyOption).includes("");
 
   return (
     <>
-      <Content footer={<Footer />}>
+      <Content footer={<ProductFooter product={product} onBuyClick={handleBuyClick} />}>
+        {/* 상품 이미지 캐러셀 */}
         {product.images.length > 0 ? (
           <Carousel className="w-full">
             <CarouselContent className="ml-0">
@@ -292,14 +207,14 @@ export default function ProductPage() {
             </CarouselContent>
           </Carousel>
         ) : (
-          <div className="w-full aspect-square bg-gray-400"></div>
+          <div className="w-full aspect-square bg-gray-400" />
         )}
 
+        {/* 상품 기본 정보 */}
         <div className="flex pt-3 px-4 flex-col justify-center items-start gap-4 self-stretch">
           <span className="text-xl font-bold leading-7.5 tracking-[-0.4px]">
             {product.name}
           </span>
-
           <div className="flex h-6 items-start gap-2 self-stretch border-b-1 border-b-muted/30">
             <div className="flex items-center gap-1 flex-gsb self-stretch">
               <div className="flex items-center gap-0.5">
@@ -333,487 +248,165 @@ export default function ProductPage() {
           </div>
         </div>
 
+        {/* 탭 네비게이션 */}
         <div className="flex w-full flex-col items-start gap-2.5 shrink-0">
           <Tabs>
             <Tab
-              title="홈"
-              isActive={isActiveTab === "home"}
-              className={{ "text-muted": isActiveTab !== "home" }}
-              onClick={handleClickTab("home")}
+              title="정보"
+              isActive={activeTab === "information"}
+              className={{ "text-muted": activeTab !== "information" }}
+              onClick={handleTabClick("information")}
             />
             <Tab
-              title="패션"
-              isActive={isActiveTab === "fashion"}
-              className={{ "text-muted": isActiveTab !== "fashion" }}
-              onClick={handleClickTab("fashion")}
+              title="사이즈"
+              isActive={activeTab === "size"}
+              className={{ "text-muted": activeTab !== "size" }}
+              onClick={handleTabClick("size")}
             />
             <Tab
-              title="스킨케어"
-              isActive={isActiveTab === "skincare"}
-              className={{ "text-muted": isActiveTab !== "skincare" }}
-              onClick={handleClickTab("skincare")}
+              title="리뷰(4,321)"
+              isActive={activeTab === "review"}
+              className={{ "text-muted": activeTab !== "review" }}
+              onClick={handleTabClick("review")}
             />
             <Tab
-              title="액티비티"
-              isActive={isActiveTab === "activity"}
-              className={{ "text-muted": isActiveTab !== "activity" }}
-              onClick={handleClickTab("activity")}
+              title="코디"
+              isActive={activeTab === "coordination"}
+              className={{ "text-muted": activeTab !== "coordination" }}
+              onClick={handleTabClick("coordination")}
             />
             <Tab
-              title="라이프"
-              isActive={isActiveTab === "life"}
-              className={{ "text-muted": isActiveTab !== "life" }}
-              onClick={handleClickTab("life")}
+              title="문의"
+              isActive={activeTab === "inquiry"}
+              className={{ "text-muted": activeTab !== "inquiry" }}
+              onClick={handleTabClick("inquiry")}
             />
           </Tabs>
 
-          <div className="flex flex-col justify-center items-center gap-2.5 self-stretch">
-            {product.descriptionImages.length > 0 ? (
-              product.descriptionImages.map((imageUrl, index) => (
-                <img
-                  key={index}
-                  className="w-full"
-                  src={imageUrl}
-                  alt={`${product.name} 상세 ${index + 1}`}
-                />
-              ))
-            ) : (
-              <img className="w-full" src={productSample1} alt="" />
-            )}
-          </div>
+          {/* 정보 섹션 */}
+          <ProductInformationSection
+            ref={informationRef}
+            productName={product.name}
+            descriptionImages={product.descriptionImages}
+          />
 
-          <ProductSizeDescription />
-          <Divider className="w-full" />
-          <div className="flex p-2.5 flex-col items-start gap-2.5 self-stretch">
-            <div className="flex px-2.5 justify-center items-center gap-2.5 self-stretch">
-              <StarRating score={4} />
-              <div className="text-xl font-bold leading-[100%] tracking-[-0.4px]">
-                <span>4.5</span>
-                <span className="text-muted"> / 5</span>
-              </div>
-              <span className="text-sm laeding-[100%] tracking-[-0.4px] text-muted">
-                (4,321)
-              </span>
-            </div>
-            <div className="flex py-2 pr-2.5 pl-1 items-center gap-9 self-stretch border-1 border-muted-foreground/10">
-              <div className="flex h-4.5 flex-col items-start">
-                <div className="flex w-19 h-4.5 flex-col justify-center shrink-0">
-                  <span className="text-sm font-bold leading-[100%] tracking-[-0.4px] text-muted">
-                    색감
-                  </span>
-                </div>
-              </div>
-              <div className="flex h-4.5 flex-col justify-center items-center">
-                <span className="text-xs font-bold leading-[100%] tracking-[-0.4px]">
-                  사진 보다 진해요
-                </span>
-              </div>
-              <div className="flex h-4.5 flex-col items-start flex-gsb">
-                <div className="flex h-4.5 flex-col justify-center shrink-0 self-stretch">
-                  <span className="text-right text-base font-bold leading-[100%] tracking-[-0.4px] text-accent">
-                    64%
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex py-2 pr-2.5 pl-1 items-center gap-9 self-stretch border-1 border-muted-foreground/10">
-              <div className="flex h-4.5 flex-col items-start">
-                <div className="flex w-19 h-4.5 flex-col justify-center shrink-0">
-                  <span className="text-sm font-bold leading-[100%] tracking-[-0.4px] text-muted">
-                    색감
-                  </span>
-                </div>
-              </div>
-              <div className="flex h-4.5 flex-col justify-center items-center">
-                <span className="text-xs font-bold leading-[100%] tracking-[-0.4px]">
-                  사진 보다 진해요
-                </span>
-              </div>
-              <div className="flex h-4.5 flex-col items-start flex-gsb">
-                <div className="flex h-4.5 flex-col justify-center shrink-0 self-stretch">
-                  <span className="text-right text-base font-bold leading-[100%] tracking-[-0.4px] text-accent">
-                    64%
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex py-2 pr-2.5 pl-1 items-center gap-9 self-stretch border-1 border-muted-foreground/10">
-              <div className="flex h-4.5 flex-col items-start">
-                <div className="flex w-19 h-4.5 flex-col justify-center shrink-0">
-                  <span className="text-sm font-bold leading-[100%] tracking-[-0.4px] text-muted">
-                    색감
-                  </span>
-                </div>
-              </div>
-              <div className="flex h-4.5 flex-col justify-center items-center">
-                <span className="text-xs font-bold leading-[100%] tracking-[-0.4px]">
-                  사진 보다 진해요
-                </span>
-              </div>
-              <div className="flex h-4.5 flex-col items-start flex-gsb">
-                <div className="flex h-4.5 flex-col justify-center shrink-0 self-stretch">
-                  <span className="text-right text-base font-bold leading-[100%] tracking-[-0.4px] text-accent">
-                    64%
-                  </span>
-                </div>
-              </div>
-            </div>
+          {/* 사이즈 섹션 */}
+          <div ref={sizeRef}>
+            <ProductSizeDescription />
           </div>
           <Divider className="w-full" />
 
-          {/* review start */}
-          <div className="flex w-full p-4 flex-col items-start gap-2.5">
-            <div className="flex p-4 items-center gap-2 self-stretch border-b-1 border-b-muted-foreground/10">
-              <div className="flex items-center gap-1 flex-gsb">
-                <span className="text-lg font-bold leading-[100%] tracking-[-0.4px]">
-                  리뷰
-                </span>
-                <span className="text-base leading-[100%] tracking-[-0.4px] text-muted/50">
-                  (4,321)
-                </span>
-              </div>
-            </div>
-            <div className="flex px-4 justify-end items-center self-stretch">
-              <span className="text-xs leading-[100%]">전체보기</span>
-              <ChevronRight size={16} />
-            </div>
-            <div className="flex w-full h-18 flex-col items-start gap-2.5 overflow-hidden">
-              <div className="flex justify-end items-center self-stretch overflow-x-auto">
-                <div className="flex w-full h-18 items-center gap-2.5">
-                  <div className="flex h-18 flex-col justify-end items-start gap-2.5 flex-gsb">
-                    <div className="flex pr-4 items-center gap-1">
-                      <img
-                        src={productSample3}
-                        className="flex justify-center items-center size-18"
-                      />
-                      <img
-                        src={productSample4}
-                        className="flex justify-center items-center size-18"
-                      />
-                      <img
-                        src={productSample5}
-                        className="flex justify-center items-center size-18"
-                      />
-                      <img
-                        src={productSample3}
-                        className="flex justify-center items-center size-18"
-                      />
-                      <img
-                        src={productSample4}
-                        className="flex justify-center items-center size-18"
-                      />
-                      <img
-                        src={productSample5}
-                        className="flex justify-center items-center size-18"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* review card start */}
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div className="flex flex-col items-start gap-2.5 self-stretch">
-                <div className="flex flex-col justify-center items-start gap-1 self-stretch">
-                  <div className="flex items-center gap-2 self-stretch">
-                    <div className="size-10 aspect-square bg-muted rounded-full"></div>
-                    <div className="flex h-12 pr-4 justify-between items-center flex-gsb">
-                      <div className="flex h-6 justify-center items-center flex-gsb">
-                        <span className="text-xs font-bold leading-[100%] flex-gsb">
-                          채림이 아빠
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex w-full pr-4 justify-center items-center gap-25">
-                    <StarRating score={5} />
-                    <div className="flex w-20 items-center gap-1 shrink-0">
-                      <span className="text-right text-xs leading-[100%] text-muted/50">
-                        등록 | 25.09.10
-                      </span>
-                    </div>
-                  </div>
-                  {/* 이미지 */}
-                  <div></div>
-
-                  <div className="flex p-2.5 flex-col items-start gap-1 self-stretch rounded-md bg-muted/10">
-                    <div className="flex items-center gap-6 self-stretch">
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground/50">
-                          색상
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground">
-                          베이지
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6 self-stretch">
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground/50">
-                          색상
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground">
-                          베이지
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6 self-stretch">
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground/50">
-                          색상
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground">
-                          베이지
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6 self-stretch">
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground/50">
-                          색상
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-5">
-                        <span className="text-xs text-center font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground">
-                          베이지
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex p-2.5 flex-col items-start gap-1 self-stretch">
-                    <div className="flex w-full h-17 flex-col justify-center">
-                      <span className="text-xs leading-[150%] tracking-[-0.4px]">
-                        소재가 일반 면은 아닌것 같아요. 쿨링 감이 있는것 같아서
-                        한 여름에도시원 하게 입힐 수있을 것 같아요. 너무 딱 달라
-                        붙지도 않아서 아이가 활동 하기 편해요. 어쩌구 저쩌구
-                        어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구
-                        어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌
-                        ...
-                        <span className="text-[10px] font-bold leading-[100%] tracking-[-0.4px] text-muted-foreground/30">
-                          더 보기
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex px-2.5 justify-center items-center gap-1 self-stretch">
-                    <div className="flex justify-center items-center gap-6">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 12 12"
-                        fill="none"
-                      >
-                        <path
-                          d="M11.4803 0.55751C11.1407 0.200271 10.6827 0 10.2093 0H1.80103C1.32247 0 0.864494 0.200271 0.530017 0.55751C0.19554 0.91475 0 1.39107 0 1.89445V11.3667C0 11.4804 0.0308748 11.5886 0.0823328 11.6861C0.133791 11.7835 0.210978 11.8647 0.303602 11.9188C0.391081 11.9729 0.493997 12 0.596913 12C0.704974 12 0.80789 11.9675 0.900515 11.9134L3.59691 10.1976C3.69468 10.1326 3.81304 10.1055 3.92624 10.111H10.199C10.6775 10.111 11.1355 9.91069 11.47 9.55345C11.8096 9.19621 12 8.71448 12 8.21651V1.89445C12 1.39107 11.8096 0.909337 11.47 0.55751H11.4803ZM3.60206 5.68336C3.27273 5.68336 3 5.40189 3 5.05007C3 4.69824 3.26758 4.41678 3.60206 4.41678C3.93654 4.41678 4.20412 4.69824 4.20412 5.05007C4.20412 5.40189 3.93654 5.68336 3.60206 5.68336ZM6.00515 5.68336C5.67582 5.68336 5.40309 5.40189 5.40309 5.05007C5.40309 4.69824 5.67067 4.41678 6.00515 4.41678C6.33962 4.41678 6.6072 4.69824 6.6072 5.05007C6.6072 5.40189 6.33962 5.68336 6.00515 5.68336ZM8.40309 5.68336C8.07376 5.68336 7.80103 5.40189 7.80103 5.05007C7.80103 4.69824 8.06861 4.41678 8.40309 4.41678C8.73756 4.41678 9.00515 4.69824 9.00515 5.05007C9.00515 5.40189 8.73756 5.68336 8.40309 5.68336Z"
-                          fill="#9F9F9F"
-                        />
-                      </svg>
-                      <span className="text-center text-[10px] leading-[100%] tracking-[-0.4px] text-muted-foreground/30">
-                        댓글 5
-                      </span>
-                    </div>
-                    <div className="flex justify-end items-center flex-gsb">
-                      <span className="text-center text-[10px] leading-[100%] tracking-[-0.4px] text-muted-foreground/30">
-                        댓글 달기
-                      </span>
-                      <ChevronRight size={12} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* review card end */}
-          </div>
+          {/* 상품평점 섹션 */}
+          <ProductRatingSection />
           <Divider className="w-full" />
-          {/* review end */}
 
-          <div className="flex px-4 flex-col justify-center items-center self-stretch">
-            <Button
-              variant="outline"
-              className={cn(
-                "flex w-full h-9 px-7.5 justify-center items-center rounded-full border-1 border-secondary",
-                "text-sm font-bold leading-[100%] tracking-[-0.4px] text-secondary",
-              )}
-            >
-              모든 리뷰 보기 (4 321)
-            </Button>
-          </div>
+          {/* 리뷰 섹션 */}
+          <ProductReviewSection ref={reviewRef} />
+          <Divider className="w-full" />
 
+          {/* 추천상품 */}
           <RecommendProducts />
         </div>
       </Content>
 
-      <BottomSheet open={isOpen} setOpen={setIsOpen}>
+      {/* 옵션 선택 바텀시트 */}
+      <BottomSheet open={isOptionSheetOpen} setOpen={setIsOptionSheetOpen}>
         <SelectAccordion
           items={optionItems}
           values={buyOption}
-          onChange={handleChangeBuyOption}
+          onChange={handleOptionChange}
         />
 
-        {Object.keys(buyOption).length > 0 &&
-          !Object.values(buyOption).includes("") && (
-            <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
-              <Button
-                className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
-                onClick={handleAddToCart}
-                disabled={fetcher.state !== "idle"}
-              >
-                {fetcher.state !== "idle" ? "담는 중..." : "장바구니"}
-              </Button>
-              <Button
-                variant="secondary"
-                className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
-                onClick={handlePurchase}
-              >
-                바로 구매
-              </Button>
-            </div>
-          )}
+        {isOptionSelected && (
+          <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
+            <Button
+              className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
+              onClick={handleAddToCart}
+              disabled={fetcher.state !== "idle"}
+            >
+              {fetcher.state !== "idle" ? "담는 중..." : "장바구니"}
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
+              onClick={handlePurchase}
+            >
+              바로 구매
+            </Button>
+          </div>
+        )}
       </BottomSheet>
 
-      <Modal
-        open={isOpen2}
-        title="결제"
-        onClose={() => setIsOpen2(false)}
-        footer={
-          <Button
-            variant="secondary"
-            className="flex w-full h-12.5 rounded-full"
-          >
-            결제하기
-          </Button>
-        }
-      >
-        <DeliveryAddress address="123" />
+      {/* 결제 모달 */}
+      <ProductPurchaseModal
+        open={isPurchaseModalOpen}
+        onClose={() => setIsPurchaseModalOpen(false)}
+      />
+    </>
+  );
+}
 
-        <div className="flex w-full flex-col pt-5.5 pb-4 px-4 items-start gap-5 bg-white">
-          <div className="flex px-4 items-center gap-2.5 self-stretch">
-            <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
-              주문 상품
+// 하단 Footer 컴포넌트
+interface ProductFooterProps {
+  product: {
+    discountRate: number;
+    regularPrice: number;
+    salePrice: number;
+  };
+  onBuyClick: () => void;
+}
+
+function ProductFooter({ product, onBuyClick }: ProductFooterProps) {
+  return (
+    <>
+      <div className="flex flex-col justify-center items-start gap-1 flex-gsb">
+        <div
+          className={cn(
+            "flex h-3.5 gap-1 self-stretch",
+            "text-sm leading-3.5 tracking-[-0.4px]"
+          )}
+        >
+          <span>{product.discountRate}%</span>
+          <span className="text-muted line-through">
+            {product.regularPrice.toLocaleString()}
+          </span>
+        </div>
+        <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
+          <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
+            {product.salePrice.toLocaleString()}원
+          </span>
+        </div>
+        <div className="flex h-5 pr-4 justify-center items-center gap-0.25">
+          <div className="flex w-37 shrink-0 self-stretch">
+            <span className="text-xl font-bold leading-5 tracking-[-0.4px] text-accent">
+              690,000원
             </span>
-            <div className="flex items-center gap-2 self-stretch">
-              <span className="text-sm text-muted">2개</span>
+            <div className="flex items-end">
+              <span className="text-xs font-bold leading-3 tracking-[-0.4px] text-accent">
+                쿠폰할인가
+              </span>
             </div>
-          </div>
-
-          <div className="flex flex-col items-center self-stretch rounded-lg border-1 border-muted/30">
-            <div className="flex flex-col items-center gap-2.5 self-stretch rounded-lg">
-              <div className="flex w-full pt-2.5 px-4 items-center gap-1 border-b-1 border-b-muted/30">
-                <span className="text-base font-bold leading-4 tracking-[-0.4px]">
-                  KEND KID
-                </span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="2"
-                  height="24"
-                  viewBox="0 0 2 24"
-                  fill="none"
-                >
-                  <path
-                    d="M1 18.5L1 4.5"
-                    stroke="#939393"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="flex gap-2 items-center self-stretch">
-                  <span className="text-muted">1개</span>
-                </div>
-                <div className="flex h-7 justify-end items-center gap-2 flex-gsb">
-                  <span className="text-muted">
-                    배송비 <span className="text-black">3,000원</span>
-                  </span>
-                </div>
-              </div>
-              <div className="flex w-full px-4 items-center gap-2.5">
-                <div className="flex size-19 justify-center items-center shrink-0">
-                  <img src={productSample2} alt="" />
-                </div>
-                <div className="flex w-60 flex-col items-start gap-2 shrink-0 self-stretch">
-                  <div className="flex items-center self-stretch">
-                    <span className="text-xs leading-3.5 tracking-[-0.4px]">
-                      [신상] 엄청 엄청 엄청 매우 따뜻한 구스 다운 패딩(기모,
-                      모자/안감 탈부착, 블랙, 화이트, 베이지, 사이즈 12 M...
-                    </span>
-                  </div>
-                  <div className="flex items-center self-stretch">
-                    <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-                      09.05(금) 이내 발송 예정
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex w-full px-4 items-center">
-                <div className="flex w-full h-8 pl-2.5 items-center gap-1 self-stretch rounded-xs bg-secondary/10">
-                  <span className="text-xs leading-4 tracking-[-0.4px]">
-                    베이지 / 24 M
-                  </span>
-                  <div className="flex flex-col py-0.25 px-0.75 items-start bg-accent rounded-xs">
-                    <span className="text-xs leading-3 tracking-[-0.4px] text-white">
-                      추천 사이즈
-                    </span>
-                  </div>
-                  <div className="flex py-0.25 px-5 flex-col justify-center items-end flex-gsb">
-                    <span className="text-xs leading-3 tracking-[-0.4px]">
-                      1개
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex w-full px-4 flex-col py-2.5 justify-center items-start gap-2.5">
-                <div className="flex w-full h-3.5 items-center justify-between">
-                  <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-                    결제 금액
-                  </span>
-                  <div className="flex-gsb text-right">
-                    <span className=" text-sm font-bold leading-3.5 tracking-[-0.4px]">
-                      700,000원
-                    </span>
-                  </div>
-                </div>
-                <div className="flex w-full h-3.5 items-center justify-between">
-                  <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-                    쿠폰 할인
-                  </span>
-                  <div className="flex-gsb text-right">
-                    <span className="text-sm font-bold leading-3.5 tracking-[-0.4px] text-accent">
-                      -1,000원
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="px-4 pb-4 flex flex-col w-full justify-center items-start">
-              <div className="flex w-full h-3 items-center border-t-1 border-t-muted/30"></div>
-              <div className="flex w-full h-3 items-center">
-                <span className="text-sm font-bold leading-3 tracking-[-0.4px]">
-                  최종 결제 금액
-                </span>
-                <span className="text-right flex-gsb text-base font-bold leading-4 tracking-[-0.4px]">
-                  690,000원
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex px-4 w-full items-center self-stretch">
-            <span className="flex-gsb font-xs leading-3 tracking-[-0.4px] text-muted/50">
-              판매자 배송 상품을 여러개 구매한 경우, 구매한 상품은 함께 배송될수
-              있으며 늦발송이 늦어질수 있습니다.
-            </span>
           </div>
         </div>
-      </Modal>
+      </div>
+      <div className="flex size-12 px-4 justify-center items-center gap-2.5 shrink-0 rounded-full bg-secondary/20">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          className="aspect-square shrink-0"
+        >
+          <path
+            d="M20.1766 4.90686C19.1163 3.82835 17.7108 3.17009 16.2139 3.05098C14.7171 2.93188 13.2276 3.35978 12.0145 4.2574C10.7419 3.29704 9.15781 2.86157 7.58133 3.03867C6.00486 3.21578 4.55308 3.99231 3.51835 5.21189C2.48362 6.43147 1.9428 8.00351 2.0048 9.61143C2.06679 11.2194 2.727 12.7437 3.85246 13.8776L10.064 20.1896C10.5842 20.7089 11.2847 21 12.0145 21C12.7443 21 13.4449 20.7089 13.965 20.1896L20.1766 13.8776C21.3445 12.6855 22 11.073 22 9.39223C22 7.71146 21.3445 6.09897 20.1766 4.90686ZM18.7663 12.4772L12.5547 18.779C12.484 18.8514 12.3999 18.9089 12.3072 18.9481C12.2144 18.9874 12.115 19.0076 12.0145 19.0076C11.9141 19.0076 11.8146 18.9874 11.7219 18.9481C11.6292 18.9089 11.5451 18.8514 11.4744 18.779L5.26282 12.4467C4.47838 11.6332 4.03912 10.5404 4.03912 9.40237C4.03912 8.26432 4.47838 7.17152 5.26282 6.35801C6.06218 5.55733 7.14027 5.10837 8.26359 5.10837C9.3869 5.10837 10.465 5.55733 11.2643 6.35801C11.3573 6.45312 11.468 6.52862 11.5899 6.58014C11.7117 6.63166 11.8425 6.65818 11.9745 6.65818C12.1066 6.65818 12.2373 6.63166 12.3592 6.58014C12.4811 6.52862 12.5917 6.45312 12.6847 6.35801C13.4841 5.55733 14.5622 5.10837 15.6855 5.10837C16.8088 5.10837 17.8869 5.55733 18.6862 6.35801C19.4815 7.16086 19.9351 8.24774 19.9501 9.38582C19.9651 10.5239 19.5401 11.6227 18.7663 12.4467V12.4772Z"
+            fill="black"
+          />
+        </svg>
+      </div>
+      <Button variant="secondary" size="lg" onClick={onBuyClick}>
+        구매하기
+      </Button>
     </>
   );
 }
