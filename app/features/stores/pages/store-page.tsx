@@ -5,7 +5,11 @@ import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { makeSSRClient } from "~/supa-client";
-import { getStoreByCode, getProductsBySeller, getMainCategories } from "../queries";
+import {
+  getStoreByCode,
+  getProductsBySeller,
+  getMainCategories,
+} from "../queries";
 import { StoreInfo } from "../components/store-card";
 import ProductCard from "~/features/products/components/product-card";
 
@@ -40,7 +44,7 @@ export default function StorePage() {
     <Content>
       <Banner />
 
-      <div className="flex flex-col h-12 px-4 items-start shrink-0 self-stretch pt-2.5">
+      <div className="flex flex-col px-4 items-start shrink-0 self-stretch py-2.5 border-b border-muted/30">
         <div className="flex flex-col pr-4 items-start shrink-0 self-stretch">
           <StoreInfo
             name={store.name}

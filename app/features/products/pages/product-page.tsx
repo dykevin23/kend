@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLoaderData } from "react-router";
+import type { Route } from "./+types/product-page";
 import {
   productSample1,
   productSample2,
@@ -29,8 +31,25 @@ import StarRating from "~/common/components/star-rating";
 import Divider from "~/common/components/divider";
 import { ChevronRight } from "lucide-react";
 import RecommendProducts from "../components/recommend-products";
+import { makeSSRClient } from "~/supa-client";
+import { getProductByCode } from "../queries";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "~/common/components/ui/carousel";
+
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const { productId: productCode } = params;
+
+  const product = await getProductByCode(client, productCode);
+
+  return { product };
+};
 
 export default function ProductPage() {
+  const { product } = useLoaderData<typeof loader>();
   const [isActiveTab, setIsActiveTab] = useState<string>("home");
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isOpen2, setIsOpen2] = useState<boolean>(false);
@@ -59,6 +78,92 @@ export default function ProductPage() {
     );
   }, [buyOption]);
 
+  // SKU에서 옵션 항목 추출
+  const optionItems = useMemo(() => {
+    // 모든 SKU의 options에서 고유한 키(코드) 추출
+    const optionKeysSet = new Set<string>();
+    product.skus.forEach((sku) => {
+      if (sku.options) {
+        Object.keys(sku.options).forEach((key) => optionKeysSet.add(key));
+      }
+    });
+    const optionKeys = Array.from(optionKeysSet);
+
+    // 숫자 추출 함수 (문자열에서 숫자 부분만 추출)
+    const extractNumber = (str: string): number | null => {
+      const match = str.match(/\d+/);
+      return match ? parseInt(match[0], 10) : null;
+    };
+
+    // 오름차순 정렬 함수 (숫자/문자 모두 처리)
+    const sortAscending = (a: string, b: string): number => {
+      const numA = extractNumber(a);
+      const numB = extractNumber(b);
+
+      // 둘 다 숫자가 있으면 숫자로 비교
+      if (numA !== null && numB !== null) {
+        return numA - numB;
+      }
+      // 그 외에는 문자열로 비교
+      return a.localeCompare(b, "ko");
+    };
+
+    // 각 옵션 키별로 고유한 값들 추출
+    return optionKeys.map((key) => {
+      const valuesSet = new Set<string>();
+      product.skus.forEach((sku) => {
+        if (sku.options && sku.options[key]) {
+          valuesSet.add(sku.options[key]);
+        }
+      });
+      // 오름차순 정렬
+      const values = Array.from(valuesSet).sort(sortAscending);
+
+      // 코드를 이름으로 변환 (없으면 코드 그대로 사용)
+      const displayName = product.optionCodeToName[key] ?? key;
+
+      return {
+        triggerLabel: displayName,
+        value: key, // 내부적으로는 코드 사용
+        options: values.map((val) => ({
+          label: val,
+          value: val,
+        })),
+      };
+    });
+  }, [product.skus, product.optionCodeToName]);
+
+  // 선택한 옵션으로 SKU 찾기
+  const findMatchingSku = (selectedOptions: Record<string, string>) => {
+    const matchedSku = product.skus.find((sku) => {
+      if (!sku.options) return false;
+      // 모든 선택된 옵션이 SKU의 옵션과 일치하는지 확인
+      return Object.entries(selectedOptions).every(
+        ([key, value]) => sku.options?.[key] === value
+      );
+    });
+    return matchedSku;
+  };
+
+  // 구매하기 버튼 핸들러
+  const handlePurchase = () => {
+    const matchedSku = findMatchingSku(buyOption);
+    if (matchedSku) {
+      console.log("=== SKU 매핑 결과 ===");
+      console.log("선택한 옵션:", buyOption);
+      console.log("매칭된 SKU:", matchedSku);
+      console.log("SKU Code:", matchedSku.skuCode);
+      console.log("가격:", matchedSku.salePrice);
+      console.log("재고:", matchedSku.stock);
+      // TODO: 결제 페이지로 이동
+      setIsOpen2(true);
+    } else {
+      console.log("=== SKU 매핑 실패 ===");
+      console.log("선택한 옵션:", buyOption);
+      console.log("일치하는 SKU를 찾을 수 없습니다.");
+    }
+  };
+
   const Footer = () => {
     return (
       <>
@@ -69,12 +174,12 @@ export default function ProductPage() {
               "text-sm leading-3.5 tracking-[-0.4px]"
             )}
           >
-            <span>30%</span>
-            <span className="text-muted line-through">1,000,000</span>
+            <span>{product.discountRate}%</span>
+            <span className="text-muted line-through">{product.regularPrice.toLocaleString()}</span>
           </div>
           <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
             <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
-              700,000원
+              {product.salePrice.toLocaleString()}원
             </span>
           </div>
           <div className="flex h-5 pr-4 justify-center items-center gap-0.25">
@@ -115,12 +220,27 @@ export default function ProductPage() {
   return (
     <>
       <Content footer={<Footer />}>
-        <div className="w-full aspect-square bg-gray-400"></div>
+        {product.images.length > 0 ? (
+          <Carousel className="w-full">
+            <CarouselContent className="ml-0">
+              {product.images.map((image, index) => (
+                <CarouselItem key={image.id} className="pl-0">
+                  <img
+                    src={image.url}
+                    alt={`${product.name} ${index + 1}`}
+                    className="w-full aspect-square object-cover"
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : (
+          <div className="w-full aspect-square bg-gray-400"></div>
+        )}
 
         <div className="flex pt-3 px-4 flex-col justify-center items-start gap-4 self-stretch">
           <span className="text-xl font-bold leading-7.5 tracking-[-0.4px]">
-            [신상] 엄청 엄청 엄청 매우 따뜻한 구스 다운 패딩(기모, 모자/안감
-            탈부착, 블랙, 화...
+            {product.name}
           </span>
 
           <div className="flex h-6 items-start gap-2 self-stretch border-b-1 border-b-muted/30">
@@ -191,7 +311,18 @@ export default function ProductPage() {
           </Tabs>
 
           <div className="flex flex-col justify-center items-center gap-2.5 self-stretch">
-            <img className="w-full" src={productSample1} alt="" />
+            {product.descriptionImages.length > 0 ? (
+              product.descriptionImages.map((imageUrl, index) => (
+                <img
+                  key={index}
+                  className="w-full"
+                  src={imageUrl}
+                  alt={`${product.name} 상세 ${index + 1}`}
+                />
+              ))
+            ) : (
+              <img className="w-full" src={productSample1} alt="" />
+            )}
           </div>
 
           <ProductSizeDescription />
@@ -289,8 +420,8 @@ export default function ProductPage() {
               <span className="text-xs leading-[100%]">전체보기</span>
               <ChevronRight size={16} />
             </div>
-            <div className="flex w-full h-18 flex-col items-start gap-2.5">
-              <div className="flex justify-end items-center self-stretch">
+            <div className="flex w-full h-18 flex-col items-start gap-2.5 overflow-hidden">
+              <div className="flex justify-end items-center self-stretch overflow-x-auto">
                 <div className="flex w-full h-18 items-center gap-2.5">
                   <div className="flex h-18 flex-col justify-end items-start gap-2.5 flex-gsb">
                     <div className="flex pr-4 items-center gap-1">
@@ -467,56 +598,7 @@ export default function ProductPage() {
 
       <BottomSheet open={isOpen} setOpen={setIsOpen}>
         <SelectAccordion
-          items={[
-            {
-              triggerLabel: "색상",
-              value: "color",
-              options: [
-                {
-                  label: (
-                    <>
-                      <div className="size-6 rounded-md border-2 bg-white" />
-                      <span className="text-base leading-5.5 tracking-[-0.4px]">
-                        화이트
-                      </span>
-                    </>
-                  ),
-                  value: "white",
-                },
-                {
-                  label: (
-                    <>
-                      <div className="size-6 rounded-md border-2 bg-black" />
-                      <span className="text-base leading-5.5 tracking-[-0.4px]">
-                        블랙
-                      </span>
-                    </>
-                  ),
-                  value: "black",
-                },
-                {
-                  label: (
-                    <>
-                      <div className="size-6 rounded-md border-2 bg-red-500" />
-                      <span className="text-base leading-5.5 tracking-[-0.4px]">
-                        레드
-                      </span>
-                    </>
-                  ),
-                  value: "red",
-                },
-              ],
-            },
-            {
-              triggerLabel: "SIZE",
-              value: "size",
-              options: [
-                { label: "small", value: "small" },
-                { label: "medium", value: "medium" },
-                { label: "large", value: "large" },
-              ],
-            },
-          ]}
+          items={optionItems}
           values={buyOption}
           onChange={handleChangeBuyOption}
         />
@@ -530,7 +612,7 @@ export default function ProductPage() {
               <Button
                 variant="secondary"
                 className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb "
-                onClick={() => setIsOpen2(true)}
+                onClick={handlePurchase}
               >
                 바로 구매
               </Button>
