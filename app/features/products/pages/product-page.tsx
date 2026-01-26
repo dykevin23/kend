@@ -16,6 +16,8 @@ import {
   CarouselItem,
 } from "~/common/components/ui/carousel";
 import { addToCart } from "~/features/carts/mutations";
+import { isProductLiked } from "~/features/likes/queries";
+import { toggleProductLike } from "~/features/likes/mutations";
 import ProductInformationSection from "../components/product-information-section";
 import ProductSizeDescription from "../components/product-size-description";
 import ProductRatingSection from "../components/product-rating-section";
@@ -29,7 +31,17 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 
   const product = await getProductByCode(client, productCode);
 
-  return { product };
+  // 로그인한 사용자의 좋아요 여부 확인
+  let isLiked = false;
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+
+  if (user) {
+    isLiked = await isProductLiked(client, user.id, product.id);
+  }
+
+  return { product, isLiked };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -38,21 +50,28 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
   const intent = formData.get("intent");
 
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+
+  if (!user) {
+    return redirect("/auth/login", { headers });
+  }
+
   if (intent === "addToCart") {
     const skuId = formData.get("skuId") as string;
     const quantity = Number(formData.get("quantity") ?? 1);
 
-    const {
-      data: { user },
-    } = await client.auth.getUser();
-
-    if (!user) {
-      return redirect("/auth/login", { headers });
-    }
-
     await addToCart(client, user.id, skuId, quantity);
 
     return { success: true, message: "장바구니에 추가되었습니다." };
+  }
+
+  if (intent === "toggleLike") {
+    const productId = formData.get("productId") as string;
+    const isLiked = await toggleProductLike(client, user.id, productId);
+
+    return { success: true, isLiked };
   }
 
   return { success: false, message: "알 수 없는 요청입니다." };
@@ -61,7 +80,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 
 export default function ProductPage() {
-  const { product } = useLoaderData<typeof loader>();
+  const { product, isLiked } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
   const [activeTab, setActiveTab] = useState<TabKey>("information");
@@ -190,7 +209,7 @@ export default function ProductPage() {
 
   return (
     <>
-      <Content footer={<ProductFooter product={product} onBuyClick={handleBuyClick} />}>
+      <Content footer={<ProductFooter product={product} isLiked={isLiked} onBuyClick={handleBuyClick} />}>
         {/* 상품 이미지 캐러셀 */}
         {product.images.length > 0 ? (
           <Carousel className="w-full">
@@ -349,14 +368,31 @@ export default function ProductPage() {
 // 하단 Footer 컴포넌트
 interface ProductFooterProps {
   product: {
+    id: string;
     discountRate: number;
     regularPrice: number;
     salePrice: number;
   };
+  isLiked: boolean;
   onBuyClick: () => void;
 }
 
-function ProductFooter({ product, onBuyClick }: ProductFooterProps) {
+function ProductFooter({ product, isLiked, onBuyClick }: ProductFooterProps) {
+  const likeFetcher = useFetcher();
+
+  // optimistic UI: 요청 중이면 반전된 상태 표시
+  const optimisticIsLiked =
+    likeFetcher.state !== "idle"
+      ? !isLiked
+      : (likeFetcher.data?.isLiked ?? isLiked);
+
+  const handleLikeClick = () => {
+    likeFetcher.submit(
+      { intent: "toggleLike", productId: product.id },
+      { method: "POST" }
+    );
+  };
+
   return (
     <>
       <div className="flex flex-col justify-center items-start gap-1 flex-gsb">
@@ -389,22 +425,44 @@ function ProductFooter({ product, onBuyClick }: ProductFooterProps) {
           </div>
         </div>
       </div>
-      <div className="flex size-12 px-4 justify-center items-center gap-2.5 shrink-0 rounded-full bg-secondary/20">
+      {/* 좋아요 버튼 */}
+      <button
+        type="button"
+        onClick={handleLikeClick}
+        disabled={likeFetcher.state !== "idle"}
+        className={cn(
+          "flex size-12 justify-center items-center shrink-0 rounded-full border transition-all",
+          optimisticIsLiked
+            ? "border-accent bg-accent/10"
+            : "border-muted/30 bg-white hover:bg-muted/5"
+        )}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
           height="24"
           viewBox="0 0 24 24"
-          fill="none"
           className="aspect-square shrink-0"
         >
-          <path
-            d="M20.1766 4.90686C19.1163 3.82835 17.7108 3.17009 16.2139 3.05098C14.7171 2.93188 13.2276 3.35978 12.0145 4.2574C10.7419 3.29704 9.15781 2.86157 7.58133 3.03867C6.00486 3.21578 4.55308 3.99231 3.51835 5.21189C2.48362 6.43147 1.9428 8.00351 2.0048 9.61143C2.06679 11.2194 2.727 12.7437 3.85246 13.8776L10.064 20.1896C10.5842 20.7089 11.2847 21 12.0145 21C12.7443 21 13.4449 20.7089 13.965 20.1896L20.1766 13.8776C21.3445 12.6855 22 11.073 22 9.39223C22 7.71146 21.3445 6.09897 20.1766 4.90686ZM18.7663 12.4772L12.5547 18.779C12.484 18.8514 12.3999 18.9089 12.3072 18.9481C12.2144 18.9874 12.115 19.0076 12.0145 19.0076C11.9141 19.0076 11.8146 18.9874 11.7219 18.9481C11.6292 18.9089 11.5451 18.8514 11.4744 18.779L5.26282 12.4467C4.47838 11.6332 4.03912 10.5404 4.03912 9.40237C4.03912 8.26432 4.47838 7.17152 5.26282 6.35801C6.06218 5.55733 7.14027 5.10837 8.26359 5.10837C9.3869 5.10837 10.465 5.55733 11.2643 6.35801C11.3573 6.45312 11.468 6.52862 11.5899 6.58014C11.7117 6.63166 11.8425 6.65818 11.9745 6.65818C12.1066 6.65818 12.2373 6.63166 12.3592 6.58014C12.4811 6.52862 12.5917 6.45312 12.6847 6.35801C13.4841 5.55733 14.5622 5.10837 15.6855 5.10837C16.8088 5.10837 17.8869 5.55733 18.6862 6.35801C19.4815 7.16086 19.9351 8.24774 19.9501 9.38582C19.9651 10.5239 19.5401 11.6227 18.7663 12.4467V12.4772Z"
-            fill="black"
-          />
+          {optimisticIsLiked ? (
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              fill="#EBABF8"
+            />
+          ) : (
+            <path
+              d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"
+              fill="#1E1E1E"
+            />
+          )}
         </svg>
-      </div>
-      <Button variant="secondary" size="lg" onClick={onBuyClick}>
+      </button>
+      {/* 구매하기 버튼 */}
+      <Button
+        variant="secondary"
+        className="flex h-12.5 px-10 justify-center items-center rounded-full text-base font-bold"
+        onClick={onBuyClick}
+      >
         구매하기
       </Button>
     </>

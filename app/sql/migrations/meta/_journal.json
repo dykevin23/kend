@@ -29,6 +29,13 @@
       "when": 1769405792382,
       "tag": "0003_solid_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769446037550,
+      "tag": "0004_parched_may_parker",
+      "breakpoints": true
     }
   ]
 }
