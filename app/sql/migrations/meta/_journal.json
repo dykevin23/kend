@@ -15,6 +15,20 @@
       "when": 1765866812367,
       "tag": "0001_fancy_wasp",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769405359406,
+      "tag": "0002_burly_jamie_braddock",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1769405792382,
+      "tag": "0003_solid_champions",
+      "breakpoints": true
     }
   ]
 }

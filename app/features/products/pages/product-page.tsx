@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLoaderData } from "react-router";
+import { redirect, useLoaderData, useFetcher } from "react-router";
 import type { Route } from "./+types/product-page";
 import {
   productSample1,
@@ -38,6 +38,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "~/common/components/ui/carousel";
+import { addToCart } from "~/features/carts/mutations";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -48,12 +49,41 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   return { product };
 };
 
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const formData = await request.formData();
+
+  const intent = formData.get("intent");
+
+  if (intent === "addToCart") {
+    const skuId = formData.get("skuId") as string;
+    const quantity = Number(formData.get("quantity") ?? 1);
+
+    // 로그인 사용자 확인
+    const {
+      data: { user },
+    } = await client.auth.getUser();
+
+    if (!user) {
+      return redirect("/auth/login", { headers });
+    }
+
+    await addToCart(client, user.id, skuId, quantity);
+
+    return { success: true, message: "장바구니에 추가되었습니다." };
+  }
+
+  return { success: false, message: "알 수 없는 요청입니다." };
+};
+
 export default function ProductPage() {
   const { product } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
   const [isActiveTab, setIsActiveTab] = useState<string>("home");
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isOpen2, setIsOpen2] = useState<boolean>(false);
   const [buyOption, setBuyOption] = useState<{ [key: string]: string }>({});
+  const [cartQuantity, setCartQuantity] = useState<number>(1);
 
   const handleClickTab = (key: string) => () => {
     setIsActiveTab(key);
@@ -74,7 +104,7 @@ export default function ProductPage() {
       "### buyOption => ",
       buyOption,
       Object.keys(buyOption),
-      Object.values(buyOption)
+      Object.values(buyOption),
     );
   }, [buyOption]);
 
@@ -139,10 +169,28 @@ export default function ProductPage() {
       if (!sku.options) return false;
       // 모든 선택된 옵션이 SKU의 옵션과 일치하는지 확인
       return Object.entries(selectedOptions).every(
-        ([key, value]) => sku.options?.[key] === value
+        ([key, value]) => sku.options?.[key] === value,
       );
     });
     return matchedSku;
+  };
+
+  // 장바구니 담기 핸들러
+  const handleAddToCart = () => {
+    const matchedSku = findMatchingSku(buyOption);
+    if (matchedSku) {
+      fetcher.submit(
+        {
+          intent: "addToCart",
+          skuId: matchedSku.id,
+          quantity: cartQuantity.toString(),
+        },
+        { method: "POST" },
+      );
+      setIsOpen(false);
+      setBuyOption({});
+      setCartQuantity(1);
+    }
   };
 
   // 구매하기 버튼 핸들러
@@ -164,6 +212,13 @@ export default function ProductPage() {
     }
   };
 
+  // 장바구니 추가 성공 시 알림
+  useEffect(() => {
+    if (fetcher.data?.success) {
+      alert(fetcher.data.message);
+    }
+  }, [fetcher.data]);
+
   const Footer = () => {
     return (
       <>
@@ -171,11 +226,13 @@ export default function ProductPage() {
           <div
             className={cn(
               "flex h-3.5 gap-1 self-stretch",
-              "text-sm leading-3.5 tracking-[-0.4px]"
+              "text-sm leading-3.5 tracking-[-0.4px]",
             )}
           >
             <span>{product.discountRate}%</span>
-            <span className="text-muted line-through">{product.regularPrice.toLocaleString()}</span>
+            <span className="text-muted line-through">
+              {product.regularPrice.toLocaleString()}
+            </span>
           </div>
           <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
             <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
@@ -585,7 +642,7 @@ export default function ProductPage() {
               variant="outline"
               className={cn(
                 "flex w-full h-9 px-7.5 justify-center items-center rounded-full border-1 border-secondary",
-                "text-sm font-bold leading-[100%] tracking-[-0.4px] text-secondary"
+                "text-sm font-bold leading-[100%] tracking-[-0.4px] text-secondary",
               )}
             >
               모든 리뷰 보기 (4 321)
@@ -606,12 +663,16 @@ export default function ProductPage() {
         {Object.keys(buyOption).length > 0 &&
           !Object.values(buyOption).includes("") && (
             <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
-              <Button className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb ">
-                장바구니
+              <Button
+                className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
+                onClick={handleAddToCart}
+                disabled={fetcher.state !== "idle"}
+              >
+                {fetcher.state !== "idle" ? "담는 중..." : "장바구니"}
               </Button>
               <Button
                 variant="secondary"
-                className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb "
+                className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
                 onClick={handlePurchase}
               >
                 바로 구매

@@ -164,6 +164,48 @@ export type Database = {
           },
         ]
       }
+      carts: {
+        Row: {
+          created_at: string
+          id: string
+          quantity: number
+          sku_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quantity?: number
+          sku_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quantity?: number
+          sku_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carts_sku_id_product_stock_keepings_id_fk"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "product_stock_keepings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carts_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       common_code_group: {
         Row: {
           code: string
