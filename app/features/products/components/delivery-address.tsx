@@ -1,5 +1,6 @@
 import { Button } from "~/common/components/ui/button";
 import DeliveryAddressAddModal from "./delivery-address-add-modal";
+import DeliveryAddressManageModal from "./delivery-address-manage-modal";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/common/components/ui/badge";
@@ -9,24 +10,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/common/components/ui/select";
-
-interface AddressProps {}
+import type { UserAddress } from "~/features/users/queries";
 
 interface DeliveryAddressProps {
-  address: AddressProps | null;
+  address: UserAddress | null;
+  onAddressChange?: (address: UserAddress) => void;
 }
 
-export default function DeliveryAddress({ address }: DeliveryAddressProps) {
+export default function DeliveryAddress({
+  address,
+  onAddressChange,
+}: DeliveryAddressProps) {
   const [addressAddModalOpen, setAddressAddModalOpen] =
     useState<boolean>(false);
+  const [addressManageModalOpen, setAddressManageModalOpen] =
+    useState<boolean>(false);
 
-  const handleDeliveryAddress = () => {
-    /* 주소 관리 모달 필요 */
+  const handleSelectAddress = (selectedAddress: UserAddress) => {
+    onAddressChange?.(selectedAddress);
   };
+
+  // 주소 전체 문자열 생성
+  const fullAddress = address
+    ? `${address.address}${address.addressDetail ? `, ${address.addressDetail}` : ""} [${address.zoneCode}]`
+    : "";
 
   return (
     <>
-      <div className="flex w-full p-4 h-66 flex-col items-start gap-2.5 shrink-0 bg-white border-b-4 border-b-muted/10">
+      <div className="flex w-full p-4 flex-col items-start gap-2.5 shrink-0 bg-white border-b-4 border-b-muted/10">
         <div
           className={cn(
             "flex h-12 p-4 items-center gap-2 shrink-0 self-stretch",
@@ -34,12 +45,12 @@ export default function DeliveryAddress({ address }: DeliveryAddressProps) {
           )}
         >
           <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
-            배송주소
+            배송 주소
           </span>
           {address && (
             <div
-              className="flex justify-end items-center"
-              onClick={handleDeliveryAddress}
+              className="flex justify-end items-center cursor-pointer"
+              onClick={() => setAddressManageModalOpen(true)}
             >
               <span className="text-xs leading-4">배송 주소 변경</span>
               <svg
@@ -55,25 +66,25 @@ export default function DeliveryAddress({ address }: DeliveryAddressProps) {
           )}
         </div>
         {address ? (
-          <div className="flex h-45 py-5 px-4 flex-col items-start gap-4 self-stretch rounded-lg border-1 border-muted/10">
+          <div className="flex py-5 px-4 flex-col items-start gap-4 self-stretch rounded-lg border-1 border-muted/10">
             <div className="flex items-center gap-2.5">
               <span className="text-base font-bold leading-4 tracking-[-0.4px]">
-                집
+                {address.label}
               </span>
-              <Badge>기본 배송 주소지</Badge>
+              {address.isDefault && <Badge>기본 배송 주소지</Badge>}
             </div>
             <div className="flex items-center gap-2.5">
               <span className="text-sm leading-3.5 tracking-[-0.4px]">
-                이경근
+                {address.recipientName}
               </span>
               <Dot className="size-4" />
               <span className="text-sm leading-3.5 tracking-[-0.4px]">
-                010-6515-6038 
+                {address.recipientPhone}
               </span>
             </div>
             <div className="flex items-center gap-2.5">
               <span className="text-sm leading-3.5 tracking-[-0.4px]">
-                서울시 서초구 명달로 122-12 (서초동, 코지밸리 비), 502호 [06658]
+                {fullAddress}
               </span>
             </div>
             <Select>
@@ -83,7 +94,7 @@ export default function DeliveryAddress({ address }: DeliveryAddressProps) {
             </Select>
           </div>
         ) : (
-          <div className="flex flex-col h-30 px-4 justify-center items-center gap-5 shrink-0 self-stretch rounded-md border-1">
+          <div className="flex flex-col h-30 px-4 justify-center items-center gap-5 shrink-0 self-stretch rounded-md border border-muted/30">
             <span className="text-sm leading-3.5 tracking-[-0.4px]">
               등록된 배송 주소가 없습니다.
             </span>
@@ -100,6 +111,13 @@ export default function DeliveryAddress({ address }: DeliveryAddressProps) {
       <DeliveryAddressAddModal
         open={addressAddModalOpen}
         onClose={() => setAddressAddModalOpen(false)}
+      />
+
+      <DeliveryAddressManageModal
+        open={addressManageModalOpen}
+        onClose={() => setAddressManageModalOpen(false)}
+        onSelect={handleSelectAddress}
+        currentAddressId={address?.id}
       />
     </>
   );

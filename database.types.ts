@@ -799,6 +799,7 @@ export type Database = {
           created_at: string
           introduction: string | null
           nickname: string
+          phone: string | null
           profile_id: string
           role: Database["public"]["Enums"]["role"]
           stats: Json | null
@@ -811,6 +812,7 @@ export type Database = {
           created_at?: string
           introduction?: string | null
           nickname: string
+          phone?: string | null
           profile_id: string
           role?: Database["public"]["Enums"]["role"]
           stats?: Json | null
@@ -823,6 +825,7 @@ export type Database = {
           created_at?: string
           introduction?: string | null
           nickname?: string
+          phone?: string | null
           profile_id?: string
           role?: Database["public"]["Enums"]["role"]
           stats?: Json | null
@@ -898,6 +901,56 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "domains"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_addresses: {
+        Row: {
+          address: string
+          address_detail: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          recipient_name: string
+          recipient_phone: string
+          updated_at: string
+          user_id: string
+          zone_code: string
+        }
+        Insert: {
+          address: string
+          address_detail?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label: string
+          recipient_name: string
+          recipient_phone: string
+          updated_at?: string
+          user_id: string
+          zone_code: string
+        }
+        Update: {
+          address?: string
+          address_detail?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          recipient_name?: string
+          recipient_phone?: string
+          updated_at?: string
+          user_id?: string
+          zone_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_addresses_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
           },
         ]
       }

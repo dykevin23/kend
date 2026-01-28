@@ -1,4 +1,5 @@
 import {
+  boolean,
   jsonb,
   pgEnum,
   pgSchema,
@@ -19,6 +20,7 @@ export const roles = pgEnum("role", ["customer", "seller", "administrator"]);
  * profile_id       사용자ID(key)
  * nickname         닉네임
  * username         이름
+ * phone            전화번호
  * avatar           아바타url
  * introduction     한줄소개
  * comment          기타 메세지
@@ -32,6 +34,7 @@ export const profiles = pgTable("profiles", {
     .references(() => users.id, { onDelete: "cascade" }),
   nickname: text().notNull(),
   username: text().notNull(),
+  phone: text(),
   avatar: text(),
   introduction: text(),
   comment: text(),
@@ -57,4 +60,34 @@ export const follows = pgTable("follows", {
     onDelete: "cascade",
   }),
   created_at: timestamp().notNull().defaultNow(),
+});
+
+/**
+ * 사용자 배송지(user_addresses) 테이블
+ * id               배송지 ID
+ * user_id          사용자 ID
+ * label            배송지명 (집, 회사 등)
+ * recipient_name   수령인 이름
+ * recipient_phone  수령인 휴대폰번호
+ * zone_code        우편번호
+ * address          기본 주소
+ * address_detail   상세 주소
+ * is_default       기본 배송지 여부
+ * created_at       등록일시
+ * updated_at       수정일시
+ */
+export const userAddresses = pgTable("user_addresses", {
+  id: uuid().primaryKey().defaultRandom(),
+  user_id: uuid()
+    .notNull()
+    .references(() => profiles.profile_id, { onDelete: "cascade" }),
+  label: text().notNull(),
+  recipient_name: text().notNull(),
+  recipient_phone: text().notNull(),
+  zone_code: text().notNull(),
+  address: text().notNull(),
+  address_detail: text(),
+  is_default: boolean().notNull().default(false),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
 });

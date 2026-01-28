@@ -54,6 +54,11 @@ export const getProductByCode = async (client: Client, productCode: string) => {
         id,
         brand,
         maker
+      ),
+      product_deliveries!product_deliveries_product_id_products_id_fk (
+        shipping_fee_type,
+        shipping_fee,
+        free_shipping_condition
       )
     `
     )
@@ -152,6 +157,14 @@ export const getProductByCode = async (client: Client, productCode: string) => {
     maker: productDetail?.maker ?? null,
     // 옵션 코드 -> 이름 매핑
     optionCodeToName,
+    // 배송 정보
+    delivery: data.product_deliveries[0]
+      ? {
+          shippingFeeType: data.product_deliveries[0].shipping_fee_type,
+          shippingFee: data.product_deliveries[0].shipping_fee,
+          freeShippingCondition: data.product_deliveries[0].free_shipping_condition,
+        }
+      : null,
   };
 };
 

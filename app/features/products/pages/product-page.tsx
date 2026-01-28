@@ -24,6 +24,9 @@ import ProductRatingSection from "../components/product-rating-section";
 import ProductReviewSection from "../components/product-review-section";
 import ProductPurchaseModal from "../components/product-purchase-modal";
 import RecommendProducts from "../components/recommend-products";
+import type { OrderItem } from "~/features/orders/types";
+import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
+import { addUserAddress } from "~/features/users/mutations";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -31,17 +34,27 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 
   const product = await getProductByCode(client, productCode);
 
-  // 로그인한 사용자의 좋아요 여부 확인
+  // 로그인한 사용자의 좋아요 여부 및 프로필/배송지 조회
   let isLiked = false;
+  let profile = null;
+  let address = null;
+
   const {
     data: { user },
   } = await client.auth.getUser();
 
   if (user) {
-    isLiked = await isProductLiked(client, user.id, product.id);
+    const [liked, userProfile, defaultAddress] = await Promise.all([
+      isProductLiked(client, user.id, product.id),
+      getUserProfile(client, user.id),
+      getDefaultAddress(client, user.id),
+    ]);
+    isLiked = liked;
+    profile = userProfile;
+    address = defaultAddress;
   }
 
-  return { product, isLiked };
+  return { product, isLiked, profile, address };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -74,13 +87,35 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return { success: true, isLiked };
   }
 
+  if (intent === "addAddress") {
+    const label = formData.get("label") as string;
+    const recipientName = formData.get("recipientName") as string;
+    const recipientPhone = formData.get("recipientPhone") as string;
+    const zoneCode = formData.get("zoneCode") as string;
+    const address = formData.get("address") as string;
+    const addressDetail = formData.get("addressDetail") as string;
+
+    await addUserAddress(client, {
+      userId: user.id,
+      label,
+      recipientName,
+      recipientPhone,
+      zoneCode,
+      address,
+      addressDetail: addressDetail || undefined,
+      isDefault: true,
+    });
+
+    return { success: true };
+  }
+
   return { success: false, message: "알 수 없는 요청입니다." };
 };
 
 type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 
 export default function ProductPage() {
-  const { product, isLiked } = useLoaderData<typeof loader>();
+  const { product, isLiked, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
   const [activeTab, setActiveTab] = useState<TabKey>("information");
@@ -88,6 +123,7 @@ export default function ProductPage() {
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [buyOption, setBuyOption] = useState<Record<string, string>>({});
   const [cartQuantity, setCartQuantity] = useState(1);
+  const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
 
   // 섹션 refs
   const informationRef = useRef<HTMLDivElement>(null);
@@ -192,6 +228,26 @@ export default function ProductPage() {
   const handlePurchase = () => {
     const matchedSku = findMatchingSku(buyOption);
     if (matchedSku) {
+      // 주문 아이템 생성
+      const orderItem: OrderItem = {
+        skuId: matchedSku.id,
+        quantity: cartQuantity,
+        sku: {
+          skuCode: matchedSku.skuCode,
+          options: matchedSku.options,
+          regularPrice: matchedSku.regularPrice,
+          salePrice: matchedSku.salePrice,
+        },
+        product: {
+          id: product.id,
+          productCode: product.productCode,
+          name: product.name,
+          mainImage: product.images[0]?.url ?? null,
+        },
+        seller: product.seller,
+        delivery: product.delivery,
+      };
+      setPurchaseItems([orderItem]);
       setIsPurchaseModalOpen(true);
     }
   };
@@ -203,8 +259,10 @@ export default function ProductPage() {
     }
   }, [fetcher.data]);
 
-  const isOptionSelected =
-    Object.keys(buyOption).length > 0 &&
+  // 모든 옵션이 선택되었는지 확인
+  const isAllOptionsSelected =
+    optionItems.length > 0 &&
+    Object.keys(buyOption).length === optionItems.length &&
     !Object.values(buyOption).includes("");
 
   return (
@@ -336,7 +394,7 @@ export default function ProductPage() {
           onChange={handleOptionChange}
         />
 
-        {isOptionSelected && (
+        {isAllOptionsSelected && (
           <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
             <Button
               className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
@@ -359,7 +417,12 @@ export default function ProductPage() {
       {/* 결제 모달 */}
       <ProductPurchaseModal
         open={isPurchaseModalOpen}
-        onClose={() => setIsPurchaseModalOpen(false)}
+        onClose={() => {
+          setIsPurchaseModalOpen(false);
+          setPurchaseItems([]);
+        }}
+        items={purchaseItems}
+        address={address}
       />
     </>
   );

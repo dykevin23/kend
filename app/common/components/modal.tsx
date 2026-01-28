@@ -5,6 +5,8 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /** 헤더 우측에 표시할 콘텐츠 (닫기 버튼과 대칭 위치) */
+  headerRight?: React.ReactNode;
   onClose: () => void;
 }
 
@@ -13,6 +15,7 @@ export default function Modal({
   title,
   children,
   footer,
+  headerRight,
   onClose,
 }: ModalProps) {
   return (
@@ -41,10 +44,12 @@ export default function Modal({
               {title}
             </span>
           </div>
-          <div className="size-7"></div>
+          <div className="size-7 flex items-center justify-center">
+            {headerRight}
+          </div>
         </DialogHeader>
 
-        <div className="flex flex-col">{children}</div>
+        <div className="flex flex-col flex-1 overflow-y-auto">{children}</div>
 
         {footer && (
           <DialogFooter

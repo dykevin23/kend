@@ -43,6 +43,11 @@ export const getCartItems = async (client: Client, userId: string) => {
             id,
             url,
             type
+          ),
+          product_deliveries!product_deliveries_product_id_products_id_fk (
+            shipping_fee_type,
+            shipping_fee,
+            free_shipping_condition
           )
         )
       )
@@ -87,6 +92,14 @@ export const getCartItems = async (client: Client, userId: string) => {
             id: product.admin_sellers.id,
             name: product.admin_sellers.name,
             sellerCode: product.admin_sellers.seller_code,
+          }
+        : null,
+      // 배송 정보
+      delivery: product.product_deliveries[0]
+        ? {
+            shippingFeeType: product.product_deliveries[0].shipping_fee_type,
+            shippingFee: product.product_deliveries[0].shipping_fee,
+            freeShippingCondition: product.product_deliveries[0].free_shipping_condition,
           }
         : null,
     };

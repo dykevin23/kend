@@ -15,6 +15,7 @@ import "./app.css";
 import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
+import { AlertProvider } from "./hooks/useAlert";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,7 +45,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <main>{children}</main>
+        <main>
+          <AlertProvider>{children}</AlertProvider>
+        </main>
         <ScrollRestoration />
         <Scripts />
       </body>

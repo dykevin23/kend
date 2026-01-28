@@ -8,6 +8,7 @@ import { Label } from "~/common/components/ui/label";
 import CartProductCard from "../compoents/cart-product-card";
 import Divider from "~/common/components/divider";
 import RecommendProducts from "~/features/products/components/recommend-products";
+import ProductPurchaseModal from "~/features/products/components/product-purchase-modal";
 import { makeSSRClient } from "~/supa-client";
 import { getCartItems } from "../queries";
 import {
@@ -15,6 +16,8 @@ import {
   removeMultipleFromCart,
   updateCartQuantity,
 } from "../mutations";
+import { type OrderItem, cartItemToOrderItem } from "~/features/orders/types";
+import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -24,12 +27,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await client.auth.getUser();
 
   if (!user) {
-    return { cartItems: [] };
+    return { cartItems: [], profile: null, address: null };
   }
 
-  const cartItems = await getCartItems(client, user.id);
+  const [cartItems, profile, address] = await Promise.all([
+    getCartItems(client, user.id),
+    getUserProfile(client, user.id),
+    getDefaultAddress(client, user.id),
+  ]);
 
-  return { cartItems };
+  return { cartItems, profile, address };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -69,12 +76,14 @@ export const action = async ({ request }: Route.ActionArgs) => {
 };
 
 export default function ShoppingCartPage() {
-  const { cartItems } = useLoaderData<typeof loader>();
+  const { cartItems, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     () => new Set(cartItems.map((item) => item.id)),
   );
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
 
   const isAllSelected =
     cartItems.length > 0 && selectedIds.size === cartItems.length;
@@ -142,6 +151,20 @@ export default function ShoppingCartPage() {
 
   const isUpdating = fetcher.state !== "idle";
 
+  // 결제하기 버튼 클릭
+  const handlePurchase = () => {
+    if (selectedIds.size === 0) return;
+
+    // 선택된 장바구니 아이템을 OrderItem으로 변환
+    const selectedCartItems = cartItems.filter((item) =>
+      selectedIds.has(item.id)
+    );
+    const orderItems = selectedCartItems.map(cartItemToOrderItem);
+
+    setPurchaseItems(orderItems);
+    setIsPurchaseModalOpen(true);
+  };
+
   return (
     <Content
       headerPorps={{ title: "장바구니", useRight: false }}
@@ -151,6 +174,7 @@ export default function ShoppingCartPage() {
             variant="secondary"
             className="flex w-full h-12.5 px-7.5 justify-center items-center rounded-full"
             disabled={selectedIds.size === 0}
+            onClick={handlePurchase}
           >
             결제하기
           </Button>
@@ -282,6 +306,17 @@ export default function ShoppingCartPage() {
       <div className="flex pt-4 flex-col items-start gap-1">
         <RecommendProducts />
       </div>
+
+      {/* 결제 모달 */}
+      <ProductPurchaseModal
+        open={isPurchaseModalOpen}
+        onClose={() => {
+          setIsPurchaseModalOpen(false);
+          setPurchaseItems([]);
+        }}
+        items={purchaseItems}
+        address={address}
+      />
     </Content>
   );
 }
