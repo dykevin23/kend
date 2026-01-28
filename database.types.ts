@@ -268,6 +268,98 @@ export type Database = {
           },
         ]
       }
+      deliveries: {
+        Row: {
+          courier: string | null
+          created_at: string
+          delivered_at: string | null
+          id: string
+          order_id: string
+          shipped_at: string | null
+          shipping_fee: number
+          status: Database["public"]["Enums"]["delivery_status"]
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          courier?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          order_id: string
+          shipped_at?: string | null
+          shipping_fee?: number
+          status?: Database["public"]["Enums"]["delivery_status"]
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          courier?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          order_id?: string
+          shipped_at?: string | null
+          shipping_fee?: number
+          status?: Database["public"]["Enums"]["delivery_status"]
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_order_id_orders_id_fk"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_items: {
+        Row: {
+          created_at: string
+          delivery_id: string
+          id: string
+          order_item_id: string
+          quantity: number
+          status: Database["public"]["Enums"]["delivery_item_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_id: string
+          id?: string
+          order_item_id: string
+          quantity: number
+          status?: Database["public"]["Enums"]["delivery_item_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_id?: string
+          id?: string
+          order_item_id?: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["delivery_item_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_items_delivery_id_deliveries_id_fk"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_items_order_item_id_order_items_id_fk"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       domains: {
         Row: {
           code: string
@@ -360,6 +452,219 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "domains"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_groups: {
+        Row: {
+          address: string
+          address_detail: string | null
+          created_at: string
+          id: string
+          order_number: string
+          paid_at: string | null
+          payment_method: string | null
+          recipient_name: string
+          recipient_phone: string
+          status: Database["public"]["Enums"]["order_group_status"]
+          total_amount: number
+          total_discount_amount: number
+          total_product_amount: number
+          total_shipping_fee: number
+          updated_at: string
+          user_id: string
+          zone_code: string
+        }
+        Insert: {
+          address: string
+          address_detail?: string | null
+          created_at?: string
+          id?: string
+          order_number: string
+          paid_at?: string | null
+          payment_method?: string | null
+          recipient_name: string
+          recipient_phone: string
+          status?: Database["public"]["Enums"]["order_group_status"]
+          total_amount: number
+          total_discount_amount?: number
+          total_product_amount: number
+          total_shipping_fee: number
+          updated_at?: string
+          user_id: string
+          zone_code: string
+        }
+        Update: {
+          address?: string
+          address_detail?: string | null
+          created_at?: string
+          id?: string
+          order_number?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          recipient_name?: string
+          recipient_phone?: string
+          status?: Database["public"]["Enums"]["order_group_status"]
+          total_amount?: number
+          total_discount_amount?: number
+          total_product_amount?: number
+          total_shipping_fee?: number
+          updated_at?: string
+          user_id?: string
+          zone_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_groups_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      order_items: {
+        Row: {
+          base_shipping_fee: number
+          created_at: string
+          free_shipping_condition_value: number | null
+          id: string
+          main_image: string | null
+          options: Json | null
+          order_id: string
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          regular_price: number
+          sale_price: number
+          ship_from_region: string | null
+          shipping_fee_type: Database["public"]["Enums"]["shipping_fee_type"]
+          sku_code: string
+          sku_id: string | null
+          subtotal: number
+        }
+        Insert: {
+          base_shipping_fee?: number
+          created_at?: string
+          free_shipping_condition_value?: number | null
+          id?: string
+          main_image?: string | null
+          options?: Json | null
+          order_id: string
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity: number
+          regular_price: number
+          sale_price: number
+          ship_from_region?: string | null
+          shipping_fee_type: Database["public"]["Enums"]["shipping_fee_type"]
+          sku_code: string
+          sku_id?: string | null
+          subtotal: number
+        }
+        Update: {
+          base_shipping_fee?: number
+          created_at?: string
+          free_shipping_condition_value?: number | null
+          id?: string
+          main_image?: string | null
+          options?: Json | null
+          order_id?: string
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          regular_price?: number
+          sale_price?: number
+          ship_from_region?: string | null
+          shipping_fee_type?: Database["public"]["Enums"]["shipping_fee_type"]
+          sku_code?: string
+          sku_id?: string | null
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_orders_id_fk"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_products_id_fk"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_sku_id_product_stock_keepings_id_fk"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "product_stock_keepings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          id: string
+          order_group_id: string
+          order_number: string
+          product_amount: number
+          seller_code: string
+          seller_id: string
+          seller_name: string
+          shipping_fee: number
+          status: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_group_id: string
+          order_number: string
+          product_amount: number
+          seller_code: string
+          seller_id: string
+          seller_name: string
+          shipping_fee: number
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_group_id?: string
+          order_number?: string
+          product_amount?: number
+          seller_code?: string
+          seller_id?: string
+          seller_name?: string
+          shipping_fee?: number
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_order_group_id_order_groups_id_fk"
+            columns: ["order_group_id"]
+            isOneToOne: false
+            referencedRelation: "order_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_seller_id_profiles_profile_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
           },
         ]
       }
@@ -1000,15 +1305,41 @@ export type Database = {
         | "GSM"
         | "ILYANG"
         | "HDEXP"
+      delivery_item_status:
+        | "normal"
+        | "cancelled"
+        | "return_requested"
+        | "returned"
+        | "exchange_requested"
+        | "exchanged"
       delivery_method_type:
         | "STANDARD"
         | "FRESH_FROZEN"
         | "CUSTOM_ORDER"
         | "PURCHASE_AGENCY"
         | "INSTALLATION_DIRECT"
+      delivery_status:
+        | "pending"
+        | "preparing"
+        | "shipped"
+        | "in_transit"
+        | "delivered"
       description_type: "IMAGE" | "HTML"
       image_type: "MAIN" | "ADDITIONAL"
       island_delivery_type: "AVAILABLE" | "UNAVAILABLE"
+      order_group_status:
+        | "pending"
+        | "paid"
+        | "partially_refunded"
+        | "refunded"
+        | "cancelled"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "preparing"
+        | "shipped"
+        | "delivered"
+        | "cancelled"
       role: "customer" | "seller" | "administrator"
       sales_status:
         | "REGISTERED"
@@ -1161,6 +1492,14 @@ export const Constants = {
         "ILYANG",
         "HDEXP",
       ],
+      delivery_item_status: [
+        "normal",
+        "cancelled",
+        "return_requested",
+        "returned",
+        "exchange_requested",
+        "exchanged",
+      ],
       delivery_method_type: [
         "STANDARD",
         "FRESH_FROZEN",
@@ -1168,9 +1507,31 @@ export const Constants = {
         "PURCHASE_AGENCY",
         "INSTALLATION_DIRECT",
       ],
+      delivery_status: [
+        "pending",
+        "preparing",
+        "shipped",
+        "in_transit",
+        "delivered",
+      ],
       description_type: ["IMAGE", "HTML"],
       image_type: ["MAIN", "ADDITIONAL"],
       island_delivery_type: ["AVAILABLE", "UNAVAILABLE"],
+      order_group_status: [
+        "pending",
+        "paid",
+        "partially_refunded",
+        "refunded",
+        "cancelled",
+      ],
+      order_status: [
+        "pending",
+        "confirmed",
+        "preparing",
+        "shipped",
+        "delivered",
+        "cancelled",
+      ],
       role: ["customer", "seller", "administrator"],
       sales_status: [
         "REGISTERED",

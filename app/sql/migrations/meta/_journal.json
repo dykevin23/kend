@@ -50,6 +50,13 @@
       "when": 1769497792413,
       "tag": "0006_sad_sunfire",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1769587038441,
+      "tag": "0007_lean_brood",
+      "breakpoints": true
     }
   ]
 }
