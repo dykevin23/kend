@@ -26,6 +26,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
       const addressJson = formData.get("address") as string;
       const sellerGroupsJson = formData.get("sellerGroups") as string;
       const itemsJson = formData.get("items") as string;
+      const paymentMethod = formData.get("paymentMethod") as string;
 
       const address: UserAddress = JSON.parse(addressJson);
       const sellerGroups: SellerOrderGroup[] = JSON.parse(sellerGroupsJson);
@@ -36,6 +37,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
         address,
         sellerGroups,
         items,
+        paymentMethod,
       });
 
       return {

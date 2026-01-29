@@ -16,11 +16,19 @@ function generateOrderNumber(): string {
   return `ORD-${date}-${random}`;
 }
 
+type PaymentMethodType =
+  | "bank_transfer"
+  | "credit_card"
+  | "mobile_payment"
+  | "easy_pay"
+  | "virtual_account";
+
 interface CreateOrderParams {
   userId: string;
   address: UserAddress;
   sellerGroups: SellerOrderGroup[];
   items: OrderItem[];
+  paymentMethod: string;
 }
 
 /**
@@ -32,7 +40,7 @@ interface CreateOrderParams {
  */
 export const createOrder = async (
   client: Client,
-  { userId, address, sellerGroups }: CreateOrderParams
+  { userId, address, sellerGroups, paymentMethod }: CreateOrderParams
 ) => {
   const groupOrderNumber = generateOrderNumber();
 
@@ -47,13 +55,19 @@ export const createOrder = async (
   );
   const totalAmount = totalProductAmount + totalShippingFee;
 
+  // 결제 수단에 따른 초기 상태 결정
+  // - bank_transfer: 무통장입금 → 결제대기 (payment_pending)
+  // - 그 외: PG 결제 → 결제 진행중 (payment_in_progress)
+  const initialStatus: "payment_pending" | "payment_in_progress" =
+    paymentMethod === "bank_transfer" ? "payment_pending" : "payment_in_progress";
+
   // 1. order_group 생성
   const { data: orderGroup, error: groupError } = await client
     .from("order_groups")
     .insert({
       user_id: userId,
       order_number: groupOrderNumber,
-      status: "payment_in_progress",
+      status: initialStatus,
       total_product_amount: totalProductAmount,
       total_shipping_fee: totalShippingFee,
       total_discount_amount: 0,
@@ -63,6 +77,7 @@ export const createOrder = async (
       zone_code: address.zoneCode,
       address: address.address,
       address_detail: address.addressDetail ?? null,
+      payment_method: paymentMethod as PaymentMethodType,
     })
     .select("id")
     .single();

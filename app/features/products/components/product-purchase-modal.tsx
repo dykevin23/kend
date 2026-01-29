@@ -10,6 +10,29 @@ import {
 } from "~/features/orders/types";
 import type { UserAddress } from "~/features/users/queries";
 import { useAlert } from "~/hooks/useAlert";
+import { cn } from "~/lib/utils";
+
+/**
+ * 결제 수단 타입
+ */
+type PaymentMethodType =
+  | "bank_transfer"
+  | "credit_card"
+  | "easy_pay";
+
+/**
+ * 결제 수단 옵션
+ */
+const PAYMENT_METHODS: {
+  value: PaymentMethodType;
+  label: string;
+  subLabel?: string;
+  disabled?: boolean;
+}[] = [
+  { value: "easy_pay", label: "카카오페이", subLabel: "준비중", disabled: true },
+  { value: "bank_transfer", label: "계좌 간편결제", disabled: false },
+  { value: "credit_card", label: "일반결제", subLabel: "준비중", disabled: true },
+];
 
 interface ProductPurchaseModalProps {
   open: boolean;
@@ -38,10 +61,15 @@ export default function ProductPurchaseModal({
     initialAddress
   );
 
+  // 선택된 결제 수단 (기본값: 계좌 간편결제)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PaymentMethodType>("bank_transfer");
+
   // 모달이 열릴 때 초기 주소로 리셋
   useEffect(() => {
     if (open) {
       setSelectedAddress(initialAddress);
+      setSelectedPaymentMethod("bank_transfer");
       hasHandledRef.current = false;
     }
   }, [open, initialAddress]);
@@ -98,6 +126,7 @@ export default function ProductPurchaseModal({
         address: JSON.stringify(selectedAddress),
         sellerGroups: JSON.stringify(sellerGroups),
         items: JSON.stringify(items),
+        paymentMethod: selectedPaymentMethod,
       },
       { method: "POST", action: "/orders/action" }
     );
@@ -146,6 +175,52 @@ export default function ProductPurchaseModal({
             판매자 배송 상품을 여러개 구매한 경우, 구매한 상품은 함께 배송될수
             있으며 발송이 늦어질수 있습니다.
           </span>
+        </div>
+      </div>
+
+      {/* 결제 수단 섹션 */}
+      <div className="flex w-full flex-col py-5 px-4 items-start gap-4 bg-white border-t-4 border-t-muted/10">
+        <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
+          결제 수단
+        </span>
+
+        <div className="flex flex-col w-full gap-1">
+          {PAYMENT_METHODS.map((method) => (
+            <button
+              key={method.value}
+              type="button"
+              disabled={method.disabled}
+              onClick={() => !method.disabled && setSelectedPaymentMethod(method.value)}
+              className={cn(
+                "flex items-center gap-3 py-3.5 px-2 rounded-lg transition-colors",
+                method.disabled && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {/* 라디오 버튼 */}
+              <div
+                className={cn(
+                  "w-5 h-5 rounded-full border-2 flex items-center justify-center",
+                  selectedPaymentMethod === method.value
+                    ? "border-secondary"
+                    : "border-gray-300"
+                )}
+              >
+                {selectedPaymentMethod === method.value && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-secondary" />
+                )}
+              </div>
+
+              {/* 라벨 */}
+              <span className="text-sm font-medium text-gray-900">
+                {method.label}
+              </span>
+
+              {/* 서브 라벨 (준비중 등) */}
+              {method.subLabel && (
+                <span className="text-xs text-gray-400">({method.subLabel})</span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
