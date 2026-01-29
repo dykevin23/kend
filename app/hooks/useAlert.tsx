@@ -46,7 +46,7 @@ export const AlertProvider = ({ children }: { children: React.ReactNode }) => {
       primaryButton: {
         label: primaryButton.label,
         onClick: () => {
-          primaryButton?.onClick();
+          primaryButton.onClick?.();
           initialState();
         },
       },
@@ -54,7 +54,7 @@ export const AlertProvider = ({ children }: { children: React.ReactNode }) => {
         ? {
             label: secondaryButton.label,
             onClick: () => {
-              secondaryButton?.onClick();
+              secondaryButton.onClick?.();
               initialState();
             },
           }

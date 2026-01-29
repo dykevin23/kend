@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { redirect, useLoaderData, useFetcher, Link } from "react-router";
+import { useMemo, useState, useRef } from "react";
+import { redirect, useLoaderData, useFetcher, useRevalidator, Link } from "react-router";
 import type { Route } from "./+types/shopping-cart-page";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
@@ -18,6 +18,7 @@ import {
 } from "../mutations";
 import { type OrderItem, cartItemToOrderItem } from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
+import { useAlert } from "~/hooks/useAlert";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -78,12 +79,15 @@ export const action = async ({ request }: Route.ActionArgs) => {
 export default function ShoppingCartPage() {
   const { cartItems, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
+  const revalidator = useRevalidator();
+  const { alert } = useAlert();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     () => new Set(cartItems.map((item) => item.id)),
   );
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
+  const purchaseCartIdsRef = useRef<string[]>([]);
 
   const isAllSelected =
     cartItems.length > 0 && selectedIds.size === cartItems.length;
@@ -161,8 +165,34 @@ export default function ShoppingCartPage() {
     );
     const orderItems = selectedCartItems.map(cartItemToOrderItem);
 
+    // 주문 완료 후 삭제할 cart ID 저장
+    purchaseCartIdsRef.current = selectedCartItems.map((item) => item.id);
+
     setPurchaseItems(orderItems);
     setIsPurchaseModalOpen(true);
+  };
+
+  // 주문 완료 후 처리
+  const handleOrderComplete = (orderNumber: string) => {
+    // 주문된 장바구니 아이템 삭제
+    if (purchaseCartIdsRef.current.length > 0) {
+      const formData = new FormData();
+      formData.append("intent", "removeSelected");
+      purchaseCartIdsRef.current.forEach((id) => formData.append("cartIds", id));
+      fetcher.submit(formData, { method: "POST" });
+    }
+
+    setSelectedIds(new Set());
+    setPurchaseItems([]);
+    setIsPurchaseModalOpen(false);
+    purchaseCartIdsRef.current = [];
+
+    alert({
+      title: "주문 완료",
+      message: `주문이 완료되었습니다.\n주문번호: ${orderNumber}`,
+      primaryButton: { label: "확인" },
+    });
+    revalidator.revalidate();
   };
 
   return (
@@ -316,6 +346,7 @@ export default function ShoppingCartPage() {
         }}
         items={purchaseItems}
         address={address}
+        onOrderComplete={handleOrderComplete}
       />
     </Content>
   );

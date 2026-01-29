@@ -27,6 +27,7 @@ import RecommendProducts from "../components/recommend-products";
 import type { OrderItem } from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
 import { addUserAddress } from "~/features/users/mutations";
+import { useAlert } from "~/hooks/useAlert";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -117,6 +118,7 @@ type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 export default function ProductPage() {
   const { product, isLiked, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
+  const { alert } = useAlert();
 
   const [activeTab, setActiveTab] = useState<TabKey>("information");
   const [isOptionSheetOpen, setIsOptionSheetOpen] = useState(false);
@@ -124,6 +126,16 @@ export default function ProductPage() {
   const [buyOption, setBuyOption] = useState<Record<string, string>>({});
   const [cartQuantity, setCartQuantity] = useState(1);
   const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
+
+  const handleOrderComplete = (orderNumber: string) => {
+    setPurchaseItems([]);
+    setIsPurchaseModalOpen(false);
+    alert({
+      title: "주문 완료",
+      message: `주문이 완료되었습니다.\n주문번호: ${orderNumber}`,
+      primaryButton: { label: "확인" },
+    });
+  };
 
   // 섹션 refs
   const informationRef = useRef<HTMLDivElement>(null);
@@ -423,6 +435,7 @@ export default function ProductPage() {
         }}
         items={purchaseItems}
         address={address}
+        onOrderComplete={handleOrderComplete}
       />
     </>
   );

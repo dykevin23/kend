@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { useFetcher } from "react-router";
 import Modal from "~/common/components/modal";
 import { Button } from "~/common/components/ui/button";
 import DeliveryAddress from "./delivery-address";
@@ -8,6 +9,7 @@ import {
   groupOrderItemsBySeller,
 } from "~/features/orders/types";
 import type { UserAddress } from "~/features/users/queries";
+import { useAlert } from "~/hooks/useAlert";
 
 interface ProductPurchaseModalProps {
   open: boolean;
@@ -16,6 +18,8 @@ interface ProductPurchaseModalProps {
   items: OrderItem[];
   /** 배송 주소 (초기값) */
   address: UserAddress | null;
+  /** 주문 완료 후 콜백 (장바구니 아이템 삭제 등) */
+  onOrderComplete?: (orderNumber: string) => void;
 }
 
 export default function ProductPurchaseModal({
@@ -23,7 +27,12 @@ export default function ProductPurchaseModal({
   onClose,
   items,
   address: initialAddress,
+  onOrderComplete,
 }: ProductPurchaseModalProps) {
+  const fetcher = useFetcher();
+  const { alert } = useAlert();
+  const hasHandledRef = useRef(false);
+
   // 선택된 배송 주소 (변경 가능)
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(
     initialAddress
@@ -33,6 +42,7 @@ export default function ProductPurchaseModal({
   useEffect(() => {
     if (open) {
       setSelectedAddress(initialAddress);
+      hasHandledRef.current = false;
     }
   }, [open, initialAddress]);
 
@@ -45,14 +55,67 @@ export default function ProductPurchaseModal({
     [items]
   );
 
+  const isSubmitting = fetcher.state !== "idle";
+
+  // 주문 결과 처리
+  useEffect(() => {
+    if (fetcher.data && !hasHandledRef.current) {
+      hasHandledRef.current = true;
+      if (fetcher.data.success) {
+        onClose();
+        onOrderComplete?.(fetcher.data.orderNumber);
+      } else {
+        alert({
+          title: "주문 실패",
+          message: fetcher.data.error ?? "주문에 실패했습니다.",
+          primaryButton: { label: "확인" },
+        });
+      }
+    }
+  }, [fetcher.data]);
+
+  const handleSubmitOrder = () => {
+    if (!selectedAddress) {
+      alert({
+        title: "알림",
+        message: "배송지를 선택해주세요.",
+        primaryButton: { label: "확인", onClick: () => {} },
+      });
+      return;
+    }
+    if (items.length === 0) {
+      alert({
+        title: "알림",
+        message: "주문할 상품이 없습니다.",
+        primaryButton: { label: "확인", onClick: () => {} },
+      });
+      return;
+    }
+
+    fetcher.submit(
+      {
+        intent: "create",
+        address: JSON.stringify(selectedAddress),
+        sellerGroups: JSON.stringify(sellerGroups),
+        items: JSON.stringify(items),
+      },
+      { method: "POST", action: "/orders/action" }
+    );
+  };
+
   return (
     <Modal
       open={open}
       title="결제"
       onClose={onClose}
       footer={
-        <Button variant="secondary" className="flex w-full h-12.5 rounded-full">
-          결제하기
+        <Button
+          variant="secondary"
+          className="flex w-full h-12.5 rounded-full"
+          onClick={handleSubmitOrder}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "주문 처리중..." : "결제하기"}
         </Button>
       }
     >

@@ -13,8 +13,8 @@ export interface AlertProps {
   open: boolean;
   title: string;
   message: string;
-  primaryButton: { label: string; onClick: () => void };
-  secondaryButton?: { label: string; onClick: () => void };
+  primaryButton: { label: string; onClick?: () => void };
+  secondaryButton?: { label: string; onClick?: () => void };
   [key: string]: any;
 }
 
@@ -40,7 +40,7 @@ export default function Alert({
           {secondaryButton && (
             <AlertDialogCancel
               className="flex-1 h-10 rounded-full"
-              onClick={() => secondaryButton.onClick()}
+              onClick={() => secondaryButton.onClick?.()}
             >
               {secondaryButton.label}
             </AlertDialogCancel>
@@ -48,7 +48,7 @@ export default function Alert({
           <AlertDialogAction
             className="flex-1 h-10 rounded-full"
             variant="secondary"
-            onClick={() => primaryButton.onClick()}
+            onClick={() => primaryButton.onClick?.()}
           >
             {primaryButton.label}
           </AlertDialogAction>

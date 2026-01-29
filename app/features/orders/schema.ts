@@ -21,6 +21,10 @@ const productStockKeepings = pgTable("product_stock_keepings", {
   id: uuid().primaryKey(),
 });
 
+const adminSellers = pgTable("admin_sellers", {
+  id: uuid().primaryKey(),
+});
+
 // ============================================================
 // Enum 정의
 // ============================================================
@@ -189,7 +193,7 @@ export const orders = pgTable("orders", {
     .references(() => orderGroups.id, { onDelete: "cascade" }),
   seller_id: uuid()
     .notNull()
-    .references(() => profiles.profile_id),
+    .references(() => adminSellers.id),
 
   order_number: text().notNull().unique(),
   status: orderStatus().notNull().default("pending"),
