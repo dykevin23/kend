@@ -196,28 +196,101 @@ delivery_items
 
 ---
 
-## 9. 향후 확장 포인트 (결제 연동 이후)
+## 9. 결제 상태 플로우
+
+### 9.1 결제 상태 (order_group_status)
+
+| 상태 | 설명 | 사용자 노출 |
+|------|------|-------------|
+| `payment_in_progress` | 결제 진행중 (PG사 연동 중) | X |
+| `payment_pending` | 결제 대기 (무통장입금) | O |
+| `paid` | 결제 완료 | O |
+| `partially_refunded` | 부분 환불 | O |
+| `refunded` | 전액 환불 | O |
+| `cancelled` | 취소 | O |
+| `failed` | 결제 실패 | X |
+
+### 9.2 결제 방식별 플로우
+
+#### Case 1: 무통장입금 (계좌이체)
+
+```
+[주문 생성] → payment_pending
+     │
+     ├── 판매자가 입금 확인 → paid → orders.status를 confirmed로 변경
+     │
+     └── 입금 기한 초과 → cancelled (또는 failed, 배치 처리)
+```
+
+- 시스템에서 입금 여부를 자동으로 알 수 없음
+- 판매자가 직접 입금 확인 후 `paid` 상태로 변경
+- 주문 직후부터 사용자 앱의 주문내역에서 확인 가능
+
+#### Case 2: PG 결제 (신용카드, 간편결제 등)
+
+```
+[결제하기 버튼 클릭] → payment_in_progress (데이터 적재)
+     │
+     ├── 결제 성공 → paid
+     │
+     ├── 결제 실패 (응답 있음) → failed
+     │
+     └── 미응답 (앱 종료, 네트워크 오류 등)
+            │
+            └── 배치 처리로 일정 시간 후 → failed
+```
+
+- 결제하기 버튼 클릭 시 주문/배송 데이터 적재 (payment_in_progress)
+- 데이터 적재 성공 후 PG사/결제앱으로 연동
+- `payment_in_progress` 상태는 미응답 케이스를 위해 필요
+- 배치를 통해 일정 기간 내 미완료 결제를 `failed`로 처리
+
+### 9.3 결제 방식 (payment_method_type)
+
+| 값 | 설명 |
+|----|------|
+| `bank_transfer` | 무통장입금 (계좌이체) |
+| `credit_card` | 신용카드 |
+| `mobile_payment` | 휴대폰 결제 |
+| `easy_pay` | 간편결제 (카카오페이, 네이버페이, 토스 등) |
+| `virtual_account` | 가상계좌 |
+
+---
+
+## 10. 향후 확장 포인트 (결제 연동 이후)
 
 - payments 테이블 추가 (order_group 기준)
 - 부분 환불 / 배송비 환불 정책 연동
 - 판매자 정산 테이블 (배송비 포함 여부 결정)
+- 결제 실패 건 배치 처리 (payment_in_progress → failed)
 
 ---
 
-## 10. 상세 테이블 스키마 (구현용)
+## 11. 상세 테이블 스키마 (구현용)
 
 > 현재 KEND 앱의 구현 상태를 반영한 상세 스키마
 
-### 10.1 Enum 타입 정의
+### 11.1 Enum 타입 정의
 
 ```sql
 -- 주문 그룹 상태 (결제 단위)
 CREATE TYPE order_group_status AS ENUM (
-  'pending',           -- 결제 대기
-  'paid',              -- 결제 완료
-  'partially_refunded', -- 부분 환불
-  'refunded',          -- 전액 환불
-  'cancelled'          -- 취소
+  'payment_in_progress', -- 결제 진행중 (PG사 연동 중, 비노출)
+  'payment_pending',     -- 결제 대기 (무통장입금, 노출)
+  'paid',                -- 결제 완료 (노출)
+  'partially_refunded',  -- 부분 환불 (노출)
+  'refunded',            -- 전액 환불 (노출)
+  'cancelled',           -- 취소 (노출)
+  'failed'               -- 결제 실패 (비노출, 배치 처리용)
+);
+
+-- 결제 방식
+CREATE TYPE payment_method_type AS ENUM (
+  'bank_transfer',    -- 무통장입금 (계좌이체)
+  'credit_card',      -- 신용카드
+  'mobile_payment',   -- 휴대폰 결제
+  'easy_pay',         -- 간편결제 (카카오페이, 네이버페이, 토스 등)
+  'virtual_account'   -- 가상계좌
 );
 
 -- 주문 상태 (판매자별)
@@ -258,7 +331,7 @@ CREATE TYPE shipping_fee_type AS ENUM (
 );
 ```
 
-### 10.2 order_groups (주문 그룹 / 체크아웃 단위)
+### 11.2 order_groups (주문 그룹 / 체크아웃 단위)
 
 > 사용자 기준 "한 번의 결제" 단위
 
@@ -271,7 +344,7 @@ CREATE TABLE order_groups (
   order_number TEXT NOT NULL UNIQUE,
 
   -- 상태
-  status order_group_status NOT NULL DEFAULT 'pending',
+  status order_group_status NOT NULL DEFAULT 'payment_in_progress',
 
   -- 금액
   total_product_amount INTEGER NOT NULL,     -- 상품 금액 합계
@@ -286,8 +359,8 @@ CREATE TABLE order_groups (
   address TEXT NOT NULL,
   address_detail TEXT,
 
-  -- 결제 정보 (TBD)
-  payment_method TEXT,                       -- 결제 수단
+  -- 결제 정보
+  payment_method payment_method_type,        -- 결제 수단
   paid_at TIMESTAMPTZ,                       -- 결제 완료 시각
 
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -299,7 +372,7 @@ CREATE INDEX idx_order_groups_status ON order_groups(status);
 CREATE INDEX idx_order_groups_created_at ON order_groups(created_at DESC);
 ```
 
-### 10.3 orders (판매자별 주문)
+### 11.3 orders (판매자별 주문)
 
 > 판매자 기준 주문 단위, order_group 하위
 
@@ -334,7 +407,7 @@ CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
 ```
 
-### 10.4 order_items (주문 상품)
+### 11.4 order_items (주문 상품)
 
 > 주문 내 개별 상품, 스냅샷 저장
 
@@ -374,7 +447,7 @@ CREATE INDEX idx_order_items_sku_id ON order_items(sku_id);
 CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 ```
 
-### 10.5 deliveries (배송)
+### 11.5 deliveries (배송)
 
 > 물류 단위, 판매자가 생성/관리
 
@@ -406,7 +479,7 @@ CREATE INDEX idx_deliveries_status ON deliveries(status);
 CREATE INDEX idx_deliveries_tracking ON deliveries(courier, tracking_number);
 ```
 
-### 10.6 delivery_items (배송 내 상품) ⭐
+### 11.6 delivery_items (배송 내 상품) ⭐
 
 > 부분취소/교환의 핵심 단위
 
@@ -433,7 +506,7 @@ CREATE INDEX idx_delivery_items_status ON delivery_items(status);
 
 ---
 
-## 11. 테이블 관계 다이어그램
+## 12. 테이블 관계 다이어그램
 
 ```
 ┌─────────────────┐
@@ -464,7 +537,7 @@ CREATE INDEX idx_delivery_items_status ON delivery_items(status);
 
 ---
 
-## 12. 한 줄 요약
+## 13. 한 줄 요약
 
 - 주문은 계약, 배송은 물류
 - 주문은 덜 쪼개고, 배송은 더 쪼갠다

@@ -64,6 +64,13 @@
       "when": 1769635973281,
       "tag": "0008_lame_ben_grimm",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1769664821973,
+      "tag": "0009_hard_skin",
+      "breakpoints": true
     }
   ]
 }

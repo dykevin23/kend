@@ -31,18 +31,38 @@ const adminSellers = pgTable("admin_sellers", {
 
 /**
  * 주문 그룹 상태 (결제 단위)
- * - pending: 결제 대기
- * - paid: 결제 완료
- * - partially_refunded: 부분 환불
- * - refunded: 전액 환불
- * - cancelled: 취소
+ * - payment_in_progress: 결제 진행중 (PG사 연동 중, 비노출)
+ * - payment_pending: 결제 대기 (무통장입금, 노출)
+ * - paid: 결제 완료 (노출)
+ * - partially_refunded: 부분 환불 (노출)
+ * - refunded: 전액 환불 (노출)
+ * - cancelled: 취소 (노출)
+ * - failed: 결제 실패 (비노출, 배치 처리용)
  */
 export const orderGroupStatus = pgEnum("order_group_status", [
-  "pending",
+  "payment_in_progress",
+  "payment_pending",
   "paid",
   "partially_refunded",
   "refunded",
   "cancelled",
+  "failed",
+]);
+
+/**
+ * 결제 방식
+ * - bank_transfer: 무통장입금 (계좌이체)
+ * - credit_card: 신용카드
+ * - mobile_payment: 휴대폰 결제
+ * - easy_pay: 간편결제 (카카오페이, 네이버페이, 토스 등)
+ * - virtual_account: 가상계좌
+ */
+export const paymentMethodType = pgEnum("payment_method_type", [
+  "bank_transfer",
+  "credit_card",
+  "mobile_payment",
+  "easy_pay",
+  "virtual_account",
 ]);
 
 /**
@@ -145,7 +165,7 @@ export const orderGroups = pgTable("order_groups", {
     .notNull()
     .references(() => profiles.profile_id, { onDelete: "cascade" }),
   order_number: text().notNull().unique(),
-  status: orderGroupStatus().notNull().default("pending"),
+  status: orderGroupStatus().notNull().default("payment_in_progress"),
 
   // 금액
   total_product_amount: integer().notNull(),
@@ -160,8 +180,8 @@ export const orderGroups = pgTable("order_groups", {
   address: text().notNull(),
   address_detail: text(),
 
-  // 결제 정보 (TBD)
-  payment_method: text(),
+  // 결제 정보
+  payment_method: paymentMethodType(),
   paid_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),

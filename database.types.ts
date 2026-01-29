@@ -463,7 +463,9 @@ export type Database = {
           id: string
           order_number: string
           paid_at: string | null
-          payment_method: string | null
+          payment_method:
+            | Database["public"]["Enums"]["payment_method_type"]
+            | null
           recipient_name: string
           recipient_phone: string
           status: Database["public"]["Enums"]["order_group_status"]
@@ -482,7 +484,9 @@ export type Database = {
           id?: string
           order_number: string
           paid_at?: string | null
-          payment_method?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["payment_method_type"]
+            | null
           recipient_name: string
           recipient_phone: string
           status?: Database["public"]["Enums"]["order_group_status"]
@@ -501,7 +505,9 @@ export type Database = {
           id?: string
           order_number?: string
           paid_at?: string | null
-          payment_method?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["payment_method_type"]
+            | null
           recipient_name?: string
           recipient_phone?: string
           status?: Database["public"]["Enums"]["order_group_status"]
@@ -660,11 +666,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "orders_seller_id_profiles_profile_id_fk"
+            foreignKeyName: "orders_seller_id_admin_sellers_id_fk"
             columns: ["seller_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["profile_id"]
+            referencedRelation: "admin_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_information_view"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1328,11 +1341,13 @@ export type Database = {
       image_type: "MAIN" | "ADDITIONAL"
       island_delivery_type: "AVAILABLE" | "UNAVAILABLE"
       order_group_status:
-        | "pending"
+        | "payment_in_progress"
+        | "payment_pending"
         | "paid"
         | "partially_refunded"
         | "refunded"
         | "cancelled"
+        | "failed"
       order_status:
         | "pending"
         | "confirmed"
@@ -1340,6 +1355,12 @@ export type Database = {
         | "shipped"
         | "delivered"
         | "cancelled"
+      payment_method_type:
+        | "bank_transfer"
+        | "credit_card"
+        | "mobile_payment"
+        | "easy_pay"
+        | "virtual_account"
       role: "customer" | "seller" | "administrator"
       sales_status:
         | "REGISTERED"
@@ -1518,11 +1539,13 @@ export const Constants = {
       image_type: ["MAIN", "ADDITIONAL"],
       island_delivery_type: ["AVAILABLE", "UNAVAILABLE"],
       order_group_status: [
-        "pending",
+        "payment_in_progress",
+        "payment_pending",
         "paid",
         "partially_refunded",
         "refunded",
         "cancelled",
+        "failed",
       ],
       order_status: [
         "pending",
@@ -1531,6 +1554,13 @@ export const Constants = {
         "shipped",
         "delivered",
         "cancelled",
+      ],
+      payment_method_type: [
+        "bank_transfer",
+        "credit_card",
+        "mobile_payment",
+        "easy_pay",
+        "virtual_account",
       ],
       role: ["customer", "seller", "administrator"],
       sales_status: [

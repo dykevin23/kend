@@ -53,7 +53,7 @@ export const createOrder = async (
     .insert({
       user_id: userId,
       order_number: groupOrderNumber,
-      status: "pending",
+      status: "payment_in_progress",
       total_product_amount: totalProductAmount,
       total_shipping_fee: totalShippingFee,
       total_discount_amount: 0,
