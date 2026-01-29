@@ -75,7 +75,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export default function App() {
   const { pathname } = useLocation();
-  const naviMenus = ["/stores", "/children/:childId", "/likes", "/users"];
+  const naviMenus = ["/stores", "/children/:childId", "/likes", "/myPage"];
 
   return (
     <div>

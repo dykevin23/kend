@@ -10,7 +10,7 @@ export interface HeaderProps {
 export default function Header({ title, useRight = true }: HeaderProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const naviMenus = ["/stores", "/children", "/likes", "/users"];
+  const naviMenus = ["/stores", "/children", "/likes", "/myPage"];
 
   const [isNaviMenu] = useState<boolean>(
     naviMenus.includes(pathname) ||

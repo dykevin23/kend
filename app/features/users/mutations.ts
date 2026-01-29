@@ -146,6 +146,8 @@ interface DeleteUserAddressInput {
 
 /**
  * 사용자 배송지 삭제
+ * - 기본 배송지 삭제 시, 가장 최근 등록된 배송지를 기본으로 설정
+ * - TODO: 추후 order_groups에 address_id 추가 후, 가장 최근 사용한 배송지로 변경
  */
 export const deleteUserAddress = async (
   client: Client,
@@ -153,6 +155,17 @@ export const deleteUserAddress = async (
 ) => {
   const { addressId, userId } = input;
 
+  // 삭제하려는 배송지가 기본 배송지인지 확인
+  const { data: addressToDelete } = await client
+    .from("user_addresses")
+    .select("is_default")
+    .eq("id", addressId)
+    .eq("user_id", userId)
+    .single();
+
+  const wasDefault = addressToDelete?.is_default ?? false;
+
+  // 배송지 삭제
   const { error } = await client
     .from("user_addresses")
     .delete()
@@ -160,6 +173,23 @@ export const deleteUserAddress = async (
     .eq("user_id", userId);
 
   if (error) throw error;
+
+  // 기본 배송지였다면, 가장 최근 등록된 배송지를 기본으로 설정
+  if (wasDefault) {
+    const { data: remainingAddresses } = await client
+      .from("user_addresses")
+      .select("id")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (remainingAddresses && remainingAddresses.length > 0) {
+      await client
+        .from("user_addresses")
+        .update({ is_default: true })
+        .eq("id", remainingAddresses[0].id);
+    }
+  }
 
   return { success: true };
 };

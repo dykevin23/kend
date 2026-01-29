@@ -28,7 +28,12 @@ export default [
   ...prefix("users", [
     route("/addresses", "features/users/pages/address-action.ts"),
   ]),
+  ...prefix("myPage", [
+    index("features/users/pages/my-page.tsx"),
+    route("/addresses", "features/users/pages/addresses-page.tsx"),
+  ]),
   ...prefix("orders", [
+    index("features/orders/pages/orders-page.tsx"),
     route("/action", "features/orders/pages/order-action.ts"),
   ]),
   ...prefix("auth", [

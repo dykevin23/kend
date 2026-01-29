@@ -11,7 +11,7 @@ import { addAddressSchema } from "~/features/users/schema.validation";
 import { useAlert } from "~/hooks/useAlert";
 import type { UserAddress } from "~/features/users/queries";
 
-interface DeliveryAddressAddModalProps {
+interface AddressAddModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
@@ -19,12 +19,12 @@ interface DeliveryAddressAddModalProps {
   editAddress?: UserAddress | null;
 }
 
-export default function DeliveryAddressAddModal({
+export default function AddressAddModal({
   open,
   onClose,
   onSuccess,
   editAddress,
-}: DeliveryAddressAddModalProps) {
+}: AddressAddModalProps) {
   const fetcher = useFetcher();
   const deleteFetcher = useFetcher();
   const formRef = useRef<HTMLFormElement>(null);
@@ -59,7 +59,10 @@ export default function DeliveryAddressAddModal({
     }
   }, [open, editAddress]);
 
-  const handlePostCodeComplete = (data: { zoneCode: string; address: string }) => {
+  const handlePostCodeComplete = (data: {
+    zoneCode: string;
+    address: string;
+  }) => {
     setZoneCode(data.zoneCode);
     setAddress(data.address);
   };
@@ -83,7 +86,11 @@ export default function DeliveryAddressAddModal({
 
   // 저장 성공 시 모달 닫기
   useEffect(() => {
-    if (fetcher.data?.success && fetcher.state === "idle" && !hasHandledSuccessRef.current) {
+    if (
+      fetcher.data?.success &&
+      fetcher.state === "idle" &&
+      !hasHandledSuccessRef.current
+    ) {
       hasHandledSuccessRef.current = true;
       resetForm();
       onSuccess?.();
@@ -93,7 +100,11 @@ export default function DeliveryAddressAddModal({
 
   // 삭제 성공 시 모달 닫기
   useEffect(() => {
-    if (deleteFetcher.data?.success && deleteFetcher.state === "idle" && !hasHandledDeleteRef.current) {
+    if (
+      deleteFetcher.data?.success &&
+      deleteFetcher.state === "idle" &&
+      !hasHandledDeleteRef.current
+    ) {
       hasHandledDeleteRef.current = true;
       resetForm();
       onSuccess?.();
@@ -130,7 +141,8 @@ export default function DeliveryAddressAddModal({
 
     if (!result.success) {
       e.preventDefault();
-      const firstError = result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
+      const firstError =
+        result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
       // TODO: toast로 변경 예정
       console.error(firstError);
       return;
@@ -206,7 +218,11 @@ export default function DeliveryAddressAddModal({
         {/* disabled input은 form submit 시 전달되지 않으므로 hidden input 사용 */}
         <input type="hidden" name="zoneCode" value={zoneCode} />
         <input type="hidden" name="address" value={address} />
-        <input type="hidden" name="isDefault" value={isDefault ? "true" : "false"} />
+        <input
+          type="hidden"
+          name="isDefault"
+          value={isDefault ? "true" : "false"}
+        />
         {/* 수정 모드일 때 intent와 addressId 전달 */}
         {isEditMode && (
           <>

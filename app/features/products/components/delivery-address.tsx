@@ -1,6 +1,6 @@
 import { Button } from "~/common/components/ui/button";
-import DeliveryAddressAddModal from "./delivery-address-add-modal";
-import DeliveryAddressManageModal from "./delivery-address-manage-modal";
+import AddressAddModal from "~/features/users/components/address-add-modal";
+import AddressManageModal from "~/features/users/components/address-manage-modal";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/common/components/ui/badge";
@@ -108,12 +108,12 @@ export default function DeliveryAddress({
         )}
       </div>
 
-      <DeliveryAddressAddModal
+      <AddressAddModal
         open={addressAddModalOpen}
         onClose={() => setAddressAddModalOpen(false)}
       />
 
-      <DeliveryAddressManageModal
+      <AddressManageModal
         open={addressManageModalOpen}
         onClose={() => setAddressManageModalOpen(false)}
         onSelect={handleSelectAddress}
