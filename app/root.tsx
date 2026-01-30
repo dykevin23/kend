@@ -15,6 +15,7 @@ import "./app.css";
 import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
+import { AlertProvider } from "./hooks/useAlert";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -38,13 +39,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <Meta />
         <Links />
       </head>
       <body>
-        <main>{children}</main>
+        <main>
+          <AlertProvider>{children}</AlertProvider>
+        </main>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -72,12 +75,15 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export default function App() {
   const { pathname } = useLocation();
-  const naviMenus = ["/stores", "/children", "/chats", "/users"];
+  const naviMenus = ["/stores", "/children/:childId", "/likes", "/myPage"];
 
   return (
     <div>
       <Outlet />
-      {naviMenus.includes(pathname) && <BottomNavigation />}
+      {(naviMenus.includes(pathname) ||
+        (pathname.includes("/children")
+          ? !isNaN(Number(pathname.split("/children/").at(-1)))
+          : false)) && <BottomNavigation />}
     </div>
   );
 }

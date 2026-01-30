@@ -15,7 +15,28 @@ export default [
   ...prefix("products", [
     route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
+  ...prefix("children", [
+    index("features/children/pages/children-redirect-page.tsx"),
+    layout("features/children/layouts/children-overview-layout.tsx", [
+      route("/:childId", "features/children/pages/children-page.tsx"),
+    ]),
+    route("/submit", "features/children/pages/submit-child-page.tsx"),
+  ]),
+  ...prefix("likes", [index("features/likes/pages/likes-page.tsx")]),
   ...prefix("carts", [index("features/carts/pages/shopping-cart-page.tsx")]),
+  ...prefix("search", [index("features/search/pages/search-page.tsx")]),
+  ...prefix("users", [
+    route("/addresses", "features/users/pages/address-action.ts"),
+  ]),
+  ...prefix("myPage", [
+    index("features/users/pages/my-page.tsx"),
+    route("/addresses", "features/users/pages/addresses-page.tsx"),
+    route("/profile/edit", "features/users/pages/edit-profile-page.tsx"),
+  ]),
+  ...prefix("orders", [
+    index("features/orders/pages/orders-page.tsx"),
+    route("/action", "features/orders/pages/order-action.ts"),
+  ]),
   ...prefix("auth", [
     route("/login", "features/auth/pages/login-page.tsx"),
     route("/join", "features/auth/pages/join-page.tsx"),

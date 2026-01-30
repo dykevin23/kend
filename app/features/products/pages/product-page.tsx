@@ -1,61 +1,309 @@
-import { useEffect, useMemo, useState } from "react";
-import { productSample1, productSample2 } from "~/assets/images";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { redirect, useLoaderData, useFetcher } from "react-router";
+import type { Route } from "./+types/product-page";
 import BottomSheet from "~/common/components/bottom-sheet";
 import Content from "~/common/components/content";
-import Modal from "~/common/components/modal";
 import { SelectAccordion } from "~/common/components/select-accordion";
 import { Tab, Tabs } from "~/common/components/tabs";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/common/components/ui/accordion";
 import { Button } from "~/common/components/ui/button";
-import { Dialog, DialogContent } from "~/common/components/ui/dialog";
 import { cn } from "~/lib/utils";
-import DeliveryAddress from "../components/delivery-address";
+import Divider from "~/common/components/divider";
+import { makeSSRClient } from "~/supa-client";
+import { getProductByCode } from "../queries";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "~/common/components/ui/carousel";
+import { addToCart } from "~/features/carts/mutations";
+import { isProductLiked } from "~/features/likes/queries";
+import { toggleProductLike } from "~/features/likes/mutations";
+import ProductInformationSection from "../components/product-information-section";
+import ProductSizeDescription from "../components/product-size-description";
+import ProductRatingSection from "../components/product-rating-section";
+import ProductReviewSection from "../components/product-review-section";
+import ProductPurchaseModal from "../components/product-purchase-modal";
+import RecommendProducts from "../components/recommend-products";
+import type { OrderItem } from "~/features/orders/types";
+import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
+import { addUserAddress } from "~/features/users/mutations";
+import { useAlert } from "~/hooks/useAlert";
+
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const { productId: productCode } = params;
+
+  const product = await getProductByCode(client, productCode);
+
+  // 로그인한 사용자의 좋아요 여부 및 프로필/배송지 조회
+  let isLiked = false;
+  let profile = null;
+  let address = null;
+
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+
+  if (user) {
+    const [liked, userProfile, defaultAddress] = await Promise.all([
+      isProductLiked(client, user.id, product.id),
+      getUserProfile(client, user.id),
+      getDefaultAddress(client, user.id),
+    ]);
+    isLiked = liked;
+    profile = userProfile;
+    address = defaultAddress;
+  }
+
+  return { product, isLiked, profile, address };
+};
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const formData = await request.formData();
+
+  const intent = formData.get("intent");
+
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+
+  if (!user) {
+    return redirect("/auth/login", { headers });
+  }
+
+  if (intent === "addToCart") {
+    const skuId = formData.get("skuId") as string;
+    const quantity = Number(formData.get("quantity") ?? 1);
+
+    await addToCart(client, user.id, skuId, quantity);
+
+    return { success: true, message: "장바구니에 추가되었습니다." };
+  }
+
+  if (intent === "toggleLike") {
+    const productId = formData.get("productId") as string;
+    const isLiked = await toggleProductLike(client, user.id, productId);
+
+    return { success: true, isLiked };
+  }
+
+  if (intent === "addAddress") {
+    const label = formData.get("label") as string;
+    const recipientName = formData.get("recipientName") as string;
+    const recipientPhone = formData.get("recipientPhone") as string;
+    const zoneCode = formData.get("zoneCode") as string;
+    const address = formData.get("address") as string;
+    const addressDetail = formData.get("addressDetail") as string;
+
+    await addUserAddress(client, {
+      userId: user.id,
+      label,
+      recipientName,
+      recipientPhone,
+      zoneCode,
+      address,
+      addressDetail: addressDetail || undefined,
+      isDefault: true,
+    });
+
+    return { success: true };
+  }
+
+  return { success: false, message: "알 수 없는 요청입니다." };
+};
+
+type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 
 export default function ProductPage() {
-  const [isActiveTab, setIsActiveTab] = useState<string>("home");
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isOpen2, setIsOpen2] = useState<boolean>(false);
-  const [buyOption, setBuyOption] = useState<{ [key: string]: string }>({});
+  const { product, isLiked, address } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
+  const { alert } = useAlert();
 
-  const handleClickTab = (key: string) => () => {
-    setIsActiveTab(key);
-  };
+  const [activeTab, setActiveTab] = useState<TabKey>("information");
+  const [isOptionSheetOpen, setIsOptionSheetOpen] = useState(false);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [buyOption, setBuyOption] = useState<Record<string, string>>({});
+  const [cartQuantity, setCartQuantity] = useState(1);
+  const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
 
-  const handleBuy = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setIsOpen(true);
-  };
-
-  const handleChangeBuyOption = (value: string, parent: string) => {
-    setBuyOption((prev) => {
-      return Object.assign({}, prev, { [parent]: value });
+  const handleOrderComplete = (orderNumber: string) => {
+    setPurchaseItems([]);
+    setIsPurchaseModalOpen(false);
+    alert({
+      title: "주문 완료",
+      message: `주문이 완료되었습니다.\n주문번호: ${orderNumber}`,
+      primaryButton: { label: "확인" },
     });
   };
 
+  // 섹션 refs
+  const informationRef = useRef<HTMLDivElement>(null);
+  const sizeRef = useRef<HTMLDivElement>(null);
+  const reviewRef = useRef<HTMLDivElement>(null);
+
+  // 탭 클릭 시 해당 섹션으로 스크롤 이동
+  const handleTabClick = (key: TabKey) => () => {
+    setActiveTab(key);
+
+    const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
+      information: informationRef,
+      size: sizeRef,
+      review: reviewRef,
+    };
+
+    const targetRef = refMap[key];
+    if (targetRef?.current) {
+      targetRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleBuyClick = () => {
+    setIsOptionSheetOpen(true);
+  };
+
+  const handleOptionChange = (value: string, parent: string) => {
+    setBuyOption((prev) => ({ ...prev, [parent]: value }));
+  };
+
+  // SKU에서 옵션 항목 추출
+  const optionItems = useMemo(() => {
+    const optionKeysSet = new Set<string>();
+    product.skus.forEach((sku) => {
+      if (sku.options) {
+        Object.keys(sku.options).forEach((key) => optionKeysSet.add(key));
+      }
+    });
+    const optionKeys = Array.from(optionKeysSet);
+
+    const extractNumber = (str: string): number | null => {
+      const match = str.match(/\d+/);
+      return match ? parseInt(match[0], 10) : null;
+    };
+
+    const sortAscending = (a: string, b: string): number => {
+      const numA = extractNumber(a);
+      const numB = extractNumber(b);
+      if (numA !== null && numB !== null) {
+        return numA - numB;
+      }
+      return a.localeCompare(b, "ko");
+    };
+
+    return optionKeys.map((key) => {
+      const valuesSet = new Set<string>();
+      product.skus.forEach((sku) => {
+        if (sku.options && sku.options[key]) {
+          valuesSet.add(sku.options[key]);
+        }
+      });
+      const values = Array.from(valuesSet).sort(sortAscending);
+      const displayName = product.optionCodeToName[key] ?? key;
+
+      return {
+        triggerLabel: displayName,
+        value: key,
+        options: values.map((val) => ({ label: val, value: val })),
+      };
+    });
+  }, [product.skus, product.optionCodeToName]);
+
+  // 선택한 옵션으로 SKU 찾기
+  const findMatchingSku = (selectedOptions: Record<string, string>) => {
+    return product.skus.find((sku) => {
+      if (!sku.options) return false;
+      return Object.entries(selectedOptions).every(
+        ([key, value]) => sku.options?.[key] === value
+      );
+    });
+  };
+
+  // 장바구니 담기
+  const handleAddToCart = () => {
+    const matchedSku = findMatchingSku(buyOption);
+    if (matchedSku) {
+      fetcher.submit(
+        {
+          intent: "addToCart",
+          skuId: matchedSku.id,
+          quantity: cartQuantity.toString(),
+        },
+        { method: "POST" }
+      );
+      setIsOptionSheetOpen(false);
+      setBuyOption({});
+      setCartQuantity(1);
+    }
+  };
+
+  // 바로 구매
+  const handlePurchase = () => {
+    const matchedSku = findMatchingSku(buyOption);
+    if (matchedSku) {
+      // 주문 아이템 생성
+      const orderItem: OrderItem = {
+        skuId: matchedSku.id,
+        quantity: cartQuantity,
+        sku: {
+          skuCode: matchedSku.skuCode,
+          options: matchedSku.options,
+          regularPrice: matchedSku.regularPrice,
+          salePrice: matchedSku.salePrice,
+        },
+        product: {
+          id: product.id,
+          productCode: product.productCode,
+          name: product.name,
+          mainImage: product.images[0]?.url ?? null,
+        },
+        seller: product.seller,
+        delivery: product.delivery,
+      };
+      setPurchaseItems([orderItem]);
+      setIsPurchaseModalOpen(true);
+    }
+  };
+
+  // 장바구니 추가 성공 시 알림
   useEffect(() => {
-    console.log(
-      "### buyOption => ",
-      buyOption,
-      Object.keys(buyOption),
-      Object.values(buyOption)
-    );
-  }, [buyOption]);
+    if (fetcher.data?.success) {
+      alert(fetcher.data.message);
+    }
+  }, [fetcher.data]);
+
+  // 모든 옵션이 선택되었는지 확인
+  const isAllOptionsSelected =
+    optionItems.length > 0 &&
+    Object.keys(buyOption).length === optionItems.length &&
+    !Object.values(buyOption).includes("");
 
   return (
     <>
-      <Content>
-        <div className="w-full h-94 shrink-0 aspect-square bg-gray-400"></div>
+      <Content footer={<ProductFooter product={product} isLiked={isLiked} onBuyClick={handleBuyClick} />}>
+        {/* 상품 이미지 캐러셀 */}
+        {product.images.length > 0 ? (
+          <Carousel className="w-full">
+            <CarouselContent className="ml-0">
+              {product.images.map((image, index) => (
+                <CarouselItem key={image.id} className="pl-0">
+                  <img
+                    src={image.url}
+                    alt={`${product.name} ${index + 1}`}
+                    className="w-full aspect-square object-cover"
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : (
+          <div className="w-full aspect-square bg-gray-400" />
+        )}
 
+        {/* 상품 기본 정보 */}
         <div className="flex pt-3 px-4 flex-col justify-center items-start gap-4 self-stretch">
           <span className="text-xl font-bold leading-7.5 tracking-[-0.4px]">
-            [신상] 엄청 엄청 엄청 매우 따뜻한 구스 다운 패딩(기모, 모자/안감
-            탈부착, 블랙, 화...
+            {product.name}
           </span>
-
           <div className="flex h-6 items-start gap-2 self-stretch border-b-1 border-b-muted/30">
             <div className="flex items-center gap-1 flex-gsb self-stretch">
               <div className="flex items-center gap-0.5">
@@ -89,301 +337,210 @@ export default function ProductPage() {
           </div>
         </div>
 
+        {/* 탭 네비게이션 */}
         <div className="flex w-full flex-col items-start gap-2.5 shrink-0">
           <Tabs>
             <Tab
-              title="홈"
-              isActive={isActiveTab === "home"}
-              className={{ "text-muted": isActiveTab !== "home" }}
-              onClick={handleClickTab("home")}
+              title="정보"
+              isActive={activeTab === "information"}
+              className={{ "text-muted": activeTab !== "information" }}
+              onClick={handleTabClick("information")}
             />
             <Tab
-              title="패션"
-              isActive={isActiveTab === "fashion"}
-              className={{ "text-muted": isActiveTab !== "fashion" }}
-              onClick={handleClickTab("fashion")}
+              title="사이즈"
+              isActive={activeTab === "size"}
+              className={{ "text-muted": activeTab !== "size" }}
+              onClick={handleTabClick("size")}
             />
             <Tab
-              title="스킨케어"
-              isActive={isActiveTab === "skincare"}
-              className={{ "text-muted": isActiveTab !== "skincare" }}
-              onClick={handleClickTab("skincare")}
+              title="리뷰(4,321)"
+              isActive={activeTab === "review"}
+              className={{ "text-muted": activeTab !== "review" }}
+              onClick={handleTabClick("review")}
             />
             <Tab
-              title="액티비티"
-              isActive={isActiveTab === "activity"}
-              className={{ "text-muted": isActiveTab !== "activity" }}
-              onClick={handleClickTab("activity")}
+              title="코디"
+              isActive={activeTab === "coordination"}
+              className={{ "text-muted": activeTab !== "coordination" }}
+              onClick={handleTabClick("coordination")}
             />
             <Tab
-              title="라이프"
-              isActive={isActiveTab === "life"}
-              className={{ "text-muted": isActiveTab !== "life" }}
-              onClick={handleClickTab("life")}
+              title="문의"
+              isActive={activeTab === "inquiry"}
+              className={{ "text-muted": activeTab !== "inquiry" }}
+              onClick={handleTabClick("inquiry")}
             />
           </Tabs>
 
-          <div className="flex flex-col justify-center items-center gap-2.5 self-stretch">
-            <img className="w-full" src={productSample1} alt="" />
-          </div>
-        </div>
+          {/* 정보 섹션 */}
+          <ProductInformationSection
+            ref={informationRef}
+            productName={product.name}
+            descriptionImages={product.descriptionImages}
+          />
 
-        <div className="flex w-full h-18 p-4 justify-center items-center gap-1.5 shrink-0 border-t-1 border-t-muted fixed bottom-0 bg-white">
-          <div className="flex flex-col justify-center items-start gap-1 flex-gsb">
-            <div
-              className={cn(
-                "flex h-3.5 gap-1 self-stretch",
-                "text-sm leading-3.5 tracking-[-0.4px]"
-              )}
-            >
-              <span>30%</span>
-              <span className="text-muted line-through">1,000,000</span>
-            </div>
-            <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
-              <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
-                700,000원
-              </span>
-            </div>
-            <div className="flex h-5 pr-4 justify-center items-center gap-0.25">
-              <div className="flex w-37 shrink-0 self-stretch">
-                <span className="text-xl font-bold leading-5 tracking-[-0.4px] text-accent">
-                  690,000원
-                </span>
-                <div className="flex items-end">
-                  <span className="text-xs font-bold leading-3 tracking-[-0.4px] text-accent">
-                    쿠폰할인가
-                  </span>
-                </div>
-              </div>
-            </div>
+          {/* 사이즈 섹션 */}
+          <div ref={sizeRef}>
+            <ProductSizeDescription />
           </div>
-          <div className="flex size-12 px-4 justify-center items-center gap-2.5 shrink-0 rounded-full bg-secondary/20">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="aspect-square shrink-0"
-            >
-              <path
-                d="M20.1766 4.90686C19.1163 3.82835 17.7108 3.17009 16.2139 3.05098C14.7171 2.93188 13.2276 3.35978 12.0145 4.2574C10.7419 3.29704 9.15781 2.86157 7.58133 3.03867C6.00486 3.21578 4.55308 3.99231 3.51835 5.21189C2.48362 6.43147 1.9428 8.00351 2.0048 9.61143C2.06679 11.2194 2.727 12.7437 3.85246 13.8776L10.064 20.1896C10.5842 20.7089 11.2847 21 12.0145 21C12.7443 21 13.4449 20.7089 13.965 20.1896L20.1766 13.8776C21.3445 12.6855 22 11.073 22 9.39223C22 7.71146 21.3445 6.09897 20.1766 4.90686ZM18.7663 12.4772L12.5547 18.779C12.484 18.8514 12.3999 18.9089 12.3072 18.9481C12.2144 18.9874 12.115 19.0076 12.0145 19.0076C11.9141 19.0076 11.8146 18.9874 11.7219 18.9481C11.6292 18.9089 11.5451 18.8514 11.4744 18.779L5.26282 12.4467C4.47838 11.6332 4.03912 10.5404 4.03912 9.40237C4.03912 8.26432 4.47838 7.17152 5.26282 6.35801C6.06218 5.55733 7.14027 5.10837 8.26359 5.10837C9.3869 5.10837 10.465 5.55733 11.2643 6.35801C11.3573 6.45312 11.468 6.52862 11.5899 6.58014C11.7117 6.63166 11.8425 6.65818 11.9745 6.65818C12.1066 6.65818 12.2373 6.63166 12.3592 6.58014C12.4811 6.52862 12.5917 6.45312 12.6847 6.35801C13.4841 5.55733 14.5622 5.10837 15.6855 5.10837C16.8088 5.10837 17.8869 5.55733 18.6862 6.35801C19.4815 7.16086 19.9351 8.24774 19.9501 9.38582C19.9651 10.5239 19.5401 11.6227 18.7663 12.4467V12.4772Z"
-                fill="black"
-              />
-            </svg>
-          </div>
-          <Button variant="secondary" size="lg" onClick={handleBuy}>
-            구매하기
-          </Button>
+          <Divider className="w-full" />
+
+          {/* 상품평점 섹션 */}
+          <ProductRatingSection />
+          <Divider className="w-full" />
+
+          {/* 리뷰 섹션 */}
+          <ProductReviewSection ref={reviewRef} />
+          <Divider className="w-full" />
+
+          {/* 추천상품 */}
+          <RecommendProducts />
         </div>
       </Content>
 
-      <BottomSheet open={isOpen}>
+      {/* 옵션 선택 바텀시트 */}
+      <BottomSheet open={isOptionSheetOpen} setOpen={setIsOptionSheetOpen}>
         <SelectAccordion
-          items={[
-            {
-              triggerLabel: "색상",
-              value: "color",
-              options: [
-                {
-                  label: (
-                    <>
-                      <div className="size-6 rounded-md border-2 bg-white" />
-                      <span className="text-base leading-5.5 tracking-[-0.4px]">
-                        화이트
-                      </span>
-                    </>
-                  ),
-                  value: "white",
-                },
-                {
-                  label: (
-                    <>
-                      <div className="size-6 rounded-md border-2 bg-black" />
-                      <span className="text-base leading-5.5 tracking-[-0.4px]">
-                        블랙
-                      </span>
-                    </>
-                  ),
-                  value: "black",
-                },
-                {
-                  label: (
-                    <>
-                      <div className="size-6 rounded-md border-2 bg-red-500" />
-                      <span className="text-base leading-5.5 tracking-[-0.4px]">
-                        레드
-                      </span>
-                    </>
-                  ),
-                  value: "red",
-                },
-              ],
-            },
-            {
-              triggerLabel: "SIZE",
-              value: "size",
-              options: [
-                { label: "small", value: "small" },
-                { label: "medium", value: "medium" },
-                { label: "large", value: "large" },
-              ],
-            },
-          ]}
+          items={optionItems}
           values={buyOption}
-          onChange={handleChangeBuyOption}
+          onChange={handleOptionChange}
         />
 
-        {Object.keys(buyOption).length > 0 &&
-          !Object.values(buyOption).includes("") && (
-            <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
-              <Button className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb ">
-                장바구니
-              </Button>
-              <Button
-                variant="secondary"
-                className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb "
-                onClick={() => setIsOpen2(true)}
-              >
-                바로 구매
-              </Button>
-            </div>
-          )}
+        {isAllOptionsSelected && (
+          <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
+            <Button
+              className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
+              onClick={handleAddToCart}
+              disabled={fetcher.state !== "idle"}
+            >
+              {fetcher.state !== "idle" ? "담는 중..." : "장바구니"}
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
+              onClick={handlePurchase}
+            >
+              바로 구매
+            </Button>
+          </div>
+        )}
       </BottomSheet>
 
-      <Modal
-        open={isOpen2}
-        title="결제"
-        onClose={() => setIsOpen2(false)}
-        footer={
-          <Button
-            variant="secondary"
-            className="flex w-full h-12.5 rounded-full"
-          >
-            결제하기
-          </Button>
-        }
-      >
-        <DeliveryAddress address="123" />
+      {/* 결제 모달 */}
+      <ProductPurchaseModal
+        open={isPurchaseModalOpen}
+        onClose={() => {
+          setIsPurchaseModalOpen(false);
+          setPurchaseItems([]);
+        }}
+        items={purchaseItems}
+        address={address}
+        onOrderComplete={handleOrderComplete}
+      />
+    </>
+  );
+}
 
-        <div className="flex w-full flex-col pt-5.5 pb-4 px-4 items-start gap-5 bg-white">
-          <div className="flex px-4 items-center gap-2.5 self-stretch">
-            <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
-              주문 상품
+// 하단 Footer 컴포넌트
+interface ProductFooterProps {
+  product: {
+    id: string;
+    discountRate: number;
+    regularPrice: number;
+    salePrice: number;
+  };
+  isLiked: boolean;
+  onBuyClick: () => void;
+}
+
+function ProductFooter({ product, isLiked, onBuyClick }: ProductFooterProps) {
+  const likeFetcher = useFetcher();
+
+  // optimistic UI: 요청 중이면 반전된 상태 표시
+  const optimisticIsLiked =
+    likeFetcher.state !== "idle"
+      ? !isLiked
+      : (likeFetcher.data?.isLiked ?? isLiked);
+
+  const handleLikeClick = () => {
+    likeFetcher.submit(
+      { intent: "toggleLike", productId: product.id },
+      { method: "POST" }
+    );
+  };
+
+  return (
+    <>
+      <div className="flex flex-col justify-center items-start gap-1 flex-gsb">
+        <div
+          className={cn(
+            "flex h-3.5 gap-1 self-stretch",
+            "text-sm leading-3.5 tracking-[-0.4px]"
+          )}
+        >
+          <span>{product.discountRate}%</span>
+          <span className="text-muted line-through">
+            {product.regularPrice.toLocaleString()}
+          </span>
+        </div>
+        <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
+          <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
+            {product.salePrice.toLocaleString()}원
+          </span>
+        </div>
+        <div className="flex h-5 pr-4 justify-center items-center gap-0.25">
+          <div className="flex w-37 shrink-0 self-stretch">
+            <span className="text-xl font-bold leading-5 tracking-[-0.4px] text-accent">
+              690,000원
             </span>
-            <div className="flex items-center gap-2 self-stretch">
-              <span className="text-sm text-muted">2개</span>
+            <div className="flex items-end">
+              <span className="text-xs font-bold leading-3 tracking-[-0.4px] text-accent">
+                쿠폰할인가
+              </span>
             </div>
-          </div>
-
-          <div className="flex flex-col items-center self-stretch rounded-lg border-1 border-muted/30">
-            <div className="flex flex-col items-center gap-2.5 self-stretch rounded-lg">
-              <div className="flex w-full pt-2.5 px-4 items-center gap-1 border-b-1 border-b-muted/30">
-                <span className="text-base font-bold leading-4 tracking-[-0.4px]">
-                  KEND KID
-                </span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="2"
-                  height="24"
-                  viewBox="0 0 2 24"
-                  fill="none"
-                >
-                  <path
-                    d="M1 18.5L1 4.5"
-                    stroke="#939393"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="flex gap-2 items-center self-stretch">
-                  <span className="text-muted">1개</span>
-                </div>
-                <div className="flex h-7 justify-end items-center gap-2 flex-gsb">
-                  <span className="text-muted">
-                    배송비 <span className="text-black">3,000원</span>
-                  </span>
-                </div>
-              </div>
-              <div className="flex w-full px-4 items-center gap-2.5">
-                <div className="flex size-19 justify-center items-center shrink-0">
-                  <img src={productSample2} alt="" />
-                </div>
-                <div className="flex w-60 flex-col items-start gap-2 shrink-0 self-stretch">
-                  <div className="flex items-center self-stretch">
-                    <span className="text-xs leading-3.5 tracking-[-0.4px]">
-                      [신상] 엄청 엄청 엄청 매우 따뜻한 구스 다운 패딩(기모,
-                      모자/안감 탈부착, 블랙, 화이트, 베이지, 사이즈 12 M...
-                    </span>
-                  </div>
-                  <div className="flex items-center self-stretch">
-                    <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-                      09.05(금) 이내 발송 예정
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex w-full px-4 items-center">
-                <div className="flex w-full h-8 pl-2.5 items-center gap-1 self-stretch rounded-xs bg-secondary/10">
-                  <span className="text-xs leading-4 tracking-[-0.4px]">
-                    베이지 / 24 M
-                  </span>
-                  <div className="flex flex-col py-0.25 px-0.75 items-start bg-accent rounded-xs">
-                    <span className="text-xs leading-3 tracking-[-0.4px] text-white">
-                      추천 사이즈
-                    </span>
-                  </div>
-                  <div className="flex py-0.25 px-5 flex-col justify-center items-end flex-gsb">
-                    <span className="text-xs leading-3 tracking-[-0.4px]">
-                      1개
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex w-full px-4 flex-col py-2.5 justify-center items-start gap-2.5">
-                <div className="flex w-full h-3.5 items-center justify-between">
-                  <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-                    결제 금액
-                  </span>
-                  <div className="flex-gsb text-right">
-                    <span className=" text-sm font-bold leading-3.5 tracking-[-0.4px]">
-                      700,000원
-                    </span>
-                  </div>
-                </div>
-                <div className="flex w-full h-3.5 items-center justify-between">
-                  <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-                    쿠폰 할인
-                  </span>
-                  <div className="flex-gsb text-right">
-                    <span className="text-sm font-bold leading-3.5 tracking-[-0.4px] text-accent">
-                      -1,000원
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="px-4 pb-4 flex flex-col w-full justify-center items-start">
-              <div className="flex w-full h-3 items-center border-t-1 border-t-muted/30"></div>
-              <div className="flex w-full h-3 items-center">
-                <span className="text-sm font-bold leading-3 tracking-[-0.4px]">
-                  최종 결제 금액
-                </span>
-                <span className="text-right flex-gsb text-base font-bold leading-4 tracking-[-0.4px]">
-                  690,000원
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex px-4 w-full items-center self-stretch">
-            <span className="flex-gsb font-xs leading-3 tracking-[-0.4px] text-muted/50">
-              판매자 배송 상품을 여러개 구매한 경우, 구매한 상품은 함께 배송될수
-              있으며 늦발송이 늦어질수 있습니다.
-            </span>
           </div>
         </div>
-      </Modal>
+      </div>
+      {/* 좋아요 버튼 */}
+      <button
+        type="button"
+        onClick={handleLikeClick}
+        disabled={likeFetcher.state !== "idle"}
+        className={cn(
+          "flex size-12 justify-center items-center shrink-0 rounded-full border transition-all",
+          optimisticIsLiked
+            ? "border-accent bg-accent/10"
+            : "border-muted/30 bg-white hover:bg-muted/5"
+        )}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          className="aspect-square shrink-0"
+        >
+          {optimisticIsLiked ? (
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              fill="#EBABF8"
+            />
+          ) : (
+            <path
+              d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"
+              fill="#1E1E1E"
+            />
+          )}
+        </svg>
+      </button>
+      {/* 구매하기 버튼 */}
+      <Button
+        variant="secondary"
+        className="flex h-12.5 px-10 justify-center items-center rounded-full text-base font-bold"
+        onClick={onBuyClick}
+      >
+        구매하기
+      </Button>
     </>
   );
 }

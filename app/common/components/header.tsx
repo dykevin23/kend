@@ -1,12 +1,6 @@
 import { ArrowLeft, Search, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-import {
-  Link,
-  useLocation,
-  useMatch,
-  useMatches,
-  useNavigate,
-} from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 
 export interface HeaderProps {
   title?: string;
@@ -16,9 +10,12 @@ export interface HeaderProps {
 export default function Header({ title, useRight = true }: HeaderProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const naviMenus = ["/stores", "/children", "/chats", "/users"];
+  const naviMenus = ["/stores", "/children", "/likes", "/myPage"];
 
-  const [isNaviMenu] = useState<boolean>(naviMenus.includes(pathname));
+  const [isNaviMenu] = useState<boolean>(
+    naviMenus.includes(pathname) ||
+      !isNaN(Number(pathname.split("/children/").at(-1)))
+  );
 
   return (
     <div className="flex p-4 justify-between items-center self-stretch">
@@ -32,7 +29,9 @@ export default function Header({ title, useRight = true }: HeaderProps) {
       ) : null}
       {useRight ? (
         <div className="flex items-center gap-6">
-          <Search className="size-7" />
+          <Link to="/search">
+            <Search className="size-7" />
+          </Link>
           <Link to="/carts">
             <ShoppingBag className="size-7" />
           </Link>

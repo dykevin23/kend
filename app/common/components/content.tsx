@@ -15,9 +15,11 @@ export default function Content({
   footer,
 }: ContentProps) {
   return (
-    <div>
+    <div className="flex flex-col w-full h-screen overflow-x-hidden">
       <Header {...headerPorps} />
-      <div className={cn({ "mb-20": footer })}>{children}</div>
+      <main className="flex-1 overflow-y-auto w-full">
+        <div className={cn({ "pb-[5.5rem]": footer })}>{children}</div>
+      </main>
       {footer && <BottomButtonArea>{footer}</BottomButtonArea>}
     </div>
   );

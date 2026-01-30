@@ -1,15 +1,35 @@
+import { useState } from "react";
+import { useLoaderData } from "react-router";
+import type { Route } from "./+types/stores-page";
 import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
-import StoreCard from "../components/store-card";
 import { Tab, Tabs } from "~/common/components/tabs";
-import { useState } from "react";
+import { makeSSRClient } from "~/supa-client";
+import { getDomains, getStoresWithProducts } from "../queries";
+import StoreCard from "../components/store-card";
+
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const [stores, domains] = await Promise.all([
+    getStoresWithProducts(client),
+    getDomains(client),
+  ]);
+  return { stores, domains };
+};
 
 export default function StoresPage() {
-  const [isActiveTab, setIsActiveTab] = useState<string>("home");
+  const { stores, domains } = useLoaderData<typeof loader>();
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   const handleClickTab = (key: string) => () => {
-    setIsActiveTab(key);
+    setActiveTab(key);
   };
+
+  // 탭에 따른 스토어 필터링
+  const filteredStores =
+    activeTab === "all"
+      ? stores
+      : stores.filter((store) => store.domainId === activeTab);
 
   return (
     <Content headerPorps={{ title: "스토어" }}>
@@ -18,37 +38,29 @@ export default function StoresPage() {
       <div className="flex flex-col w-full items-start gap-6 pt-5">
         <Tabs>
           <Tab
-            title="홈"
-            isActive={isActiveTab === "home"}
-            onClick={handleClickTab("home")}
+            title="전체"
+            isActive={activeTab === "all"}
+            onClick={handleClickTab("all")}
           />
-          <Tab
-            title="패션"
-            isActive={isActiveTab === "fashion"}
-            onClick={handleClickTab("fashion")}
-          />
-          <Tab
-            title="스킨케어"
-            isActive={isActiveTab === "skincare"}
-            onClick={handleClickTab("skincare")}
-          />
-          <Tab
-            title="액티비티"
-            isActive={isActiveTab === "activity"}
-            onClick={handleClickTab("activity")}
-          />
-          <Tab
-            title="라이프"
-            isActive={isActiveTab === "life"}
-            onClick={handleClickTab("life")}
-          />
+          {domains.map((domain) => (
+            <Tab
+              key={domain.id}
+              title={domain.name}
+              isActive={activeTab === domain.id}
+              onClick={handleClickTab(domain.id)}
+            />
+          ))}
         </Tabs>
 
-        {/* 스토어 start */}
-        {Array.from({ length: 10 }).map((_, index) => (
-          <StoreCard storeId={`store-${index}`} key={`store-${index}`} />
-        ))}
-        {/* 스토어 end */}
+        {filteredStores.length === 0 ? (
+          <div className="flex w-full py-10 justify-center items-center">
+            <span className="text-muted">등록된 스토어가 없습니다.</span>
+          </div>
+        ) : (
+          filteredStores.map((store) => (
+            <StoreCard key={store.id} store={store} />
+          ))
+        )}
       </div>
     </Content>
   );

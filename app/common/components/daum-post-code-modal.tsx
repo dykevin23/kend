@@ -4,7 +4,7 @@ import Modal from "./modal";
 import DaumPostcode from "react-daum-postcode";
 
 interface DaumPostCodeModalProps {
-  onComplete: () => void;
+  onComplete: (data: { zoneCode: string; address: string }) => void;
 }
 
 export default function DaumPostCodeModal({
@@ -12,13 +12,17 @@ export default function DaumPostCodeModal({
 }: DaumPostCodeModalProps) {
   const [open, setOpen] = useState<boolean>(false);
 
-  const handleComplete = (data: any) => {
-    console.log("### handleComplete => ", data);
+  const handleComplete = (data: { zonecode: string; address: string }) => {
+    onComplete({
+      zoneCode: data.zonecode,
+      address: data.address,
+    });
+    setOpen(false);
   };
 
   return (
     <>
-      <Button className="rounded-2xl" onClick={() => setOpen(true)}>
+      <Button type="button" className="rounded-2xl" onClick={() => setOpen(true)}>
         우편번호 찾기
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} title="우편 번호 찾기">

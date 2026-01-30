@@ -1,0 +1,1 @@
+ALTER TABLE "carts" ADD CONSTRAINT "carts_sku_id_product_stock_keepings_id_fk" FOREIGN KEY ("sku_id") REFERENCES "public"."product_stock_keepings"("id") ON DELETE cascade ON UPDATE no action;

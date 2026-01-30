@@ -8,6 +8,69 @@
       "when": 1762482390659,
       "tag": "0000_grey_jamie_braddock",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765866812367,
+      "tag": "0001_fancy_wasp",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769405359406,
+      "tag": "0002_burly_jamie_braddock",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1769405792382,
+      "tag": "0003_solid_champions",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769446037550,
+      "tag": "0004_parched_may_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1769490768256,
+      "tag": "0005_open_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1769497792413,
+      "tag": "0006_sad_sunfire",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1769587038441,
+      "tag": "0007_lean_brood",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1769635973281,
+      "tag": "0008_lame_ben_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1769664821973,
+      "tag": "0009_hard_skin",
+      "breakpoints": true
     }
   ]
 }
