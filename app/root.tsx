@@ -78,7 +78,7 @@ export default function App() {
   const naviMenus = ["/stores", "/children/:childId", "/likes", "/myPage"];
 
   return (
-    <div>
+    <div className="h-screen overflow-hidden">
       <Outlet />
       {(naviMenus.includes(pathname) ||
         (pathname.includes("/children")

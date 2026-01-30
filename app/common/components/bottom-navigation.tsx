@@ -9,15 +9,12 @@ export default function BottomNavigation() {
   return (
     <nav
       className={cn(
+        "fixed bottom-0 left-0 right-0",
         "flex w-full min-h-14 py-2.5 px-6 justify-between items-start self-stretch",
-        "border-t-1 border-t-muted/30 bg-white",
-        "pb-[max(0.625rem,var(--safe-area-inset-bottom))]"
+        "border-t border-t-muted/30 bg-white",
+        "pb-[max(0.625rem,var(--safe-area-inset-bottom))]",
+        "z-50"
       )}
-      style={{
-        position: "sticky",
-        bottom: 0,
-        zIndex: 50,
-      }}
     >
       <NavLink to="/stores">
         {({ isActive }) => (

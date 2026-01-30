@@ -206,6 +206,53 @@ export type Database = {
           },
         ]
       }
+      children: {
+        Row: {
+          birth_date: string
+          code: number
+          created_at: string
+          gender: Database["public"]["Enums"]["child_gender"] | null
+          id: string
+          name: string | null
+          nickname: string
+          profile_image_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birth_date: string
+          code: number
+          created_at?: string
+          gender?: Database["public"]["Enums"]["child_gender"] | null
+          id?: string
+          name?: string | null
+          nickname: string
+          profile_image_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          birth_date?: string
+          code?: number
+          created_at?: string
+          gender?: Database["public"]["Enums"]["child_gender"] | null
+          id?: string
+          name?: string | null
+          nickname?: string
+          profile_image_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       common_code_group: {
         Row: {
           code: string
@@ -417,6 +464,50 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      growth_records: {
+        Row: {
+          child_id: string
+          created_at: string
+          foot_size: number | null
+          head_circumference: number | null
+          height: number | null
+          id: string
+          measured_at: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          foot_size?: number | null
+          head_circumference?: number | null
+          height?: number | null
+          id?: string
+          measured_at: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          foot_size?: number | null
+          head_circumference?: number | null
+          height?: number | null
+          id?: string
+          measured_at?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_records_child_id_children_id_fk"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1307,6 +1398,7 @@ export type Database = {
     Enums: {
       admin_address_type: "SHIPPING" | "RETURN"
       bundle_delivery_type: "AVAILABLE" | "UNAVAILABLE"
+      child_gender: "boy" | "girl"
       courier_company:
         | "CJ"
         | "POST"
@@ -1501,6 +1593,7 @@ export const Constants = {
     Enums: {
       admin_address_type: ["SHIPPING", "RETURN"],
       bundle_delivery_type: ["AVAILABLE", "UNAVAILABLE"],
+      child_gender: ["boy", "girl"],
       courier_company: [
         "CJ",
         "POST",

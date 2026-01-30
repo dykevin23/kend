@@ -15,7 +15,7 @@ export default function BottomSheet({
   return (
     <Sheet open={open}>
       <SheetContent
-        className="pb-20 rounded-t-3xl flex px-6 flex-col items-start"
+        className="pb-8 pt-6 rounded-t-3xl flex px-6 flex-col items-start"
         side="bottom"
         onClose={() => setOpen(false)}
       >

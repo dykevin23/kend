@@ -16,11 +16,13 @@ export default [
     route("/:productId", "features/products/pages/product-page.tsx"),
   ]),
   ...prefix("children", [
-    index("features/children/pages/children-redirect-page.tsx"),
     layout("features/children/layouts/children-overview-layout.tsx", [
+      index("features/children/pages/children-index-page.tsx"),
       route("/:childId", "features/children/pages/children-page.tsx"),
     ]),
     route("/submit", "features/children/pages/submit-child-page.tsx"),
+    route("/:childId/edit", "features/children/pages/edit-child-page.tsx"),
+    route("/:childId/growth", "features/children/pages/growth-detail-page.tsx"),
   ]),
   ...prefix("likes", [index("features/likes/pages/likes-page.tsx")]),
   ...prefix("carts", [index("features/carts/pages/shopping-cart-page.tsx")]),
