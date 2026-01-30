@@ -31,6 +31,7 @@ export default [
   ...prefix("myPage", [
     index("features/users/pages/my-page.tsx"),
     route("/addresses", "features/users/pages/addresses-page.tsx"),
+    route("/profile/edit", "features/users/pages/edit-profile-page.tsx"),
   ]),
   ...prefix("orders", [
     index("features/orders/pages/orders-page.tsx"),

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   ChevronRight,
   Package,
@@ -11,12 +12,14 @@ import {
   FileText,
   ShieldCheck,
   MapPin,
+  User,
 } from "lucide-react";
 import { Link, useLoaderData } from "react-router";
 import Content from "~/common/components/content";
 import { cn } from "~/lib/utils";
 import { makeSSRClient } from "~/supa-client";
 import { getUserOrderCount } from "~/features/orders/queries";
+import { getUserProfile } from "../queries";
 import type { Route } from "./+types/my-page";
 
 /**
@@ -117,22 +120,60 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await client.auth.getUser();
 
   if (!user) {
-    return { orderCount: 0 };
+    return { profile: null, orderCount: 0, storageImageUrl: null };
   }
 
-  const orderCount = await getUserOrderCount(client, user.id);
+  try {
+    const [profile, orderCount] = await Promise.all([
+      getUserProfile(client, user.id),
+      getUserOrderCount(client, user.id),
+    ]);
 
-  return { orderCount };
+    const storageImageUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profiles/${user.id}`;
+
+    return { profile, orderCount, storageImageUrl };
+  } catch (error) {
+    console.error("Failed to load my page data:", error);
+    return { profile: null, orderCount: 0, storageImageUrl: null };
+  }
 };
 
 export default function MyPage() {
-  const { orderCount } = useLoaderData<typeof loader>();
-  // TODO: 실제 사용자 데이터로 교체
-  const user = {
-    nickname: "KENDD",
-    introduction: "채림이 지은이 딸랑구 맘입니다.",
-    avatar: null as string | null,
-  };
+  const { profile, orderCount, storageImageUrl } = useLoaderData<typeof loader>();
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // 클라이언트에서만 이미지 로드 시도
+  useEffect(() => {
+    if (storageImageUrl) {
+      const img = new Image();
+      img.onload = () => {
+        setImageSrc(storageImageUrl);
+        setImageLoaded(true);
+      };
+      img.onerror = () => {
+        // Storage 이미지 실패 시 소셜 아바타 시도
+        if (profile?.avatar) {
+          const socialImg = new Image();
+          socialImg.onload = () => {
+            setImageSrc(profile.avatar);
+            setImageLoaded(true);
+          };
+          socialImg.onerror = () => {
+            setImageSrc(null);
+            setImageLoaded(true);
+          };
+          socialImg.src = profile.avatar;
+        } else {
+          setImageSrc(null);
+          setImageLoaded(true);
+        }
+      };
+      img.src = storageImageUrl;
+    } else {
+      setImageLoaded(true);
+    }
+  }, [storageImageUrl, profile?.avatar]);
 
   // 빠른 메뉴 아이템 - 실제 컨텐츠는 추후 결정
   const quickMenuItems: QuickMenuItem[] = [
@@ -229,32 +270,30 @@ export default function MyPage() {
               "bg-gray-200 flex items-center justify-center"
             )}
           >
-            {user.avatar ? (
+            {imageSrc ? (
               <img
-                src={user.avatar}
-                alt={user.nickname}
+                src={imageSrc}
+                alt=""
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-2xl text-gray-400">
-                {user.nickname.charAt(0)}
-              </span>
+              <User className="w-10 h-10 text-gray-400" />
             )}
           </div>
 
           {/* 닉네임 */}
           <h2 className="mt-3 text-lg font-semibold text-gray-900">
-            {user.nickname}
+            {profile?.nickname ?? "게스트"}
           </h2>
 
           {/* 소개 */}
-          {user.introduction && (
-            <p className="mt-1 text-sm text-gray-500">{user.introduction}</p>
+          {profile?.introduction && (
+            <p className="mt-1 text-sm text-gray-500">{profile.introduction}</p>
           )}
 
           {/* 프로필 수정 버튼 */}
           <Link
-            to="/profile/edit"
+            to="/myPage/profile/edit"
             className={cn(
               "mt-4 w-full max-w-xs py-2.5 px-4",
               "border border-gray-300 rounded-full",

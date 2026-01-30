@@ -9,7 +9,7 @@ type Client = SupabaseClient<Database>;
 export const getUserProfile = async (client: Client, userId: string) => {
   const { data, error } = await client
     .from("profiles")
-    .select("profile_id, nickname, username, phone, avatar")
+    .select("profile_id, nickname, username, phone, avatar, introduction, comment")
     .eq("profile_id", userId)
     .single();
 
@@ -21,6 +21,8 @@ export const getUserProfile = async (client: Client, userId: string) => {
     username: data.username,
     phone: data.phone,
     avatar: data.avatar,
+    introduction: data.introduction,
+    comment: data.comment,
   };
 };
 

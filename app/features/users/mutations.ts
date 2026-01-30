@@ -3,6 +3,73 @@ import type { Database } from "~/supa-client";
 
 type Client = SupabaseClient<Database>;
 
+interface UpdateUserProfileInput {
+  userId: string;
+  nickname: string;
+  introduction?: string;
+  comment?: string;
+}
+
+/**
+ * 사용자 프로필 수정
+ */
+export const updateUserProfile = async (
+  client: Client,
+  input: UpdateUserProfileInput
+) => {
+  const { userId, nickname, introduction, comment } = input;
+
+  const { data, error } = await client
+    .from("profiles")
+    .update({
+      nickname,
+      introduction: introduction ?? null,
+      comment: comment ?? null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("profile_id", userId)
+    .select("profile_id, nickname, introduction, comment")
+    .single();
+
+  if (error) throw error;
+
+  return {
+    id: data.profile_id,
+    nickname: data.nickname,
+    introduction: data.introduction,
+    comment: data.comment,
+  };
+};
+
+/**
+ * 프로필 이미지 업로드
+ * - 파일명을 userId로 고정하여 항상 덮어쓰기
+ */
+export const uploadProfileImage = async (
+  client: Client,
+  userId: string,
+  file: File
+): Promise<string> => {
+  const filePath = userId;
+
+  const { error: uploadError } = await client.storage
+    .from("profiles")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
+  }
+
+  const {
+    data: { publicUrl },
+  } = client.storage.from("profiles").getPublicUrl(filePath);
+
+  return publicUrl;
+};
+
 interface AddUserAddressInput {
   userId: string;
   label: string;

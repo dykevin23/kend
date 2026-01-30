@@ -11,7 +11,7 @@ export default function NaviMyPage({
       viewBox="0 0 24 24"
       fill="none"
     >
-      <g clip-path="url(#clip0_1_486)">
+      <g clipPath="url(#clip0_1_486)">
         <rect width="23.33" height="23.33" rx="11.665" fill="black" />
         <path
           d="M1.62056 23.2177C1.65745 18.557 3.99644 13.9331 9.39678 13.9331C14.7971 13.9331 17.1361 18.557 17.173 23.2177C17.1735 23.2797 17.1232 23.3299 17.0613 23.3299H1.73228C1.67033 23.3299 1.62007 23.2797 1.62056 23.2177Z"
@@ -40,7 +40,7 @@ export default function NaviMyPage({
           width="11.5143"
           height="8.92328"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
@@ -81,7 +81,7 @@ export default function NaviMyPage({
       viewBox="0 0 24 24"
       fill="none"
     >
-      <g clip-path="url(#clip0_1_422)">
+      <g clipPath="url(#clip0_1_422)">
         <rect width="23.33" height="23.33" rx="11.665" fill="#F1F1F1" />
         <path
           d="M1.62056 23.2177C1.65745 18.557 3.99644 13.9331 9.39678 13.9331C14.7971 13.9331 17.1361 18.557 17.173 23.2177C17.1735 23.2797 17.1232 23.3299 17.0613 23.3299H1.73228C1.67033 23.3299 1.62007 23.2797 1.62056 23.2177Z"
