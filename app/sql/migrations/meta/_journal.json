@@ -71,6 +71,20 @@
       "when": 1769664821973,
       "tag": "0009_hard_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1769753829115,
+      "tag": "0010_careless_starbolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1769756453353,
+      "tag": "0011_lucky_warhawk",
+      "breakpoints": true
     }
   ]
 }

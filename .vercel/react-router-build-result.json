@@ -1,0 +1,479 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "common/pages/home-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/stores/pages/stores-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/stores/pages/store-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/products/pages/product-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/children/pages/children-index-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/children/pages/children-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/children/pages/submit-child-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/children/pages/edit-child-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/children/pages/growth-detail-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/likes/pages/likes-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/carts/pages/shopping-cart-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/search/pages/search-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/address-action": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/my-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/addresses-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/edit-profile-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/orders/pages/orders-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/orders/pages/order-action": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/auth/pages/login-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/auth/pages/join-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/auth/pages/social-start-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/auth/pages/social-complete-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/auth/pages/naver-start-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/auth/pages/naver-complete-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/auth/pages/naver-callback-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "app/root.tsx",
+        "config": {}
+      },
+      "common/pages/home-page": {
+        "id": "common/pages/home-page",
+        "parentId": "root",
+        "file": "app/common/pages/home-page.tsx",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/stores/pages/stores-page": {
+        "id": "features/stores/pages/stores-page",
+        "parentId": "root",
+        "file": "app/features/stores/pages/stores-page.tsx",
+        "path": "stores",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/stores/pages/store-page": {
+        "id": "features/stores/pages/store-page",
+        "parentId": "root",
+        "file": "app/features/stores/pages/store-page.tsx",
+        "path": "stores/:storeId",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/products/pages/product-page": {
+        "id": "features/products/pages/product-page",
+        "parentId": "root",
+        "file": "app/features/products/pages/product-page.tsx",
+        "path": "products/:productId",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/children/layouts/children-overview-layout": {
+        "id": "features/children/layouts/children-overview-layout",
+        "parentId": "root",
+        "file": "app/features/children/layouts/children-overview-layout.tsx",
+        "config": {}
+      },
+      "features/children/pages/children-index-page": {
+        "id": "features/children/pages/children-index-page",
+        "parentId": "features/children/layouts/children-overview-layout",
+        "file": "app/features/children/pages/children-index-page.tsx",
+        "path": "children",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/children/pages/children-page": {
+        "id": "features/children/pages/children-page",
+        "parentId": "features/children/layouts/children-overview-layout",
+        "file": "app/features/children/pages/children-page.tsx",
+        "path": "children/:childId",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/children/pages/submit-child-page": {
+        "id": "features/children/pages/submit-child-page",
+        "parentId": "root",
+        "file": "app/features/children/pages/submit-child-page.tsx",
+        "path": "children/submit",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/children/pages/edit-child-page": {
+        "id": "features/children/pages/edit-child-page",
+        "parentId": "root",
+        "file": "app/features/children/pages/edit-child-page.tsx",
+        "path": "children/:childId/edit",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/children/pages/growth-detail-page": {
+        "id": "features/children/pages/growth-detail-page",
+        "parentId": "root",
+        "file": "app/features/children/pages/growth-detail-page.tsx",
+        "path": "children/:childId/growth",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/likes/pages/likes-page": {
+        "id": "features/likes/pages/likes-page",
+        "parentId": "root",
+        "file": "app/features/likes/pages/likes-page.tsx",
+        "path": "likes",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/carts/pages/shopping-cart-page": {
+        "id": "features/carts/pages/shopping-cart-page",
+        "parentId": "root",
+        "file": "app/features/carts/pages/shopping-cart-page.tsx",
+        "path": "carts",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/search/pages/search-page": {
+        "id": "features/search/pages/search-page",
+        "parentId": "root",
+        "file": "app/features/search/pages/search-page.tsx",
+        "path": "search",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/address-action": {
+        "id": "features/users/pages/address-action",
+        "parentId": "root",
+        "file": "app/features/users/pages/address-action.ts",
+        "path": "users/addresses",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/my-page": {
+        "id": "features/users/pages/my-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/my-page.tsx",
+        "path": "myPage",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/addresses-page": {
+        "id": "features/users/pages/addresses-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/addresses-page.tsx",
+        "path": "myPage/addresses",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/edit-profile-page": {
+        "id": "features/users/pages/edit-profile-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/edit-profile-page.tsx",
+        "path": "myPage/profile/edit",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/orders/pages/orders-page": {
+        "id": "features/orders/pages/orders-page",
+        "parentId": "root",
+        "file": "app/features/orders/pages/orders-page.tsx",
+        "path": "orders",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/orders/pages/order-action": {
+        "id": "features/orders/pages/order-action",
+        "parentId": "root",
+        "file": "app/features/orders/pages/order-action.ts",
+        "path": "orders/action",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/auth/pages/login-page": {
+        "id": "features/auth/pages/login-page",
+        "parentId": "root",
+        "file": "app/features/auth/pages/login-page.tsx",
+        "path": "auth/login",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/auth/pages/join-page": {
+        "id": "features/auth/pages/join-page",
+        "parentId": "root",
+        "file": "app/features/auth/pages/join-page.tsx",
+        "path": "auth/join",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/auth/pages/social-start-page": {
+        "id": "features/auth/pages/social-start-page",
+        "parentId": "root",
+        "file": "app/features/auth/pages/social-start-page.tsx",
+        "path": "auth/social/:provider/start",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/auth/pages/social-complete-page": {
+        "id": "features/auth/pages/social-complete-page",
+        "parentId": "root",
+        "file": "app/features/auth/pages/social-complete-page.tsx",
+        "path": "auth/social/:provider/complete",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/auth/pages/naver-start-page": {
+        "id": "features/auth/pages/naver-start-page",
+        "parentId": "root",
+        "file": "app/features/auth/pages/naver-start-page.tsx",
+        "path": "auth/naver/start",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/auth/pages/naver-complete-page": {
+        "id": "features/auth/pages/naver-complete-page",
+        "parentId": "root",
+        "file": "app/features/auth/pages/naver-complete-page.tsx",
+        "path": "auth/naver/complete",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/auth/pages/naver-callback-page": {
+        "id": "features/auth/pages/naver-callback-page",
+        "parentId": "root",
+        "file": "app/features/auth/pages/naver-callback-page.tsx",
+        "path": "auth/naver/callback",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    }
+  },
+  "reactRouterConfig": {
+    "appDirectory": "/Users/dyk/Desktop/workspace/kend/app",
+    "basename": "/",
+    "buildDirectory": "/Users/dyk/Desktop/workspace/kend/build",
+    "future": {
+      "unstable_middleware": false,
+      "unstable_optimizeDeps": false,
+      "unstable_splitRouteModules": false,
+      "unstable_subResourceIntegrity": false,
+      "unstable_viteEnvironmentApi": false
+    },
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "root.tsx"
+      },
+      "common/pages/home-page": {
+        "id": "common/pages/home-page",
+        "parentId": "root",
+        "file": "common/pages/home-page.tsx",
+        "index": true
+      },
+      "features/stores/pages/stores-page": {
+        "id": "features/stores/pages/stores-page",
+        "parentId": "root",
+        "file": "features/stores/pages/stores-page.tsx",
+        "path": "stores",
+        "index": true
+      },
+      "features/stores/pages/store-page": {
+        "id": "features/stores/pages/store-page",
+        "parentId": "root",
+        "file": "features/stores/pages/store-page.tsx",
+        "path": "stores/:storeId"
+      },
+      "features/products/pages/product-page": {
+        "id": "features/products/pages/product-page",
+        "parentId": "root",
+        "file": "features/products/pages/product-page.tsx",
+        "path": "products/:productId"
+      },
+      "features/children/layouts/children-overview-layout": {
+        "id": "features/children/layouts/children-overview-layout",
+        "parentId": "root",
+        "file": "features/children/layouts/children-overview-layout.tsx"
+      },
+      "features/children/pages/children-index-page": {
+        "id": "features/children/pages/children-index-page",
+        "parentId": "features/children/layouts/children-overview-layout",
+        "file": "features/children/pages/children-index-page.tsx",
+        "path": "children",
+        "index": true
+      },
+      "features/children/pages/children-page": {
+        "id": "features/children/pages/children-page",
+        "parentId": "features/children/layouts/children-overview-layout",
+        "file": "features/children/pages/children-page.tsx",
+        "path": "children/:childId"
+      },
+      "features/children/pages/submit-child-page": {
+        "id": "features/children/pages/submit-child-page",
+        "parentId": "root",
+        "file": "features/children/pages/submit-child-page.tsx",
+        "path": "children/submit"
+      },
+      "features/children/pages/edit-child-page": {
+        "id": "features/children/pages/edit-child-page",
+        "parentId": "root",
+        "file": "features/children/pages/edit-child-page.tsx",
+        "path": "children/:childId/edit"
+      },
+      "features/children/pages/growth-detail-page": {
+        "id": "features/children/pages/growth-detail-page",
+        "parentId": "root",
+        "file": "features/children/pages/growth-detail-page.tsx",
+        "path": "children/:childId/growth"
+      },
+      "features/likes/pages/likes-page": {
+        "id": "features/likes/pages/likes-page",
+        "parentId": "root",
+        "file": "features/likes/pages/likes-page.tsx",
+        "path": "likes",
+        "index": true
+      },
+      "features/carts/pages/shopping-cart-page": {
+        "id": "features/carts/pages/shopping-cart-page",
+        "parentId": "root",
+        "file": "features/carts/pages/shopping-cart-page.tsx",
+        "path": "carts",
+        "index": true
+      },
+      "features/search/pages/search-page": {
+        "id": "features/search/pages/search-page",
+        "parentId": "root",
+        "file": "features/search/pages/search-page.tsx",
+        "path": "search",
+        "index": true
+      },
+      "features/users/pages/address-action": {
+        "id": "features/users/pages/address-action",
+        "parentId": "root",
+        "file": "features/users/pages/address-action.ts",
+        "path": "users/addresses"
+      },
+      "features/users/pages/my-page": {
+        "id": "features/users/pages/my-page",
+        "parentId": "root",
+        "file": "features/users/pages/my-page.tsx",
+        "path": "myPage",
+        "index": true
+      },
+      "features/users/pages/addresses-page": {
+        "id": "features/users/pages/addresses-page",
+        "parentId": "root",
+        "file": "features/users/pages/addresses-page.tsx",
+        "path": "myPage/addresses"
+      },
+      "features/users/pages/edit-profile-page": {
+        "id": "features/users/pages/edit-profile-page",
+        "parentId": "root",
+        "file": "features/users/pages/edit-profile-page.tsx",
+        "path": "myPage/profile/edit"
+      },
+      "features/orders/pages/orders-page": {
+        "id": "features/orders/pages/orders-page",
+        "parentId": "root",
+        "file": "features/orders/pages/orders-page.tsx",
+        "path": "orders",
+        "index": true
+      },
+      "features/orders/pages/order-action": {
+        "id": "features/orders/pages/order-action",
+        "parentId": "root",
+        "file": "features/orders/pages/order-action.ts",
+        "path": "orders/action"
+      },
+      "features/auth/pages/login-page": {
+        "id": "features/auth/pages/login-page",
+        "parentId": "root",
+        "file": "features/auth/pages/login-page.tsx",
+        "path": "auth/login"
+      },
+      "features/auth/pages/join-page": {
+        "id": "features/auth/pages/join-page",
+        "parentId": "root",
+        "file": "features/auth/pages/join-page.tsx",
+        "path": "auth/join"
+      },
+      "features/auth/pages/social-start-page": {
+        "id": "features/auth/pages/social-start-page",
+        "parentId": "root",
+        "file": "features/auth/pages/social-start-page.tsx",
+        "path": "auth/social/:provider/start"
+      },
+      "features/auth/pages/social-complete-page": {
+        "id": "features/auth/pages/social-complete-page",
+        "parentId": "root",
+        "file": "features/auth/pages/social-complete-page.tsx",
+        "path": "auth/social/:provider/complete"
+      },
+      "features/auth/pages/naver-start-page": {
+        "id": "features/auth/pages/naver-start-page",
+        "parentId": "root",
+        "file": "features/auth/pages/naver-start-page.tsx",
+        "path": "auth/naver/start"
+      },
+      "features/auth/pages/naver-complete-page": {
+        "id": "features/auth/pages/naver-complete-page",
+        "parentId": "root",
+        "file": "features/auth/pages/naver-complete-page.tsx",
+        "path": "auth/naver/complete"
+      },
+      "features/auth/pages/naver-callback-page": {
+        "id": "features/auth/pages/naver-callback-page",
+        "parentId": "root",
+        "file": "features/auth/pages/naver-callback-page.tsx",
+        "path": "auth/naver/callback"
+      }
+    },
+    "routeDiscovery": {
+      "mode": "lazy",
+      "manifestPath": "/__manifest"
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}

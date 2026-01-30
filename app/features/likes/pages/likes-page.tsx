@@ -12,6 +12,7 @@ export default function LikesPage() {
 
   return (
     <Content headerPorps={{ title: "좋아요" }}>
+      <div className="pb-20">
       <div className="flex w-full items-center">
         <Tabs>
           <Tab
@@ -42,6 +43,7 @@ export default function LikesPage() {
             <span className="text-muted">찜한 스토어가 없습니다.</span>
           </div>
         )}
+      </div>
       </div>
     </Content>
   );

@@ -33,6 +33,7 @@ export default function StoresPage() {
 
   return (
     <Content headerPorps={{ title: "스토어" }}>
+      <div className="pb-20">
       <Banner />
 
       <div className="flex flex-col w-full items-start gap-6 pt-5">
@@ -61,6 +62,7 @@ export default function StoresPage() {
             <StoreCard key={store.id} store={store} />
           ))
         )}
+      </div>
       </div>
     </Content>
   );

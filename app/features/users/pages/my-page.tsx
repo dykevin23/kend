@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import Content from "~/common/components/content";
+import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import { makeSSRClient, browserClient } from "~/supa-client";
 import { getUserOrderCount } from "~/features/orders/queries";
@@ -267,7 +268,7 @@ export default function MyPage() {
 
   return (
     <Content headerPorps={{ title: "마이 페이지" }}>
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full pb-20">
         {/* 프로필 영역 */}
         <div className="flex flex-col items-center py-6 px-4">
           {/* 아바타 */}
@@ -336,19 +337,13 @@ export default function MyPage() {
 
         {/* 로그아웃 버튼 */}
         <div className="px-4 py-6">
-          <button
+          <Button
             onClick={handleLogout}
-            className={cn(
-              "w-full py-3 px-4",
-              "flex items-center justify-center gap-2",
-              "border border-gray-300 rounded-lg",
-              "text-sm text-gray-600",
-              "hover:bg-gray-50 active:bg-gray-100"
-            )}
+            className="w-full py-3 rounded-lg"
           >
             <LogOut className="w-4 h-4" />
             로그아웃
-          </button>
+          </Button>
         </div>
       </div>
     </Content>
