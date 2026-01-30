@@ -13,11 +13,12 @@ import {
   ShieldCheck,
   MapPin,
   User,
+  LogOut,
 } from "lucide-react";
-import { Link, useLoaderData } from "react-router";
+import { Link, useLoaderData, useNavigate } from "react-router";
 import Content from "~/common/components/content";
 import { cn } from "~/lib/utils";
-import { makeSSRClient } from "~/supa-client";
+import { makeSSRClient, browserClient } from "~/supa-client";
 import { getUserOrderCount } from "~/features/orders/queries";
 import { getUserProfile } from "../queries";
 import type { Route } from "./+types/my-page";
@@ -142,6 +143,12 @@ export default function MyPage() {
   const { profile, orderCount, storageImageUrl } = useLoaderData<typeof loader>();
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await browserClient.auth.signOut();
+    navigate("/auth/login");
+  };
 
   // 클라이언트에서만 이미지 로드 시도
   useEffect(() => {
@@ -325,6 +332,23 @@ export default function MyPage() {
           {menuGroups.map((group, index) => (
             <MenuSection key={index} title={group.title} items={group.items} />
           ))}
+        </div>
+
+        {/* 로그아웃 버튼 */}
+        <div className="px-4 py-6">
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "w-full py-3 px-4",
+              "flex items-center justify-center gap-2",
+              "border border-gray-300 rounded-lg",
+              "text-sm text-gray-600",
+              "hover:bg-gray-50 active:bg-gray-100"
+            )}
+          >
+            <LogOut className="w-4 h-4" />
+            로그아웃
+          </button>
         </div>
       </div>
     </Content>
