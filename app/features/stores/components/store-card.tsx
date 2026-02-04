@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { Badge } from "~/common/components/ui/badge";
 import { cn } from "~/lib/utils";
@@ -60,14 +61,17 @@ export const StoreInfo = ({
   hashtags,
   followerCount,
 }: StoreInfoProps) => {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <div className="flex h-12 py-3 items-center gap-2 shrink-0 self-stretch">
       {/* profile */}
-      {profileImage ? (
+      {profileImage && !imageError ? (
         <img
           src={profileImage}
           alt={name}
-          className="size-10 aspect-square rounded-full object-cover"
+          className="size-10 aspect-square rounded-full object-contain"
+          onError={() => setImageError(true)}
         />
       ) : (
         <div className="size-10 aspect-square rounded-full bg-gray-300 flex items-center justify-center">
@@ -87,7 +91,7 @@ export const StoreInfo = ({
           {name}
         </Badge>
 
-        <span className="w-[170px] text-right text-sm leading-3.5 tracking-[-0.4px] truncate">
+        <span className="w-[170px] text-right text-sm leading-3.5 tracking-[-0.4px] line-clamp-2 break-keep">
           {hashtags ?? ""}
         </span>
 
