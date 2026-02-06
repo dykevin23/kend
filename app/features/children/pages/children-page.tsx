@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, redirect, useLoaderData } from "react-router";
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
@@ -15,6 +15,11 @@ import {
 import { createGrowthRecord } from "../mutations";
 import type { Route } from "./+types/children-page";
 import { cn } from "~/lib/utils";
+import {
+  calculateAgeInMonths,
+  getHeightPercentile,
+  type Gender,
+} from "~/lib/growth-data";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -136,8 +141,22 @@ export default function ChildrenPage() {
 
   const [isGrowthSheetOpen, setIsGrowthSheetOpen] = useState(false);
 
-  // 슬라이더 위치 계산 (예시: 0-100 사이, 실제로는 또래 비교 API 필요)
-  const growthPercentile = 70; // TODO: 실제 백분위 계산
+  // 성별을 Gender 타입으로 변환 (boy=1, girl=2)
+  const gender: Gender = child.gender === "boy" ? 1 : 2;
+
+  // 실제 백분위수 계산
+  const growthPercentile = useMemo(() => {
+    if (!child.birthDate || !latestRecord?.height) {
+      return 50; // 기본값
+    }
+
+    const birthDateObj = new Date(child.birthDate);
+    const measureDate = new Date(latestRecord.measuredAt);
+    const ageMonths = calculateAgeInMonths(birthDateObj, measureDate);
+
+    const result = getHeightPercentile(gender, ageMonths, latestRecord.height);
+    return result?.percentile ?? 50;
+  }, [child.birthDate, latestRecord, gender]);
 
   return (
     <div className="pb-20">
@@ -162,7 +181,7 @@ export default function ChildrenPage() {
               </span>
             </div>
             <Badge variant="secondary">
-              100명 중 {100 - growthPercentile + 1}등
+              100명 중 {Math.round(100 - growthPercentile + 1)}등
             </Badge>
           </div>
 
@@ -182,8 +201,11 @@ export default function ChildrenPage() {
             <div className="relative w-full h-2 bg-gray-200 rounded-full">
               {/* 진행 바 */}
               <div
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 rounded-full"
-                style={{ width: `${growthPercentile}%` }}
+                className="absolute top-0 left-0 h-full rounded-full"
+                style={{
+                  width: `${growthPercentile}%`,
+                  background: "linear-gradient(to right, #a3c4e4, #2d6a9f, #163756)",
+                }}
               />
               {/* 포인트 */}
               <div
@@ -244,11 +266,15 @@ export default function ChildrenPage() {
             type="height"
             childNickname={child.nickname}
             records={heightRecords}
+            gender={gender}
+            birthDate={child.birthDate ?? undefined}
           />
           <GrowthChart
             type="weight"
             childNickname={child.nickname}
             records={weightRecords}
+            gender={gender}
+            birthDate={child.birthDate ?? undefined}
           />
           <GrowthChart
             type="footSize"
@@ -259,6 +285,8 @@ export default function ChildrenPage() {
             type="headCircumference"
             childNickname={child.nickname}
             records={headCircumferenceRecords}
+            gender={gender}
+            birthDate={child.birthDate ?? undefined}
           />
         </div>
       </div>
