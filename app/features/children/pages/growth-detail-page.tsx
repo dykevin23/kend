@@ -82,7 +82,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
       if (type === "height") recordData.height = parseFloat(value);
       else if (type === "weight") recordData.weight = parseFloat(value);
       else if (type === "footSize") recordData.footSize = parseFloat(value);
-      else if (type === "headCircumference") recordData.headCircumference = parseFloat(value);
+      else if (type === "headCircumference")
+        recordData.headCircumference = parseFloat(value);
 
       await createGrowthRecord(client, recordData);
 
@@ -98,7 +99,10 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
 type GrowthType = "height" | "weight" | "footSize" | "headCircumference";
 
-const GROWTH_LABELS: Record<GrowthType, { label: string; unit: string; placeholder: string }> = {
+const GROWTH_LABELS: Record<
+  GrowthType,
+  { label: string; unit: string; placeholder: string }
+> = {
   height: { label: "신장", unit: "cm", placeholder: "100.0" },
   weight: { label: "체중", unit: "kg", placeholder: "15.0" },
   footSize: { label: "발사이즈", unit: "mm", placeholder: "150" },
@@ -112,7 +116,9 @@ export default function GrowthDetailPage() {
 
   const [selectedType, setSelectedType] = useState<GrowthType>("height");
   const [isAddingRecord, setIsAddingRecord] = useState(false);
-  const [measuredAt, setMeasuredAt] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [measuredAt, setMeasuredAt] = useState<string>(
+    format(new Date(), "yyyy-MM-dd")
+  );
 
   // 각 타입별 최신 값 추출
   const latestValues: Record<GrowthType, number | null> = {
@@ -132,7 +138,10 @@ export default function GrowthDetailPage() {
     if (latestValues.footSize === null && record.footSize !== null) {
       latestValues.footSize = record.footSize;
     }
-    if (latestValues.headCircumference === null && record.headCircumference !== null) {
+    if (
+      latestValues.headCircumference === null &&
+      record.headCircumference !== null
+    ) {
       latestValues.headCircumference = record.headCircumference;
     }
   }
@@ -168,7 +177,9 @@ export default function GrowthDetailPage() {
   const isToday = measuredAt === format(new Date(), "yyyy-MM-dd");
 
   return (
-    <Content headerPorps={{ title: `${child.nickname}의 성장 데이터`, useRight: false }}>
+    <Content
+      headerPorps={{ title: `${child.nickname}의 성장 데이터`, useRight: false }}
+    >
       <div className="flex flex-col h-full">
         {/* 성장 데이터 타입 선택 탭 */}
         <div className="flex px-4 py-3 gap-2 border-b border-muted/20">
@@ -203,7 +214,12 @@ export default function GrowthDetailPage() {
               </p>
               {historyRecords.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-2">
-                  마지막 측정: {format(new Date(historyRecords[0].measuredAt), "yyyy년 M월 d일", { locale: ko })}
+                  마지막 측정:{" "}
+                  {format(
+                    new Date(historyRecords[0].measuredAt),
+                    "yyyy년 M월 d일",
+                    { locale: ko }
+                  )}
                 </p>
               )}
             </div>
@@ -212,18 +228,24 @@ export default function GrowthDetailPage() {
 
         {/* 히스토리 목록 */}
         <div className="flex-1 px-4 pb-8 overflow-y-auto">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">측정 기록</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+            측정 기록
+          </h3>
 
           {historyRecords.length === 0 && !isAddingRecord ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>아직 기록이 없습니다.</p>
-              <p className="text-sm mt-1">아래 버튼을 눌러 데이터를 추가해보세요.</p>
+              <p className="text-sm mt-1">
+                아래 버튼을 눌러 데이터를 추가해보세요.
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
               {historyRecords.map((record, index) => {
                 const prevRecord = historyRecords[index + 1];
-                const diff = prevRecord ? record.value - prevRecord.value : null;
+                const diff = prevRecord
+                  ? record.value - prevRecord.value
+                  : null;
 
                 return (
                   <div
@@ -232,7 +254,9 @@ export default function GrowthDetailPage() {
                   >
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        {format(new Date(record.measuredAt), "yyyy. M. d", { locale: ko })}
+                        {format(new Date(record.measuredAt), "yyyy. M. d", {
+                          locale: ko,
+                        })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -245,11 +269,13 @@ export default function GrowthDetailPage() {
                               : "bg-red-100 text-red-600"
                           )}
                         >
-                          {diff > 0 ? "+" : ""}{diff.toFixed(1)}
+                          {diff > 0 ? "+" : ""}
+                          {diff.toFixed(1)}
                         </span>
                       )}
                       <span className="text-lg font-medium">
-                        {record.value}{GROWTH_LABELS[selectedType].unit}
+                        {record.value}
+                        {GROWTH_LABELS[selectedType].unit}
                       </span>
                     </div>
                   </div>
@@ -262,7 +288,9 @@ export default function GrowthDetailPage() {
           {isAddingRecord && (
             <div className="mt-4 p-4 bg-white rounded-xl border border-secondary">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium">{GROWTH_LABELS[selectedType].label} 추가</h4>
+                <h4 className="font-medium">
+                  {GROWTH_LABELS[selectedType].label} 추가
+                </h4>
                 <Button
                   type="button"
                   variant="ghost"
@@ -286,13 +314,17 @@ export default function GrowthDetailPage() {
 
                 {/* 측정일 */}
                 <div className="mb-4">
-                  <Label className="text-muted-foreground mb-2 block">측정일</Label>
+                  <Label className="text-muted-foreground mb-2 block">
+                    측정일
+                  </Label>
                   <div className="flex items-center gap-2">
                     <Button
                       type="button"
                       variant={isToday ? "secondary" : "ghost"}
                       size="sm"
-                      onClick={() => setMeasuredAt(format(new Date(), "yyyy-MM-dd"))}
+                      onClick={() =>
+                        setMeasuredAt(format(new Date(), "yyyy-MM-dd"))
+                      }
                       className="rounded-full"
                     >
                       오늘
