@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { redirect, useLoaderData, useFetcher } from "react-router";
+import { redirect, useLoaderData, useFetcher, useNavigate } from "react-router";
 import type { Route } from "./+types/product-page";
 import BottomSheet from "~/common/components/bottom-sheet";
 import Content from "~/common/components/content";
@@ -118,7 +118,8 @@ type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 export default function ProductPage() {
   const { product, isLiked, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const { alert } = useAlert();
+  const navigate = useNavigate();
+  const { alert, confirm } = useAlert();
 
   const [activeTab, setActiveTab] = useState<TabKey>("information");
   const [isOptionSheetOpen, setIsOptionSheetOpen] = useState(false);
@@ -264,10 +265,20 @@ export default function ProductPage() {
     }
   };
 
-  // 장바구니 추가 성공 시 알림
+  // 장바구니 추가 성공 시 확인 다이얼로그
   useEffect(() => {
-    if (fetcher.data?.success) {
-      alert(fetcher.data.message);
+    if (fetcher.data?.success && fetcher.data?.message) {
+      confirm({
+        title: "장바구니 담기",
+        message: "상품이 장바구니에 담겼습니다.\n장바구니로 이동하시겠습니까?",
+        primaryButton: {
+          label: "장바구니로 이동",
+          onClick: () => navigate("/carts"),
+        },
+        secondaryButton: {
+          label: "계속 쇼핑하기",
+        },
+      });
     }
   }, [fetcher.data]);
 
@@ -469,36 +480,28 @@ function ProductFooter({ product, isLiked, onBuyClick }: ProductFooterProps) {
     );
   };
 
+  const hasDiscount = product.discountRate > 0 && product.regularPrice !== product.salePrice;
+
   return (
     <>
       <div className="flex flex-col justify-center items-start gap-1 flex-gsb">
-        <div
-          className={cn(
-            "flex h-3.5 gap-1 self-stretch",
-            "text-sm leading-3.5 tracking-[-0.4px]"
-          )}
-        >
-          <span>{product.discountRate}%</span>
-          <span className="text-muted line-through">
-            {product.regularPrice.toLocaleString()}
-          </span>
-        </div>
+        {hasDiscount && (
+          <div
+            className={cn(
+              "flex h-3.5 gap-1 self-stretch",
+              "text-sm leading-3.5 tracking-[-0.4px]"
+            )}
+          >
+            <span>{product.discountRate}%</span>
+            <span className="text-muted line-through">
+              {product.regularPrice.toLocaleString()}
+            </span>
+          </div>
+        )}
         <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
           <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
             {product.salePrice.toLocaleString()}원
           </span>
-        </div>
-        <div className="flex h-5 pr-4 justify-center items-center gap-0.25">
-          <div className="flex w-37 shrink-0 self-stretch">
-            <span className="text-xl font-bold leading-5 tracking-[-0.4px] text-accent">
-              690,000원
-            </span>
-            <div className="flex items-end">
-              <span className="text-xs font-bold leading-3 tracking-[-0.4px] text-accent">
-                쿠폰할인가
-              </span>
-            </div>
-          </div>
         </div>
       </div>
       {/* 좋아요 버튼 */}
