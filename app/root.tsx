@@ -11,11 +11,11 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-// import { makeSSRClient } from "./supa-client";
 import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
 import { AlertProvider } from "./hooks/useAlert";
+import { getCartCount } from "./features/carts/queries";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -61,8 +61,8 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     data: { user },
   } = await client.auth.getUser();
   if (user) {
-    // const profile = await getUserById(client, { id: user.id });
-    // return { user, profile };
+    const cartCount = await getCartCount(client, user.id);
+    return { user, cartCount };
   } else {
     const url = new URL(request.url);
     const pathname = url.pathname;
@@ -70,7 +70,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       return redirect("/auth/login", { headers });
     }
   }
-  return { user: null, profile: null };
+  return { user: null, cartCount: 0 };
 };
 
 export default function App() {
