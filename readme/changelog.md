@@ -8,6 +8,17 @@
 
 ---
 
+## 2026-02-10
+
+### [KEND] 장바구니 아이콘 배지 기능 추가
+
+- **CartIcon 컴포넌트**: 장바구니 아이콘에 현재 담긴 상품 개수를 배지로 표시 (`app/common/components/cart-icon.tsx`)
+- **root loader 확장**: 로그인 사용자의 장바구니 개수를 조회하여 전역으로 제공
+- **useRouteLoaderData 활용**: Context/Provider 없이 root loader 데이터에 접근하여 개수 표시
+- **자동 갱신**: 장바구니 추가/삭제 시 React Router의 자동 revalidation으로 개수 업데이트
+
+---
+
 ## 2026-02-06
 
 ### [KEND] 성장기록 기능 구현

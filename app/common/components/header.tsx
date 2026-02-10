@@ -1,6 +1,7 @@
-import { ArrowLeft, Search, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import CartIcon from "./cart-icon";
 
 export interface HeaderProps {
   title?: string;
@@ -32,9 +33,7 @@ export default function Header({ title, useRight = true }: HeaderProps) {
           <Link to="/search">
             <Search className="size-7" />
           </Link>
-          <Link to="/carts">
-            <ShoppingBag className="size-7" />
-          </Link>
+          <CartIcon />
         </div>
       ) : (
         <div className="size-6" />
