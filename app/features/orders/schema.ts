@@ -180,6 +180,9 @@ export const orderGroups = pgTable("order_groups", {
   address: text().notNull(),
   address_detail: text(),
 
+  // 배송 메시지
+  delivery_message: text(),
+
   // 결제 정보
   payment_method: paymentMethodType(),
   paid_at: timestamp({ withTimezone: true }),

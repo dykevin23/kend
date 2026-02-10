@@ -17,6 +17,18 @@
 - **useRouteLoaderData 활용**: Context/Provider 없이 root loader 데이터에 접근하여 개수 표시
 - **자동 갱신**: 장바구니 추가/삭제 시 React Router의 자동 revalidation으로 개수 업데이트
 
+### [KEND] 결제 모달 배송 메시지 기능 추가
+
+- **배송 메시지 선택**: DeliveryAddress 컴포넌트에 배송 메시지 Select 통합
+- **옵션 제공**: 선택 안함, 문 앞에 놔주세요, 부재 시 연락주세요, 배송 전 미리 연락해 주세요, 직접 입력하기
+- **DB 스키마**: `order_groups` 테이블에 `delivery_message` 컬럼 추가
+- **주문 저장**: 주문 생성 시 선택한 배송 메시지를 DB에 저장
+
+### [KEND] UI 스타일 개선
+
+- **Select 컴포넌트**: 선택 항목 강조색 opacity 조정 (`focus:bg-accent` → `focus:bg-accent/30`)
+- **안내 문구**: 결제 모달 안내 문구 스타일 피그마 디자인에 맞게 수정 (중앙 정렬, 별표 추가)
+
 ---
 
 ## 2026-02-06

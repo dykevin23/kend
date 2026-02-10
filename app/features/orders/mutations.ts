@@ -29,6 +29,7 @@ interface CreateOrderParams {
   sellerGroups: SellerOrderGroup[];
   items: OrderItem[];
   paymentMethod: string;
+  deliveryMessage: string | null;
 }
 
 /**
@@ -40,7 +41,7 @@ interface CreateOrderParams {
  */
 export const createOrder = async (
   client: Client,
-  { userId, address, sellerGroups, paymentMethod }: CreateOrderParams
+  { userId, address, sellerGroups, paymentMethod, deliveryMessage }: CreateOrderParams
 ) => {
   const groupOrderNumber = generateOrderNumber();
 
@@ -77,6 +78,7 @@ export const createOrder = async (
       zone_code: address.zoneCode,
       address: address.address,
       address_detail: address.addressDetail ?? null,
+      delivery_message: deliveryMessage,
       payment_method: paymentMethod as PaymentMethodType,
     })
     .select("id")

@@ -572,6 +572,7 @@ export type Database = {
           address: string
           address_detail: string | null
           created_at: string
+          delivery_message: string | null
           id: string
           order_number: string
           paid_at: string | null
@@ -593,6 +594,7 @@ export type Database = {
           address: string
           address_detail?: string | null
           created_at?: string
+          delivery_message?: string | null
           id?: string
           order_number: string
           paid_at?: string | null
@@ -614,6 +616,7 @@ export type Database = {
           address?: string
           address_detail?: string | null
           created_at?: string
+          delivery_message?: string | null
           id?: string
           order_number?: string
           paid_at?: string | null
