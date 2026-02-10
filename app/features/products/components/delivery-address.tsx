@@ -7,19 +7,41 @@ import { Badge } from "~/common/components/ui/badge";
 import { Dot } from "lucide-react";
 import {
   Select,
+  SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "~/common/components/ui/select";
+import { Input } from "~/common/components/ui/input";
 import type { UserAddress } from "~/features/users/queries";
+
+/**
+ * 배송 메시지 옵션
+ */
+const DELIVERY_MESSAGE_OPTIONS = [
+  { value: "none", label: "선택 안함" },
+  { value: "문 앞에 놔주세요", label: "문 앞에 놔주세요" },
+  { value: "부재 시 연락주세요", label: "부재 시 연락주세요" },
+  { value: "배송 전 미리 연락해 주세요", label: "배송 전 미리 연락해 주세요" },
+  { value: "custom", label: "직접 입력하기" },
+];
 
 interface DeliveryAddressProps {
   address: UserAddress | null;
   onAddressChange?: (address: UserAddress) => void;
+  deliveryMessageOption: string;
+  onDeliveryMessageOptionChange: (value: string) => void;
+  customDeliveryMessage: string;
+  onCustomDeliveryMessageChange: (value: string) => void;
 }
 
 export default function DeliveryAddress({
   address,
   onAddressChange,
+  deliveryMessageOption,
+  onDeliveryMessageOptionChange,
+  customDeliveryMessage,
+  onCustomDeliveryMessageChange,
 }: DeliveryAddressProps) {
   const [addressAddModalOpen, setAddressAddModalOpen] =
     useState<boolean>(false);
@@ -87,11 +109,30 @@ export default function DeliveryAddress({
                 {fullAddress}
               </span>
             </div>
-            <Select>
+            <Select
+              value={deliveryMessageOption}
+              onValueChange={onDeliveryMessageOptionChange}
+            >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="배송 메세지를 선택해주세요." />
+                <SelectValue placeholder="배송 메시지를 선택하세요" />
               </SelectTrigger>
+              <SelectContent>
+                {DELIVERY_MESSAGE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
+            {deliveryMessageOption === "custom" && (
+              <Input
+                placeholder="배송 메시지를 입력하세요"
+                value={customDeliveryMessage}
+                onChange={(e) => onCustomDeliveryMessageChange(e.target.value)}
+                className="w-full h-11"
+                maxLength={50}
+              />
+            )}
           </div>
         ) : (
           <div className="flex flex-col h-30 px-4 justify-center items-center gap-5 shrink-0 self-stretch rounded-md border border-muted/30">

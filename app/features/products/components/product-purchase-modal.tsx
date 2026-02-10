@@ -65,14 +65,28 @@ export default function ProductPurchaseModal({
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethodType>("bank_transfer");
 
+  // 배송 메시지 상태
+  const [deliveryMessageOption, setDeliveryMessageOption] = useState<string>("none");
+  const [customDeliveryMessage, setCustomDeliveryMessage] = useState<string>("");
+
   // 모달이 열릴 때 초기 주소로 리셋
   useEffect(() => {
     if (open) {
       setSelectedAddress(initialAddress);
       setSelectedPaymentMethod("bank_transfer");
+      setDeliveryMessageOption("none");
+      setCustomDeliveryMessage("");
       hasHandledRef.current = false;
     }
   }, [open, initialAddress]);
+
+  // 최종 배송 메시지
+  const deliveryMessage =
+    deliveryMessageOption === "none"
+      ? ""
+      : deliveryMessageOption === "custom"
+        ? customDeliveryMessage
+        : deliveryMessageOption;
 
   // 판매자별 그룹핑
   const sellerGroups = useMemo(() => groupOrderItemsBySeller(items), [items]);
@@ -127,6 +141,7 @@ export default function ProductPurchaseModal({
         sellerGroups: JSON.stringify(sellerGroups),
         items: JSON.stringify(items),
         paymentMethod: selectedPaymentMethod,
+        deliveryMessage: deliveryMessage,
       },
       { method: "POST", action: "/orders/action" }
     );
@@ -151,6 +166,10 @@ export default function ProductPurchaseModal({
       <DeliveryAddress
         address={selectedAddress}
         onAddressChange={setSelectedAddress}
+        deliveryMessageOption={deliveryMessageOption}
+        onDeliveryMessageOptionChange={setDeliveryMessageOption}
+        customDeliveryMessage={customDeliveryMessage}
+        onCustomDeliveryMessageChange={setCustomDeliveryMessage}
       />
 
       <div className="flex w-full flex-col pt-5.5 pb-4 px-4 items-start gap-5 bg-white">
@@ -170,10 +189,10 @@ export default function ProductPurchaseModal({
         ))}
 
         {/* 안내 문구 */}
-        <div className="flex px-4 w-full items-center self-stretch">
-          <span className="flex-gsb font-xs leading-3 tracking-[-0.4px] text-muted/50">
-            판매자 배송 상품을 여러개 구매한 경우, 구매한 상품은 함께 배송될수
-            있으며 발송이 늦어질수 있습니다.
+        <div className="flex px-4 w-full justify-center">
+          <span className="text-xs leading-4 tracking-[-0.4px] text-muted/60 text-center">
+            *판매자 배송 상품을 여러개 구매한 경우, 구매한 상품은 함께 배송될
+            수 있으며 늦발송이 늦어질수 있습니다.
           </span>
         </div>
       </div>
