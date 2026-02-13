@@ -16,19 +16,11 @@ function generateOrderNumber(): string {
   return `ORD-${date}-${random}`;
 }
 
-type PaymentMethodType =
-  | "bank_transfer"
-  | "credit_card"
-  | "mobile_payment"
-  | "easy_pay"
-  | "virtual_account";
-
 interface CreateOrderParams {
   userId: string;
   address: UserAddress;
   sellerGroups: SellerOrderGroup[];
   items: OrderItem[];
-  paymentMethod: string;
   deliveryMessage: string | null;
 }
 
@@ -41,7 +33,7 @@ interface CreateOrderParams {
  */
 export const createOrder = async (
   client: Client,
-  { userId, address, sellerGroups, paymentMethod, deliveryMessage }: CreateOrderParams
+  { userId, address, sellerGroups, deliveryMessage }: CreateOrderParams
 ) => {
   const groupOrderNumber = generateOrderNumber();
 
@@ -56,11 +48,9 @@ export const createOrder = async (
   );
   const totalAmount = totalProductAmount + totalShippingFee;
 
-  // 결제 수단에 따른 초기 상태 결정
-  // - bank_transfer: 무통장입금 → 결제대기 (payment_pending)
-  // - 그 외: PG 결제 → 결제 진행중 (payment_in_progress)
-  const initialStatus: "payment_pending" | "payment_in_progress" =
-    paymentMethod === "bank_transfer" ? "payment_pending" : "payment_in_progress";
+  // TossPayments 위젯 사용 → 항상 payment_in_progress로 시작
+  // 결제 확인 후 payment-success-page에서 paid로 업데이트
+  const initialStatus = "payment_in_progress" as const;
 
   // 1. order_group 생성
   const { data: orderGroup, error: groupError } = await client
@@ -79,7 +69,7 @@ export const createOrder = async (
       address: address.address,
       address_detail: address.addressDetail ?? null,
       delivery_message: deliveryMessage,
-      payment_method: paymentMethod as PaymentMethodType,
+      payment_method: null, // 결제 확인 후 실제 결제수단으로 업데이트
     })
     .select("id")
     .single();

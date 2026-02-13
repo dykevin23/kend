@@ -576,6 +576,7 @@ export type Database = {
           id: string
           order_number: string
           paid_at: string | null
+          payment_key: string | null
           payment_method:
             | Database["public"]["Enums"]["payment_method_type"]
             | null
@@ -598,6 +599,7 @@ export type Database = {
           id?: string
           order_number: string
           paid_at?: string | null
+          payment_key?: string | null
           payment_method?:
             | Database["public"]["Enums"]["payment_method_type"]
             | null
@@ -620,6 +622,7 @@ export type Database = {
           id?: string
           order_number?: string
           paid_at?: string | null
+          payment_key?: string | null
           payment_method?:
             | Database["public"]["Enums"]["payment_method_type"]
             | null
@@ -792,6 +795,89 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "seller_information_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          approved_at: string | null
+          card_acquirer_code: string | null
+          card_approve_no: string | null
+          card_installment_plan_months: number | null
+          card_issuer_code: string | null
+          card_number: string | null
+          card_owner_type: string | null
+          card_type: string | null
+          created_at: string
+          easy_pay_amount: number | null
+          easy_pay_discount_amount: number | null
+          easy_pay_provider: string | null
+          id: string
+          method: string | null
+          order_group_id: string
+          order_id: string
+          payment_key: string
+          raw_response: Json | null
+          receipt_url: string | null
+          requested_at: string | null
+          status: string
+          total_amount: number
+        }
+        Insert: {
+          approved_at?: string | null
+          card_acquirer_code?: string | null
+          card_approve_no?: string | null
+          card_installment_plan_months?: number | null
+          card_issuer_code?: string | null
+          card_number?: string | null
+          card_owner_type?: string | null
+          card_type?: string | null
+          created_at?: string
+          easy_pay_amount?: number | null
+          easy_pay_discount_amount?: number | null
+          easy_pay_provider?: string | null
+          id?: string
+          method?: string | null
+          order_group_id: string
+          order_id: string
+          payment_key: string
+          raw_response?: Json | null
+          receipt_url?: string | null
+          requested_at?: string | null
+          status: string
+          total_amount: number
+        }
+        Update: {
+          approved_at?: string | null
+          card_acquirer_code?: string | null
+          card_approve_no?: string | null
+          card_installment_plan_months?: number | null
+          card_issuer_code?: string | null
+          card_number?: string | null
+          card_owner_type?: string | null
+          card_type?: string | null
+          created_at?: string
+          easy_pay_amount?: number | null
+          easy_pay_discount_amount?: number | null
+          easy_pay_provider?: string | null
+          id?: string
+          method?: string | null
+          order_group_id?: string
+          order_id?: string
+          payment_key?: string
+          raw_response?: Json | null
+          receipt_url?: string | null
+          requested_at?: string | null
+          status?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_group_id_order_groups_id_fk"
+            columns: ["order_group_id"]
+            isOneToOne: false
+            referencedRelation: "order_groups"
             referencedColumns: ["id"]
           },
         ]

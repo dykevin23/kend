@@ -28,6 +28,8 @@
       "features/users/pages/edit-profile-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/orders/pages/orders-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/orders/pages/order-action": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/payments/pages/payment-success-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/payments/pages/payment-fail-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/auth/pages/login-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/auth/pages/join-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/auth/pages/social-start-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
@@ -214,6 +216,24 @@
         "parentId": "root",
         "file": "app/features/orders/pages/order-action.ts",
         "path": "orders/action",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/payments/pages/payment-success-page": {
+        "id": "features/payments/pages/payment-success-page",
+        "parentId": "root",
+        "file": "app/features/payments/pages/payment-success-page.tsx",
+        "path": "payments/success",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/payments/pages/payment-fail-page": {
+        "id": "features/payments/pages/payment-fail-page",
+        "parentId": "root",
+        "file": "app/features/payments/pages/payment-fail-page.tsx",
+        "path": "payments/fail",
         "config": {
           "runtime": "nodejs"
         }
@@ -419,6 +439,18 @@
         "parentId": "root",
         "file": "features/orders/pages/order-action.ts",
         "path": "orders/action"
+      },
+      "features/payments/pages/payment-success-page": {
+        "id": "features/payments/pages/payment-success-page",
+        "parentId": "root",
+        "file": "features/payments/pages/payment-success-page.tsx",
+        "path": "payments/success"
+      },
+      "features/payments/pages/payment-fail-page": {
+        "id": "features/payments/pages/payment-fail-page",
+        "parentId": "root",
+        "file": "features/payments/pages/payment-fail-page.tsx",
+        "path": "payments/fail"
       },
       "features/auth/pages/login-page": {
         "id": "features/auth/pages/login-page",

@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useFetcher } from "react-router";
+import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import Modal from "~/common/components/modal";
 import { Button } from "~/common/components/ui/button";
 import DeliveryAddress from "./delivery-address";
@@ -10,29 +11,6 @@ import {
 } from "~/features/orders/types";
 import type { UserAddress } from "~/features/users/queries";
 import { useAlert } from "~/hooks/useAlert";
-import { cn } from "~/lib/utils";
-
-/**
- * 결제 수단 타입
- */
-type PaymentMethodType =
-  | "bank_transfer"
-  | "credit_card"
-  | "easy_pay";
-
-/**
- * 결제 수단 옵션
- */
-const PAYMENT_METHODS: {
-  value: PaymentMethodType;
-  label: string;
-  subLabel?: string;
-  disabled?: boolean;
-}[] = [
-  { value: "easy_pay", label: "카카오페이", subLabel: "준비중", disabled: true },
-  { value: "bank_transfer", label: "계좌 간편결제", disabled: false },
-  { value: "credit_card", label: "일반결제", subLabel: "준비중", disabled: true },
-];
 
 interface ProductPurchaseModalProps {
   open: boolean;
@@ -43,6 +21,8 @@ interface ProductPurchaseModalProps {
   address: UserAddress | null;
   /** 주문 완료 후 콜백 (장바구니 아이템 삭제 등) */
   onOrderComplete?: (orderNumber: string) => void;
+  /** 장바구니 아이템 ID 목록 (결제 성공 후 삭제용) */
+  cartItemIds?: string[];
 }
 
 export default function ProductPurchaseModal({
@@ -50,7 +30,7 @@ export default function ProductPurchaseModal({
   onClose,
   items,
   address: initialAddress,
-  onOrderComplete,
+  cartItemIds,
 }: ProductPurchaseModalProps) {
   const fetcher = useFetcher();
   const { alert } = useAlert();
@@ -61,19 +41,19 @@ export default function ProductPurchaseModal({
     initialAddress
   );
 
-  // 선택된 결제 수단 (기본값: 계좌 간편결제)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<PaymentMethodType>("bank_transfer");
-
   // 배송 메시지 상태
   const [deliveryMessageOption, setDeliveryMessageOption] = useState<string>("none");
   const [customDeliveryMessage, setCustomDeliveryMessage] = useState<string>("");
+
+  // TossPayments Widget 관련 상태
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [paymentWidget, setPaymentWidget] = useState<any>(null);
+  const [isWidgetReady, setIsWidgetReady] = useState(false);
 
   // 모달이 열릴 때 초기 주소로 리셋
   useEffect(() => {
     if (open) {
       setSelectedAddress(initialAddress);
-      setSelectedPaymentMethod("bank_transfer");
       setDeliveryMessageOption("none");
       setCustomDeliveryMessage("");
       hasHandledRef.current = false;
@@ -97,16 +77,135 @@ export default function ProductPurchaseModal({
     [items]
   );
 
+  // 전체 결제 금액 계산
+  const totalAmount = useMemo(() => {
+    const productAmount = sellerGroups.reduce((sum, g) => sum + g.subtotal, 0);
+    const shippingFee = sellerGroups.reduce((sum, g) => sum + g.shippingFee, 0);
+    return productAmount + shippingFee;
+  }, [sellerGroups]);
+
+  // 모달이 열릴 때 TossPayments 위젯 초기화
+  useEffect(() => {
+    if (!open || totalAmount <= 0) {
+      setPaymentWidget(null);
+      setIsWidgetReady(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const initWidget = async () => {
+      try {
+        const tossPayments = await loadTossPayments(
+          import.meta.env.VITE_TOSS_CLIENT_KEY
+        );
+        if (cancelled) return;
+
+        const widget = tossPayments.widgets({ customerKey: "anonymous" });
+        await widget.setAmount({ currency: "KRW", value: totalAmount });
+
+        if (cancelled) return;
+        setPaymentWidget(widget);
+      } catch (error) {
+        console.error("TossPayments 초기화 실패:", error);
+      }
+    };
+
+    initWidget();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, totalAmount]);
+
+  // 위젯이 준비되면 DOM에 렌더링
+  useEffect(() => {
+    if (!paymentWidget) return;
+
+    let cancelled = false;
+
+    const renderWidget = async () => {
+      try {
+        await paymentWidget.renderPaymentMethods({
+          selector: "#toss-payment-method",
+        });
+        await paymentWidget.renderAgreement({
+          selector: "#toss-agreement",
+        });
+        if (!cancelled) setIsWidgetReady(true);
+      } catch (error) {
+        console.error("TossPayments 위젯 렌더링 실패:", error);
+      }
+    };
+
+    renderWidget();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paymentWidget]);
+
+  // 금액 변경 시 위젯 업데이트
+  useEffect(() => {
+    if (paymentWidget && totalAmount > 0) {
+      paymentWidget.setAmount({ currency: "KRW", value: totalAmount });
+    }
+  }, [paymentWidget, totalAmount]);
+
   const isSubmitting = fetcher.state !== "idle";
 
-  // 주문 결과 처리
+  // 주문 결과 처리 → 서버 응답 후 requestPayment() 호출
   useEffect(() => {
+    console.log("[결제] fetcher 상태 변경:", {
+      state: fetcher.state,
+      data: fetcher.data,
+      hasHandled: hasHandledRef.current,
+      paymentWidgetReady: !!paymentWidget,
+    });
+
     if (fetcher.data && !hasHandledRef.current) {
       hasHandledRef.current = true;
-      if (fetcher.data.success) {
-        onClose();
-        onOrderComplete?.(fetcher.data.orderNumber);
-      } else {
+
+      if (fetcher.data.success && paymentWidget) {
+        const { orderNumber } = fetcher.data;
+        const orderName =
+          items.length > 1
+            ? `${items[0].product.name} 외 ${items.length - 1}건`
+            : items[0].product.name;
+
+        console.log("[결제] 주문 생성 성공, requestPayment 호출:", {
+          orderNumber,
+          orderName,
+          successUrl: `${window.location.origin}/payments/success`,
+          failUrl: `${window.location.origin}/payments/fail`,
+        });
+
+        // 장바구니 정리용 ID를 sessionStorage에 저장
+        if (cartItemIds && cartItemIds.length > 0) {
+          sessionStorage.setItem(
+            "pending_cart_cleanup",
+            JSON.stringify(cartItemIds)
+          );
+        }
+
+        paymentWidget
+          .requestPayment({
+            orderId: orderNumber,
+            orderName,
+            successUrl: `${window.location.origin}/payments/success`,
+            failUrl: `${window.location.origin}/payments/fail`,
+          })
+          .catch((error: { code?: string }) => {
+            if (error.code === "USER_CANCEL") {
+              // 사용자가 결제를 취소한 경우 - 다시 시도 가능하도록 리셋
+              hasHandledRef.current = false;
+            }
+            console.error("[결제] 결제 요청 실패:", error);
+          });
+      } else if (fetcher.data.success && !paymentWidget) {
+        console.error("[결제] 주문은 생성됐지만 paymentWidget이 null입니다");
+      } else if (!fetcher.data.success) {
+        console.error("[결제] 주문 생성 실패:", fetcher.data.error);
         alert({
           title: "주문 실패",
           message: fetcher.data.error ?? "주문에 실패했습니다.",
@@ -133,6 +232,23 @@ export default function ProductPurchaseModal({
       });
       return;
     }
+    if (!isWidgetReady) {
+      alert({
+        title: "알림",
+        message: "결제 수단을 불러오는 중입니다. 잠시만 기다려주세요.",
+        primaryButton: { label: "확인", onClick: () => {} },
+      });
+      return;
+    }
+
+    hasHandledRef.current = false;
+
+    console.log("[결제] 주문 생성 요청 시작", {
+      address: selectedAddress,
+      sellerGroups,
+      items,
+      deliveryMessage,
+    });
 
     fetcher.submit(
       {
@@ -140,7 +256,6 @@ export default function ProductPurchaseModal({
         address: JSON.stringify(selectedAddress),
         sellerGroups: JSON.stringify(sellerGroups),
         items: JSON.stringify(items),
-        paymentMethod: selectedPaymentMethod,
         deliveryMessage: deliveryMessage,
       },
       { method: "POST", action: "/orders/action" }
@@ -157,9 +272,11 @@ export default function ProductPurchaseModal({
           variant="secondary"
           className="flex w-full h-12.5 rounded-full"
           onClick={handleSubmitOrder}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !isWidgetReady}
         >
-          {isSubmitting ? "주문 처리중..." : "결제하기"}
+          {isSubmitting
+            ? "주문 처리중..."
+            : `${totalAmount.toLocaleString()}원 결제하기`}
         </Button>
       }
     >
@@ -197,52 +314,21 @@ export default function ProductPurchaseModal({
         </div>
       </div>
 
-      {/* 결제 수단 섹션 */}
+      {/* 결제 수단 섹션 - TossPayments 위젯 */}
       <div className="flex w-full flex-col py-5 px-4 items-start gap-4 bg-white border-t-4 border-t-muted/10">
         <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
           결제 수단
         </span>
-
-        <div className="flex flex-col w-full gap-1">
-          {PAYMENT_METHODS.map((method) => (
-            <button
-              key={method.value}
-              type="button"
-              disabled={method.disabled}
-              onClick={() => !method.disabled && setSelectedPaymentMethod(method.value)}
-              className={cn(
-                "flex items-center gap-3 py-3.5 px-2 rounded-lg transition-colors",
-                method.disabled && "opacity-50 cursor-not-allowed"
-              )}
-            >
-              {/* 라디오 버튼 */}
-              <div
-                className={cn(
-                  "w-5 h-5 rounded-full border-2 flex items-center justify-center",
-                  selectedPaymentMethod === method.value
-                    ? "border-secondary"
-                    : "border-gray-300"
-                )}
-              >
-                {selectedPaymentMethod === method.value && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-secondary" />
-                )}
-              </div>
-
-              {/* 라벨 */}
-              <span className="text-sm font-medium text-gray-900">
-                {method.label}
-              </span>
-
-              {/* 서브 라벨 (준비중 등) */}
-              {method.subLabel && (
-                <span className="text-xs text-gray-400">({method.subLabel})</span>
-              )}
-            </button>
-          ))}
-        </div>
+        <div id="toss-payment-method" className="w-full" />
+        <div id="toss-agreement" className="w-full" />
+        {!isWidgetReady && (
+          <div className="flex w-full h-32 items-center justify-center">
+            <span className="text-sm text-muted">
+              결제 수단을 불러오는 중...
+            </span>
+          </div>
+        )}
       </div>
-
     </Modal>
   );
 }
