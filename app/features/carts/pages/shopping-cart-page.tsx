@@ -1,5 +1,5 @@
-import { useMemo, useState, useRef } from "react";
-import { redirect, useLoaderData, useFetcher, useRevalidator, Link } from "react-router";
+import { useMemo, useState, useRef, useEffect } from "react";
+import { redirect, useLoaderData, useFetcher, useSearchParams, Link } from "react-router";
 import type { Route } from "./+types/shopping-cart-page";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
@@ -18,7 +18,6 @@ import {
 } from "../mutations";
 import { type OrderItem, cartItemToOrderItem } from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
-import { useAlert } from "~/hooks/useAlert";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -79,8 +78,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
 export default function ShoppingCartPage() {
   const { cartItems, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const revalidator = useRevalidator();
-  const { alert } = useAlert();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     () => new Set(cartItems.map((item) => item.id)),
@@ -88,6 +87,20 @@ export default function ShoppingCartPage() {
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
   const purchaseCartIdsRef = useRef<string[]>([]);
+
+  // 결제 실패 후 redirect로 넘어온 경우 에러 메시지 표시
+  useEffect(() => {
+    const error = searchParams.get("payment_error");
+    if (error) {
+      setPaymentError(error);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("payment_error");
+      setSearchParams(newParams, { replace: true });
+
+      const timer = setTimeout(() => setPaymentError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const isAllSelected =
     cartItems.length > 0 && selectedIds.size === cartItems.length;
@@ -172,29 +185,6 @@ export default function ShoppingCartPage() {
     setIsPurchaseModalOpen(true);
   };
 
-  // 주문 완료 후 처리
-  const handleOrderComplete = (orderNumber: string) => {
-    // 주문된 장바구니 아이템 삭제
-    if (purchaseCartIdsRef.current.length > 0) {
-      const formData = new FormData();
-      formData.append("intent", "removeSelected");
-      purchaseCartIdsRef.current.forEach((id) => formData.append("cartIds", id));
-      fetcher.submit(formData, { method: "POST" });
-    }
-
-    setSelectedIds(new Set());
-    setPurchaseItems([]);
-    setIsPurchaseModalOpen(false);
-    purchaseCartIdsRef.current = [];
-
-    alert({
-      title: "주문 완료",
-      message: `주문이 완료되었습니다.\n주문번호: ${orderNumber}`,
-      primaryButton: { label: "확인" },
-    });
-    revalidator.revalidate();
-  };
-
   return (
     <Content
       headerPorps={{ title: "장바구니", useRight: false }}
@@ -211,6 +201,19 @@ export default function ShoppingCartPage() {
         )
       }
     >
+      {/* 결제 실패 배너 */}
+      {paymentError && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border-b border-red-200">
+          <span className="text-sm text-red-800">{paymentError}</span>
+          <button
+            className="ml-auto text-red-600 text-xs shrink-0"
+            onClick={() => setPaymentError(null)}
+          >
+            닫기
+          </button>
+        </div>
+      )}
+
       {cartItems.length > 0 ? (
         <>
           <div className="flex w-full p-4 items-center gap-2 border-b-1 border-b-muted/30">
@@ -346,7 +349,7 @@ export default function ShoppingCartPage() {
         }}
         items={purchaseItems}
         address={address}
-        onOrderComplete={handleOrderComplete}
+        cartItemIds={purchaseCartIdsRef.current}
       />
     </Content>
   );

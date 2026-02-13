@@ -39,6 +39,10 @@ export default [
     index("features/orders/pages/orders-page.tsx"),
     route("/action", "features/orders/pages/order-action.ts"),
   ]),
+  ...prefix("payments", [
+    route("/success", "features/payments/pages/payment-success-page.tsx"),
+    route("/fail", "features/payments/pages/payment-fail-page.tsx"),
+  ]),
   ...prefix("auth", [
     route("/login", "features/auth/pages/login-page.tsx"),
     route("/join", "features/auth/pages/join-page.tsx"),

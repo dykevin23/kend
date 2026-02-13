@@ -26,21 +26,29 @@ export const action = async ({ request }: Route.ActionArgs) => {
       const addressJson = formData.get("address") as string;
       const sellerGroupsJson = formData.get("sellerGroups") as string;
       const itemsJson = formData.get("items") as string;
-      const paymentMethod = formData.get("paymentMethod") as string;
       const deliveryMessage = (formData.get("deliveryMessage") as string) || null;
+
+      console.log("[주문] 주문 생성 요청 수신:", { intent, deliveryMessage });
 
       const address: UserAddress = JSON.parse(addressJson);
       const sellerGroups: SellerOrderGroup[] = JSON.parse(sellerGroupsJson);
       const items: OrderItem[] = JSON.parse(itemsJson);
+
+      console.log("[주문] 파싱 완료:", {
+        address: address.address,
+        sellerGroupCount: sellerGroups.length,
+        itemCount: items.length,
+      });
 
       const result = await createOrder(client, {
         userId: user.id,
         address,
         sellerGroups,
         items,
-        paymentMethod,
         deliveryMessage,
       });
+
+      console.log("[주문] 주문 생성 성공:", result);
 
       return {
         success: true,
@@ -48,7 +56,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
         orderNumber: result.orderNumber,
       };
     } catch (error) {
-      console.error("Failed to create order:", error);
+      console.error("[주문] 주문 생성 실패:", error);
       return { success: false, error: "주문 생성에 실패했습니다." };
     }
   }

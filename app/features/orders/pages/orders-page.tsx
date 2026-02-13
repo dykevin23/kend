@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLoaderData, useSearchParams } from "react-router";
-import { Search } from "lucide-react";
+import { Search, CheckCircle } from "lucide-react";
 import Content from "~/common/components/content";
 import { Input } from "~/common/components/ui/input";
 import { makeSSRClient } from "~/supa-client";
@@ -39,6 +39,30 @@ export default function OrdersPage() {
   const { orderGroups } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState<{
+    orderNumber: string;
+    amount: number;
+  } | null>(null);
+
+  // 결제 성공 후 redirect로 넘어온 경우 메시지 표시
+  useEffect(() => {
+    if (searchParams.get("payment_success") === "true") {
+      const orderNumber = searchParams.get("orderNumber") ?? "";
+      const amount = Number(searchParams.get("amount") ?? 0);
+      setPaymentSuccess({ orderNumber, amount });
+
+      // URL에서 결제 관련 파라미터 제거
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("payment_success");
+      newParams.delete("orderNumber");
+      newParams.delete("amount");
+      setSearchParams(newParams, { replace: true });
+
+      // 5초 후 메시지 자동 숨김
+      const timer = setTimeout(() => setPaymentSuccess(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const currentFilter = (searchParams.get("filter") as OrderTabFilter) || "all";
 
@@ -60,6 +84,27 @@ export default function OrdersPage() {
   return (
     <Content headerPorps={{ title: "주문/배송", useRight: false }}>
       <div className="flex flex-col w-full bg-gray-50 min-h-full">
+        {/* 결제 성공 배너 */}
+        {paymentSuccess && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border-b border-green-200">
+            <CheckCircle className="size-5 text-green-600 shrink-0" />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-bold text-green-800">
+                결제가 완료되었습니다
+              </span>
+              <span className="text-xs text-green-700">
+                주문번호: {paymentSuccess.orderNumber} · {paymentSuccess.amount.toLocaleString()}원
+              </span>
+            </div>
+            <button
+              className="ml-auto text-green-600 text-xs"
+              onClick={() => setPaymentSuccess(null)}
+            >
+              닫기
+            </button>
+          </div>
+        )}
+
         {/* 검색 영역 */}
         <div className="px-4 py-3 bg-white">
           <div className="relative">

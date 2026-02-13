@@ -185,10 +185,70 @@ export const orderGroups = pgTable("order_groups", {
 
   // 결제 정보
   payment_method: paymentMethodType(),
+  payment_key: text(), // TossPayments paymentKey (환불/취소 등 후속 작업용)
   paid_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * 결제(payments) 테이블 - TossPayments 결제 상세 정보
+ *
+ * TossPayments Confirm API 응답 데이터를 저장
+ * 환불/취소/정산/고객 문의 시 원본 결제 데이터 참조용
+ *
+ * id                            결제 ID (PK)
+ * order_group_id                주문 그룹 ID (FK → order_groups)
+ * payment_key                   TossPayments paymentKey (unique)
+ * order_id                      TossPayments orderId (= order_number)
+ * method                        결제 수단 (카드, 간편결제, 계좌이체 등)
+ * status                        결제 상태 (DONE, CANCELED 등)
+ * total_amount                  결제 금액
+ * requested_at                  결제 요청 시각
+ * approved_at                   결제 승인 시각
+ * card_*                        카드 결제 상세 정보
+ * easy_pay_*                    간편결제 상세 정보
+ * receipt_url                   영수증 URL
+ * raw_response                  TossPayments 원본 응답 (JSONB)
+ * created_at                    생성일시
+ */
+export const payments = pgTable("payments", {
+  id: uuid().primaryKey().defaultRandom(),
+  order_group_id: uuid()
+    .notNull()
+    .references(() => orderGroups.id, { onDelete: "cascade" }),
+
+  // TossPayments 핵심 필드
+  payment_key: text().notNull().unique(),
+  order_id: text().notNull(),
+  method: text(),
+  status: text().notNull(),
+  total_amount: integer().notNull(),
+  requested_at: timestamp({ withTimezone: true }),
+  approved_at: timestamp({ withTimezone: true }),
+
+  // 카드 결제 정보
+  card_issuer_code: text(),
+  card_acquirer_code: text(),
+  card_number: text(),
+  card_installment_plan_months: integer(),
+  card_approve_no: text(),
+  card_type: text(),
+  card_owner_type: text(),
+
+  // 간편결제 정보
+  easy_pay_provider: text(),
+  easy_pay_amount: integer(),
+  easy_pay_discount_amount: integer(),
+
+  // 영수증
+  receipt_url: text(),
+
+  // 원본 응답 전체 (추후 필요한 데이터 추출용)
+  raw_response: jsonb().$type<Record<string, unknown>>(),
+
+  created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
 /**
