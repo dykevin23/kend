@@ -10,6 +10,13 @@
 
 ## 2026-03-03
 
+### [KEND] 판매자 배너 노출 기능 추가
+
+- **스토어 목록 배너**: 전체 판매자의 활성 배너 중 무작위 최대 5개를 스토어 목록 상단에 노출 (`getRandomBanners`)
+- **스토어 상세 배너**: 해당 판매자가 등록한 활성 배너를 `display_order` 순으로 최대 5개 노출 (`getSellerBanners`)
+- **Banner 컴포넌트 개선**: 기존 빈 플레이스홀더에서 embla-carousel 기반 이미지 슬라이더로 교체, dot indicator 추가 (현재 슬라이드 강조 + 클릭 이동), `loop: true` 옵션 적용
+- **배너 없을 시**: 기존 빈 플레이스홀더 UI 유지
+
 ### [KEND-SELLER] 판매자 스토어 배너 관리 기능 추가
 
 - **`seller_banners` 테이블 추가**: 배너 제목(`title`, 관리자 식별용), 이미지 URL, 표시 순서(`display_order`), 활성 여부(`is_active`) 컬럼 구성
