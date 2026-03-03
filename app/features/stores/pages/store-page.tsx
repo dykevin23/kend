@@ -9,6 +9,7 @@ import {
   getStoreByCode,
   getProductsBySeller,
   getMainCategories,
+  getSellerBanners,
 } from "../queries";
 import { StoreInfo } from "../components/store-card";
 import ProductCard from "~/features/products/components/product-card";
@@ -18,16 +19,17 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { storeId: sellerCode } = params;
 
   const store = await getStoreByCode(client, sellerCode);
-  const [products, mainCategories] = await Promise.all([
+  const [products, mainCategories, bannerImages] = await Promise.all([
     getProductsBySeller(client, store.id),
     getMainCategories(client, store.domainId ?? undefined),
+    getSellerBanners(client, store.id),
   ]);
 
-  return { store, products, mainCategories };
+  return { store, products, mainCategories, bannerImages };
 };
 
 export default function StorePage() {
-  const { store, products, mainCategories } = useLoaderData<typeof loader>();
+  const { store, products, mainCategories, bannerImages } = useLoaderData<typeof loader>();
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const handleClickTab = (key: string) => () => {
@@ -42,7 +44,7 @@ export default function StorePage() {
 
   return (
     <Content>
-      <Banner />
+      <Banner images={bannerImages} />
 
       <div className="flex flex-col px-4 items-start shrink-0 self-stretch py-2.5 border-b border-muted/30">
         <div className="flex flex-col pr-4 items-start shrink-0 self-stretch">

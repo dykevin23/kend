@@ -272,3 +272,41 @@ export const getProductsBySeller = async (
 export type ProductListItem = Awaited<
   ReturnType<typeof getProductsBySeller>
 >[number];
+
+/**
+ * 무작위 배너 조회 (스토어 목록용)
+ * - 모든 판매자의 활성 배너 중 무작위 최대 5개
+ */
+export const getRandomBanners = async (client: Client, limit = 5) => {
+  const { data, error } = await client
+    .from("seller_banners")
+    .select("id, image_url")
+    .eq("is_active", true);
+
+  if (error) throw error;
+
+  const shuffled = data.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, limit).map((b) => b.image_url);
+};
+
+/**
+ * 특정 판매자 배너 조회 (스토어 상세용)
+ * - is_active = true, display_order 오름차순, 최대 5개
+ */
+export const getSellerBanners = async (
+  client: Client,
+  sellerId: string,
+  limit = 5
+) => {
+  const { data, error } = await client
+    .from("seller_banners")
+    .select("id, image_url")
+    .eq("seller_id", sellerId)
+    .eq("is_active", true)
+    .order("display_order", { ascending: true })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return data.map((b) => b.image_url);
+};

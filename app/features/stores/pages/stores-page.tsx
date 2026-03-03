@@ -5,20 +5,21 @@ import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { makeSSRClient } from "~/supa-client";
-import { getDomains, getStoresWithProducts } from "../queries";
+import { getDomains, getStoresWithProducts, getRandomBanners } from "../queries";
 import StoreCard from "../components/store-card";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
-  const [stores, domains] = await Promise.all([
+  const [stores, domains, bannerImages] = await Promise.all([
     getStoresWithProducts(client),
     getDomains(client),
+    getRandomBanners(client),
   ]);
-  return { stores, domains };
+  return { stores, domains, bannerImages };
 };
 
 export default function StoresPage() {
-  const { stores, domains } = useLoaderData<typeof loader>();
+  const { stores, domains, bannerImages } = useLoaderData<typeof loader>();
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const handleClickTab = (key: string) => () => {
@@ -34,7 +35,7 @@ export default function StoresPage() {
   return (
     <Content headerPorps={{ title: "스토어" }}>
       <div className="pb-20">
-      <Banner />
+      <Banner images={bannerImages} />
 
       <div className="flex flex-col w-full items-start gap-6 pt-5">
         <Tabs>
