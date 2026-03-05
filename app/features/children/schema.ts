@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   decimal,
   integer,
@@ -55,6 +56,7 @@ export const children = pgTable(
     gender: childGender(),
     birth_date: date().notNull(),
     profile_image_url: text(),
+    is_dummy: boolean().notNull().default(false),
     created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },

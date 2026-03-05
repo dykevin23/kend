@@ -1,0 +1,1 @@
+ALTER TABLE "children" ADD COLUMN "is_dummy" boolean DEFAULT false NOT NULL;

@@ -213,6 +213,7 @@ export type Database = {
           created_at: string
           gender: Database["public"]["Enums"]["child_gender"] | null
           id: string
+          is_dummy: boolean
           name: string | null
           nickname: string
           profile_image_url: string | null
@@ -225,6 +226,7 @@ export type Database = {
           created_at?: string
           gender?: Database["public"]["Enums"]["child_gender"] | null
           id?: string
+          is_dummy?: boolean
           name?: string | null
           nickname: string
           profile_image_url?: string | null
@@ -237,6 +239,7 @@ export type Database = {
           created_at?: string
           gender?: Database["public"]["Enums"]["child_gender"] | null
           id?: string
+          is_dummy?: boolean
           name?: string | null
           nickname?: string
           profile_image_url?: string | null
@@ -1597,7 +1600,15 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_growth_percentile_history: {
+        Args: { p_child_id: string; p_type: string }
+        Returns: {
+          age_months: number
+          measured_at: string
+          percentile: number
+          value: number
+        }[]
+      }
     }
     Enums: {
       admin_address_type: "SHIPPING" | "RETURN"
