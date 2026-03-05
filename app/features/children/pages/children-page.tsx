@@ -10,16 +10,13 @@ import { makeSSRClient } from "~/supa-client";
 import {
   getChildByCode,
   getGrowthRecordsByType,
+  getGrowthPercentileHistory,
   getLatestGrowthRecord,
 } from "../queries";
 import { createGrowthRecord } from "../mutations";
 import type { Route } from "./+types/children-page";
 import { cn } from "~/lib/utils";
-import {
-  calculateAgeInMonths,
-  getHeightPercentile,
-  type Gender,
-} from "~/lib/growth-data";
+import { type Gender } from "~/lib/growth-data";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -53,11 +50,17 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
       weightRecords,
       footSizeRecords,
       headCircumferenceRecords,
+      heightPercentileHistory,
+      weightPercentileHistory,
+      headCircumferencePercentileHistory,
     ] = await Promise.all([
       getGrowthRecordsByType(client, child.id, "height"),
       getGrowthRecordsByType(client, child.id, "weight"),
       getGrowthRecordsByType(client, child.id, "foot_size"),
       getGrowthRecordsByType(client, child.id, "head_circumference"),
+      getGrowthPercentileHistory(client, child.id, "height"),
+      getGrowthPercentileHistory(client, child.id, "weight"),
+      getGrowthPercentileHistory(client, child.id, "head_circumference"),
     ]);
 
     // 프로필 이미지 URL: profiles/{userId}/{childId}
@@ -72,6 +75,9 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
       weightRecords,
       footSizeRecords,
       headCircumferenceRecords,
+      heightPercentileHistory,
+      weightPercentileHistory,
+      headCircumferencePercentileHistory,
       storageImageUrl,
     };
   } catch (error) {
@@ -136,6 +142,9 @@ export default function ChildrenPage() {
     weightRecords,
     footSizeRecords,
     headCircumferenceRecords,
+    heightPercentileHistory,
+    weightPercentileHistory,
+    headCircumferencePercentileHistory,
     storageImageUrl,
   } = useLoaderData<typeof loader>();
 
@@ -144,19 +153,11 @@ export default function ChildrenPage() {
   // 성별을 Gender 타입으로 변환 (boy=1, girl=2)
   const gender: Gender = child.gender === "boy" ? 1 : 2;
 
-  // 실제 백분위수 계산
+  // DB 기반 최신 백분위 (신장 기준)
   const growthPercentile = useMemo(() => {
-    if (!child.birthDate || !latestRecord?.height) {
-      return 50; // 기본값
-    }
-
-    const birthDateObj = new Date(child.birthDate);
-    const measureDate = new Date(latestRecord.measuredAt);
-    const ageMonths = calculateAgeInMonths(birthDateObj, measureDate);
-
-    const result = getHeightPercentile(gender, ageMonths, latestRecord.height);
-    return result?.percentile ?? 50;
-  }, [child.birthDate, latestRecord, gender]);
+    if (heightPercentileHistory.length === 0) return 50;
+    return heightPercentileHistory[heightPercentileHistory.length - 1].percentile;
+  }, [heightPercentileHistory]);
 
   return (
     <div className="pb-20">
@@ -268,6 +269,7 @@ export default function ChildrenPage() {
             records={heightRecords}
             gender={gender}
             birthDate={child.birthDate ?? undefined}
+            percentileHistory={heightPercentileHistory}
           />
           <GrowthChart
             type="weight"
@@ -275,6 +277,7 @@ export default function ChildrenPage() {
             records={weightRecords}
             gender={gender}
             birthDate={child.birthDate ?? undefined}
+            percentileHistory={weightPercentileHistory}
           />
           <GrowthChart
             type="footSize"
@@ -287,6 +290,7 @@ export default function ChildrenPage() {
             records={headCircumferenceRecords}
             gender={gender}
             birthDate={child.birthDate ?? undefined}
+            percentileHistory={headCircumferencePercentileHistory}
           />
         </div>
       </div>

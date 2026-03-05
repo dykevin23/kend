@@ -172,6 +172,35 @@ export const getFirstChildCode = async (client: Client, userId: string) => {
 };
 
 /**
+ * 자녀의 측정 타입별 백분위 이력 조회
+ * 동일 월령·성별 전체 Kend 사용자 데이터와 비교
+ * (Supabase RPC: get_growth_percentile_history)
+ */
+export const getGrowthPercentileHistory = async (
+  client: Client,
+  childId: string,
+  type: "height" | "weight" | "head_circumference"
+) => {
+  const { data, error } = await client.rpc("get_growth_percentile_history", {
+    p_child_id: childId,
+    p_type: type,
+  });
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    measuredAt: row.measured_at,
+    ageMonths: row.age_months,
+    value: Number(row.value),
+    percentile: Number(row.percentile),
+  }));
+};
+
+export type GrowthPercentilePoint = Awaited<
+  ReturnType<typeof getGrowthPercentileHistory>
+>[number];
+
+/**
  * 사용자의 다음 자녀 code 조회 (자녀 생성 시 사용)
  */
 export const getNextChildCode = async (client: Client, userId: string) => {
