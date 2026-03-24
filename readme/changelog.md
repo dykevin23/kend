@@ -8,6 +8,17 @@
 
 ---
 
+## 2026-03-24
+
+### [KEND] 네이버 소셜 로그인 버그 수정
+
+- **원인**: `create-naver-user` Edge Function에서 `listUsers()`로 기존 유저를 검색할 때, 다른 provider로 가입한 동일 이메일 유저를 찾지 못해 `createUser` 중복 에러 발생 → `link`가 `undefined`로 반환되어 `/auth/naver/complete/undefined`로 리다이렉트
+- **수정**: `listUsers()` 기반 검색 제거, `createUser`를 먼저 시도하고 이미 존재하는 유저면 에러를 무시한 뒤 `generateLink`로 magic link만 발급하는 방식으로 변경
+- **에러 핸들링 추가**: `naver-complete-page.tsx`에서 토큰 교환 실패, 프로필 조회 실패, Edge Function 응답 실패 시 `/auth/login`으로 에러 파라미터와 함께 리다이렉트
+- **Edge Function 로컬 관리**: `app/sql/functions/create-naver-user.ts`에 Edge Function 코드 추가
+
+---
+
 ## 2026-03-05
 
 ### [KEND] 성장 그래프 DB 기반 백분위 비교 기능 개선
