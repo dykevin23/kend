@@ -10,6 +10,7 @@ import Divider from "~/common/components/divider";
 import RecommendProducts from "~/features/products/components/recommend-products";
 import ProductPurchaseModal from "~/features/products/components/product-purchase-modal";
 import { makeSSRClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import { getCartItems } from "../queries";
 import {
   removeFromCart,
@@ -53,26 +54,30 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
   const intent = formData.get("intent");
 
-  if (intent === "updateQuantity") {
-    const cartId = formData.get("cartId") as string;
-    const quantity = Number(formData.get("quantity"));
-    await updateCartQuantity(client, cartId, quantity);
-    return { success: true };
-  }
+  try {
+    if (intent === "updateQuantity") {
+      const cartId = formData.get("cartId") as string;
+      const quantity = Number(formData.get("quantity"));
+      await updateCartQuantity(client, cartId, quantity);
+      return { success: true };
+    }
 
-  if (intent === "remove") {
-    const cartId = formData.get("cartId") as string;
-    await removeFromCart(client, cartId);
-    return { success: true };
-  }
+    if (intent === "remove") {
+      const cartId = formData.get("cartId") as string;
+      await removeFromCart(client, cartId);
+      return { success: true };
+    }
 
-  if (intent === "removeSelected") {
-    const cartIds = formData.getAll("cartIds") as string[];
-    await removeMultipleFromCart(client, cartIds);
-    return { success: true };
-  }
+    if (intent === "removeSelected") {
+      const cartIds = formData.getAll("cartIds") as string[];
+      await removeMultipleFromCart(client, cartIds);
+      return { success: true };
+    }
 
-  return { success: false };
+    return { success: false };
+  } catch (error) {
+    return actionErrorResponse(error);
+  }
 };
 
 export default function ShoppingCartPage() {

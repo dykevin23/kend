@@ -1,5 +1,6 @@
 import { makeSSRClient } from "~/supa-client";
 import { createOrder } from "~/features/orders/mutations";
+import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/order-action";
 import type { OrderItem, SellerOrderGroup } from "~/features/orders/types";
 import type { UserAddress } from "~/features/users/queries";
@@ -56,8 +57,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
         orderNumber: result.orderNumber,
       };
     } catch (error) {
-      console.error("[주문] 주문 생성 실패:", error);
-      return { success: false, error: "주문 생성에 실패했습니다." };
+      return actionErrorResponse(error);
     }
   }
 

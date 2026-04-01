@@ -7,6 +7,7 @@ import Select from "~/common/components/select";
 import TextField from "~/common/components/text-field";
 import DatePicker from "~/common/components/date-picker";
 import { makeSSRClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import {
   createChild,
   createGrowthRecord,
@@ -81,8 +82,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     return redirect(`/children/${child.code}`);
   } catch (error) {
-    console.error("Failed to create child:", error);
-    return { error: "자녀 등록에 실패했습니다. 다시 시도해주세요." };
+    return actionErrorResponse(error);
   }
 };
 

@@ -12,6 +12,7 @@ import Select from "~/common/components/select";
 import TextField from "~/common/components/text-field";
 import DatePicker from "~/common/components/date-picker";
 import { makeSSRClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import {
   updateChild,
   deleteChild,
@@ -80,8 +81,7 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
       await deleteChild(client, child.id);
       return redirect("/children");
     } catch (error) {
-      console.error("Failed to delete child:", error);
-      return { error: "자녀 삭제에 실패했습니다." };
+      return actionErrorResponse(error);
     }
   }
 
@@ -113,8 +113,7 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
 
     return redirect(`/children/${childCode}`);
   } catch (error) {
-    console.error("Failed to update child:", error);
-    return { error: "자녀 정보 수정에 실패했습니다." };
+    return actionErrorResponse(error);
   }
 };
 
