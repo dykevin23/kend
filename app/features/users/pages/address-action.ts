@@ -2,6 +2,7 @@ import { makeSSRClient } from "~/supa-client";
 import { addUserAddress, updateUserAddress, deleteUserAddress } from "~/features/users/mutations";
 import { getUserAddresses } from "~/features/users/queries";
 import { parseAddAddressForm } from "~/features/users/schema.validation";
+import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/address-action";
 
 /**
@@ -47,8 +48,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
       await deleteUserAddress(client, { addressId, userId: user.id });
       return { success: true };
     } catch (error) {
-      console.error("Failed to delete address:", error);
-      return { success: false, error: "주소 삭제에 실패했습니다." };
+      return actionErrorResponse(error);
     }
   }
 
@@ -92,7 +92,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to save address:", error);
-    return { success: false, error: "주소 저장에 실패했습니다." };
+    return actionErrorResponse(error);
   }
 };

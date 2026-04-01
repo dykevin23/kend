@@ -7,6 +7,7 @@ import { ChevronRight, Plus } from "lucide-react";
 import GrowthChart from "../components/growth-chart";
 import GrowthInputSheet from "../components/growth-input-sheet";
 import { makeSSRClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import {
   getChildByCode,
   getGrowthRecordsByType,
@@ -126,8 +127,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
       return { success: true };
     } catch (error) {
-      console.error("Failed to add growth record:", error);
-      return { error: "성장 데이터 저장에 실패했습니다." };
+      return actionErrorResponse(error);
     }
   }
 

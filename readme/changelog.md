@@ -8,6 +8,24 @@
 
 ---
 
+## 2026-04-01
+
+### [KEND] 공통 에러 핸들러 구현 및 전체 action 적용
+
+- **`app/lib/error-handler.ts` 신규 생성**: `AppError` 타입, `parseSupabaseError()`, `actionErrorResponse()` 구현
+- **PostgreSQL 에러코드 자동 매핑**: `23505`(중복), `23503`(참조), `23502`(NOT NULL), `23514`(CHECK), `42501`(RLS 위반), `PGRST116`(not found) 등을 한국어 사용자 메시지로 변환
+- **Auth/Storage/네트워크 에러 파싱**: JWT 만료, 인증 실패, 파일 크기 초과, 네트워크 오류 등 에러 유형별 메시지 자동 분기
+- **기존 action 8개 파일에 적용**: address-action, order-action, edit-profile-page, submit-child-page, edit-child-page, children-page, growth-detail-page에서 하드코딩 에러 메시지를 `actionErrorResponse()`로 교체
+- **미보호 action에 try-catch 추가**: shopping-cart-page, product-page의 action에 에러 핸들링 래핑 추가 (기존에는 mutation throw 시 ErrorBoundary에 의존)
+
+### [KEND] 출시 전 완성도 강화 로드맵 작성
+
+- **`readme/kend-error-handling-roadmap.md` 작성**: 코드베이스 분석 기반 에러 처리 로드맵 v2.0
+- **Part 1 (웹앱)**: 3주 계획 — 1주차(에러 구조화, Auth, Toast, ErrorBoundary, RLS), 2주차(오프라인 감지, Validation, 이미지 검증, 결제, Edge Function), 3주차(PostHog, console.log 정리, QA)
+- **Part 2 (RN 네이티브)**: WebView 에러 처리, 네이티브 브리지, 네트워크 감지, 크래시 리포팅, 권한 처리
+
+---
+
 ## 2026-03-24
 
 ### [KEND] 네이버 소셜 로그인 버그 수정

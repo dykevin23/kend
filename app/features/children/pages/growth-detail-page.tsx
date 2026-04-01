@@ -7,6 +7,7 @@ import { Button } from "~/common/components/ui/button";
 import { Input } from "~/common/components/ui/input";
 import { Label } from "~/common/components/ui/label";
 import { makeSSRClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import { getChildByCode, getGrowthRecords } from "../queries";
 import { createGrowthRecord } from "../mutations";
 import type { Route } from "./+types/growth-detail-page";
@@ -89,8 +90,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
       return { success: true };
     } catch (error) {
-      console.error("Failed to add growth record:", error);
-      return { error: "성장 데이터 저장에 실패했습니다." };
+      return actionErrorResponse(error);
     }
   }
 

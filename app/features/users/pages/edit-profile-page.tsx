@@ -7,6 +7,7 @@ import TextField from "~/common/components/text-field";
 import { makeSSRClient, browserClient } from "~/supa-client";
 import { getUserProfile } from "../queries";
 import { updateUserProfile, uploadProfileImage } from "../mutations";
+import { actionErrorResponse } from "~/lib/error-handler";
 import { useAlert } from "~/hooks/useAlert";
 import { cn } from "~/lib/utils";
 import type { Route } from "./+types/edit-profile-page";
@@ -62,8 +63,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to update profile:", error);
-    return { success: false, error: "프로필 수정에 실패했습니다." };
+    return actionErrorResponse(error);
   }
 };
 

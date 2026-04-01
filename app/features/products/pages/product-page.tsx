@@ -18,6 +18,7 @@ import {
 import { addToCart } from "~/features/carts/mutations";
 import { isProductLiked } from "~/features/likes/queries";
 import { toggleProductLike } from "~/features/likes/mutations";
+import { actionErrorResponse } from "~/lib/error-handler";
 import ProductInformationSection from "../components/product-information-section";
 import ProductSizeDescription from "../components/product-size-description";
 import ProductRatingSection from "../components/product-rating-section";
@@ -72,45 +73,49 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return redirect("/auth/login", { headers });
   }
 
-  if (intent === "addToCart") {
-    const skuId = formData.get("skuId") as string;
-    const quantity = Number(formData.get("quantity") ?? 1);
+  try {
+    if (intent === "addToCart") {
+      const skuId = formData.get("skuId") as string;
+      const quantity = Number(formData.get("quantity") ?? 1);
 
-    await addToCart(client, user.id, skuId, quantity);
+      await addToCart(client, user.id, skuId, quantity);
 
-    return { success: true, message: "장바구니에 추가되었습니다." };
+      return { success: true, message: "장바구니에 추가되었습니다." };
+    }
+
+    if (intent === "toggleLike") {
+      const productId = formData.get("productId") as string;
+      const isLiked = await toggleProductLike(client, user.id, productId);
+
+      return { success: true, isLiked };
+    }
+
+    if (intent === "addAddress") {
+      const label = formData.get("label") as string;
+      const recipientName = formData.get("recipientName") as string;
+      const recipientPhone = formData.get("recipientPhone") as string;
+      const zoneCode = formData.get("zoneCode") as string;
+      const address = formData.get("address") as string;
+      const addressDetail = formData.get("addressDetail") as string;
+
+      await addUserAddress(client, {
+        userId: user.id,
+        label,
+        recipientName,
+        recipientPhone,
+        zoneCode,
+        address,
+        addressDetail: addressDetail || undefined,
+        isDefault: true,
+      });
+
+      return { success: true };
+    }
+
+    return { success: false, message: "알 수 없는 요청입니다." };
+  } catch (error) {
+    return actionErrorResponse(error);
   }
-
-  if (intent === "toggleLike") {
-    const productId = formData.get("productId") as string;
-    const isLiked = await toggleProductLike(client, user.id, productId);
-
-    return { success: true, isLiked };
-  }
-
-  if (intent === "addAddress") {
-    const label = formData.get("label") as string;
-    const recipientName = formData.get("recipientName") as string;
-    const recipientPhone = formData.get("recipientPhone") as string;
-    const zoneCode = formData.get("zoneCode") as string;
-    const address = formData.get("address") as string;
-    const addressDetail = formData.get("addressDetail") as string;
-
-    await addUserAddress(client, {
-      userId: user.id,
-      label,
-      recipientName,
-      recipientPhone,
-      zoneCode,
-      address,
-      addressDetail: addressDetail || undefined,
-      isDefault: true,
-    });
-
-    return { success: true };
-  }
-
-  return { success: false, message: "알 수 없는 요청입니다." };
 };
 
 type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";

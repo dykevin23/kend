@@ -1,0 +1,1 @@
+- [Error Handling Roadmap](project_error_handling_roadmap.md) — 출시 전 에러/완성도 강화 3주 로드맵 (2026-04-01~)
