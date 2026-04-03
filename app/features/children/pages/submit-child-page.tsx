@@ -6,6 +6,7 @@ import Content from "~/common/components/content";
 import Select from "~/common/components/select";
 import TextField from "~/common/components/text-field";
 import DatePicker from "~/common/components/date-picker";
+import { z } from "zod";
 import { makeSSRClient } from "~/supa-client";
 import { actionErrorResponse } from "~/lib/error-handler";
 import {
@@ -14,6 +15,13 @@ import {
   uploadChildProfileImage,
 } from "../mutations";
 import type { Route } from "./+types/submit-child-page";
+
+const childSchema = z.object({
+  nickname: z.string().min(1, "닉네임을 입력해주세요.").max(20, "닉네임은 20자 이하로 입력해주세요."),
+  name: z.string().max(20, "이름은 20자 이하로 입력해주세요.").optional(),
+  gender: z.enum(["boy", "girl"]).optional(),
+  birthDate: z.string().min(1, "생년월일을 선택해주세요."),
+});
 import { Button } from "~/common/components/ui/button";
 import { Input } from "~/common/components/ui/input";
 import { Label } from "~/common/components/ui/label";
@@ -31,11 +39,20 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return { error: "로그인이 필요합니다." };
   }
 
-  // 자녀 정보
-  const nickname = formData.get("nickname") as string;
-  const name = formData.get("name") as string;
-  const gender = formData.get("gender") as "boy" | "girl" | null;
-  const birthDate = formData.get("birthDate") as string;
+  // 유효성 검사
+  const result = childSchema.safeParse({
+    nickname: formData.get("nickname")?.toString().trim() ?? "",
+    name: formData.get("name")?.toString().trim() || undefined,
+    gender: formData.get("gender")?.toString() || undefined,
+    birthDate: formData.get("birthDate")?.toString() ?? "",
+  });
+
+  if (!result.success) {
+    const firstError = result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
+    return { error: firstError };
+  }
+
+  const { nickname, name, gender, birthDate } = result.data;
   const profileImage = formData.get("profileImage") as File | null;
 
   // 성장 데이터
@@ -44,11 +61,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const weight = formData.get("weight") as string;
   const footSize = formData.get("footSize") as string;
   const headCircumference = formData.get("headCircumference") as string;
-
-  // 유효성 검사
-  if (!nickname || !birthDate) {
-    return { error: "닉네임과 생년월일은 필수 입력 항목입니다." };
-  }
 
   try {
     // 자녀 생성

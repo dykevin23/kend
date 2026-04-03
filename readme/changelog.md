@@ -10,6 +10,14 @@
 
 ## 2026-04-03
 
+### [KEND] 폼 Validation Zod 스키마 확대 적용
+
+- **자녀 등록/수정**: `childSchema` — 닉네임(필수, 20자), 생년월일(필수), 이름(20자), 성별. `submit-child-page.tsx`, `edit-child-page.tsx`에 적용
+- **프로필 수정**: `profileSchema` — 닉네임(필수, 20자), 한줄소개(100자), 기타메세지(500자). `edit-profile-page.tsx`에 적용
+- **로그인**: `loginSchema` — 이메일(형식검증), 비밀번호(필수). `login-page.tsx`에 적용 + `actionErrorResponse` 연동
+- **회원가입**: `signupSchema` — 이메일(형식), 비밀번호(6자+), 비밀번호확인(일치 refine), 닉네임(20자). `join-page.tsx`에 적용 + `actionErrorResponse` 연동
+- **방침**: 별도 validation 파일 분리 없이 각 action 파일 내에 스키마 정의
+
 ### [KEND] ErrorBoundary Fallback UI 개선
 
 - **`root.tsx` ErrorBoundary 재작성**: 영문 기본 메시지 → 한국어 안내 ("문제가 발생했어요", "페이지를 찾을 수 없어요")
