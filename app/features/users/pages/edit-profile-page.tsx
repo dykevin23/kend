@@ -9,6 +9,7 @@ import { makeSSRClient, browserClient } from "~/supa-client";
 import { getUserProfile } from "../queries";
 import { updateUserProfile, uploadProfileImage } from "../mutations";
 import { actionErrorResponse } from "~/lib/error-handler";
+import { validateImageFile } from "~/lib/validate-image";
 
 const profileSchema = z.object({
   nickname: z.string().min(1, "닉네임을 입력해주세요.").max(20, "닉네임은 20자 이하로 입력해주세요."),
@@ -117,6 +118,17 @@ export default function EditProfilePage() {
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !profile || !storageImageUrl) return;
+
+    const imageError = validateImageFile(file);
+    if (imageError) {
+      alert({
+        title: "오류",
+        message: imageError,
+        primaryButton: { label: "확인" },
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     setIsUploading(true);
     try {
