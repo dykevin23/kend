@@ -8,6 +8,16 @@
 
 ---
 
+## 2026-04-03
+
+### [KEND] Auth 토큰 만료 자동 감지 및 로그인 리다이렉트
+
+- **`app/hooks/useAuthListener.ts` 신규 생성**: Supabase `onAuthStateChange`로 `SIGNED_OUT` 이벤트 구독, 세션 만료 시 자동으로 `/auth/login`으로 이동
+- **`app/root.tsx` 적용**: `App` 컴포넌트에서 `useAuthListener()` 호출하여 앱 전역에서 인증 상태 감지
+- **인증 에러 판별 유틸 추가**: `error-handler.ts`에 `isAuthError()`, `isSessionExpiredError()` 함수 추가
+
+---
+
 ## 2026-04-01
 
 ### [KEND] 공통 에러 핸들러 구현 및 전체 action 적용

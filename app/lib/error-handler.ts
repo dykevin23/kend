@@ -66,6 +66,33 @@ export function actionErrorResponse(error: unknown, fallbackMessage?: string) {
   };
 }
 
+// ─── 인증 에러 판별 ──────────────────────────────────
+
+const AUTH_ERROR_CODES = new Set([
+  "AUTH_EXPIRED",
+  "AUTH_REQUIRED",
+  "AUTH_FAILED",
+  "DUPLICATE_USER",
+  "WEAK_PASSWORD",
+]);
+
+/**
+ * 인증 관련 에러인지 판별한다.
+ * loader/action에서 인증 에러 시 로그인 redirect 분기에 사용.
+ */
+export function isAuthError(error: unknown): boolean {
+  const appError = parseSupabaseError(error);
+  return AUTH_ERROR_CODES.has(appError.code);
+}
+
+/**
+ * 세션 만료 에러인지 판별한다 (재로그인 필요).
+ */
+export function isSessionExpiredError(error: unknown): boolean {
+  const appError = parseSupabaseError(error);
+  return appError.code === "AUTH_EXPIRED" || appError.code === "AUTH_REQUIRED";
+}
+
 // ─── 내부 파싱 함수 ──────────────────────────────────
 
 function parseErrorCode(

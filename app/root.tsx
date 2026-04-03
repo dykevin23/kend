@@ -15,6 +15,7 @@ import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
 import { AlertProvider } from "./hooks/useAlert";
+import { useAuthListener } from "./hooks/useAuthListener";
 import { getCartCount } from "./features/carts/queries";
 
 export const links: Route.LinksFunction = () => [
@@ -74,6 +75,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 };
 
 export default function App() {
+  useAuthListener();
   const { pathname } = useLocation();
   const naviMenus = ["/stores", "/children/:childId", "/likes", "/myPage"];
 
