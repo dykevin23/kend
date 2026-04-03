@@ -14,6 +14,7 @@ import "./app.css";
 import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
 import { makeSSRClient } from "./supa-client";
+import { Toaster } from "sonner";
 import { AlertProvider } from "./hooks/useAlert";
 import { useAuthListener } from "./hooks/useAuthListener";
 import { getCartCount } from "./features/carts/queries";
@@ -49,6 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <main>
           <AlertProvider>{children}</AlertProvider>
         </main>
+        <Toaster position="top-center" richColors duration={3000} />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -91,27 +93,46 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
+  let title = "문제가 발생했어요";
+  let details = "일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요.";
   let stack: string | undefined;
+  let is404 = false;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
+    if (error.status === 404) {
+      is404 = true;
+      title = "페이지를 찾을 수 없어요";
+      details = "요청하신 페이지가 존재하지 않아요.";
+    } else {
+      title = `오류가 발생했어요 (${error.status})`;
+      details = error.statusText || details;
+    }
+  } else if (import.meta.env.DEV && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <main className="flex flex-col items-center justify-center h-screen px-6 text-center">
+      <p className="text-6xl mb-4">{is404 ? "404" : "!"}</p>
+      <h1 className="text-xl font-semibold mb-2">{title}</h1>
+      <p className="text-sm text-gray-500 mb-8">{details}</p>
+      <div className="flex gap-3">
+        <a
+          href="/"
+          className="px-6 py-2.5 rounded-full border border-gray-300 text-sm"
+        >
+          홈으로
+        </a>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-2.5 rounded-full bg-secondary text-secondary-foreground text-sm"
+        >
+          다시 시도
+        </button>
+      </div>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="mt-8 w-full max-w-lg p-4 overflow-x-auto text-left text-xs bg-gray-100 rounded-lg">
           <code>{stack}</code>
         </pre>
       )}
