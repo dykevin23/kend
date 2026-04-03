@@ -1,39 +1,42 @@
+import { z } from "zod";
 import TextField from "~/common/components/text-field";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import { Form, Link, redirect, useActionData } from "react-router";
 import { makeSSRClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/join-page";
+
+const signupSchema = z
+  .object({
+    email: z.string().min(1, "이메일을 입력해주세요.").email("올바른 이메일 형식을 입력해주세요."),
+    password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 해요."),
+    passwordConfirm: z.string().min(1, "비밀번호 확인을 입력해주세요."),
+    nickname: z.string().min(1, "닉네임을 입력해주세요.").max(20, "닉네임은 20자 이하로 입력해주세요."),
+  })
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "비밀번호가 일치하지 않아요.",
+    path: ["passwordConfirm"],
+  });
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const passwordConfirm = formData.get("passwordConfirm") as string;
-  const nickname = formData.get("nickname") as string;
 
-  // 유효성 검사
-  if (!email || !password || !passwordConfirm || !nickname) {
-    return {
-      error: "모든 항목을 입력해주세요.",
-    };
+  const result = signupSchema.safeParse({
+    email: formData.get("email")?.toString().trim() ?? "",
+    password: formData.get("password")?.toString() ?? "",
+    passwordConfirm: formData.get("passwordConfirm")?.toString() ?? "",
+    nickname: formData.get("nickname")?.toString().trim() ?? "",
+  });
+
+  if (!result.success) {
+    const firstError = result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
+    return { error: firstError };
   }
 
-  if (password !== passwordConfirm) {
-    return {
-      error: "비밀번호가 일치하지 않습니다.",
-    };
-  }
-
-  if (password.length < 6) {
-    return {
-      error: "비밀번호는 최소 6자 이상이어야 합니다.",
-    };
-  }
-
+  const { email, password, nickname } = result.data;
   const { client, headers } = makeSSRClient(request);
 
-  // Supabase 회원가입
   const { error } = await client.auth.signUp({
     email,
     password,
@@ -45,17 +48,9 @@ export async function action({ request }: Route.ActionArgs) {
   });
 
   if (error) {
-    if (error.message.includes("already registered")) {
-      return {
-        error: "이미 가입된 이메일 주소입니다.",
-      };
-    }
-    return {
-      error: "회원가입에 실패했습니다. 다시 시도해주세요.",
-    };
+    return actionErrorResponse(error);
   }
 
-  // 가입 성공 시 홈으로 리디렉션
   return redirect("/", {
     headers,
   });

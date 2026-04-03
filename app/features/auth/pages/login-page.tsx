@@ -1,22 +1,32 @@
+import { z } from "zod";
 import InputInnerLabel from "~/common/components/input-inner-label";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import SocialButtons from "../components/social-buttons";
 import { Form, Link, redirect, useActionData } from "react-router";
 import { makeSSRClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/login-page";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "이메일을 입력해주세요.").email("올바른 이메일 형식을 입력해주세요."),
+  password: z.string().min(1, "비밀번호를 입력해주세요."),
+});
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
 
-  if (!email || !password) {
-    return {
-      error: "이메일과 비밀번호를 입력해주세요.",
-    };
+  const result = loginSchema.safeParse({
+    email: formData.get("email")?.toString().trim() ?? "",
+    password: formData.get("password")?.toString() ?? "",
+  });
+
+  if (!result.success) {
+    const firstError = result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
+    return { error: firstError };
   }
 
+  const { email, password } = result.data;
   const { client, headers } = makeSSRClient(request);
 
   const { error } = await client.auth.signInWithPassword({
@@ -25,9 +35,7 @@ export async function action({ request }: Route.ActionArgs) {
   });
 
   if (error) {
-    return {
-      error: "이메일 또는 비밀번호가 올바르지 않습니다.",
-    };
+    return actionErrorResponse(error);
   }
 
   return redirect("/", {

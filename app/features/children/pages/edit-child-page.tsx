@@ -11,6 +11,7 @@ import Content from "~/common/components/content";
 import Select from "~/common/components/select";
 import TextField from "~/common/components/text-field";
 import DatePicker from "~/common/components/date-picker";
+import { z } from "zod";
 import { makeSSRClient } from "~/supa-client";
 import { actionErrorResponse } from "~/lib/error-handler";
 import {
@@ -18,6 +19,13 @@ import {
   deleteChild,
   uploadChildProfileImage,
 } from "../mutations";
+
+const childSchema = z.object({
+  nickname: z.string().min(1, "닉네임을 입력해주세요.").max(20, "닉네임은 20자 이하로 입력해주세요."),
+  name: z.string().max(20, "이름은 20자 이하로 입력해주세요.").optional(),
+  gender: z.enum(["boy", "girl"]).optional(),
+  birthDate: z.string().min(1, "생년월일을 선택해주세요."),
+});
 import { getChildByCode } from "../queries";
 import type { Route } from "./+types/edit-child-page";
 import { Button } from "~/common/components/ui/button";
@@ -85,16 +93,21 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     }
   }
 
-  // 수정 처리
-  const nickname = formData.get("nickname") as string;
-  const name = formData.get("name") as string;
-  const gender = formData.get("gender") as "boy" | "girl" | null;
-  const birthDate = formData.get("birthDate") as string;
-  const profileImage = formData.get("profileImage") as File | null;
+  // 수정 처리 — 유효성 검사
+  const result = childSchema.safeParse({
+    nickname: formData.get("nickname")?.toString().trim() ?? "",
+    name: formData.get("name")?.toString().trim() || undefined,
+    gender: formData.get("gender")?.toString() || undefined,
+    birthDate: formData.get("birthDate")?.toString() ?? "",
+  });
 
-  if (!nickname || !birthDate) {
-    return { error: "닉네임과 생년월일은 필수 입력 항목입니다." };
+  if (!result.success) {
+    const firstError = result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
+    return { error: firstError };
   }
+
+  const { nickname, name, gender, birthDate } = result.data;
+  const profileImage = formData.get("profileImage") as File | null;
 
   try {
     // 자녀 정보 수정

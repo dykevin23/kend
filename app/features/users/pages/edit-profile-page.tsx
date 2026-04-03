@@ -4,10 +4,17 @@ import { Camera, Loader2, User } from "lucide-react";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
 import TextField from "~/common/components/text-field";
+import { z } from "zod";
 import { makeSSRClient, browserClient } from "~/supa-client";
 import { getUserProfile } from "../queries";
 import { updateUserProfile, uploadProfileImage } from "../mutations";
 import { actionErrorResponse } from "~/lib/error-handler";
+
+const profileSchema = z.object({
+  nickname: z.string().min(1, "닉네임을 입력해주세요.").max(20, "닉네임은 20자 이하로 입력해주세요."),
+  introduction: z.string().max(100, "한줄소개는 100자 이하로 입력해주세요.").optional(),
+  comment: z.string().max(500, "기타 메세지는 500자 이하로 입력해주세요.").optional(),
+});
 import { useAlert } from "~/hooks/useAlert";
 import { cn } from "~/lib/utils";
 import type { Route } from "./+types/edit-profile-page";
@@ -45,20 +52,25 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return { success: false, error: "로그인이 필요합니다." };
   }
 
-  const nickname = formData.get("nickname") as string;
-  const introduction = formData.get("introduction") as string;
-  const comment = formData.get("comment") as string;
+  const result = profileSchema.safeParse({
+    nickname: formData.get("nickname")?.toString().trim() ?? "",
+    introduction: formData.get("introduction")?.toString().trim() || undefined,
+    comment: formData.get("comment")?.toString().trim() || undefined,
+  });
 
-  if (!nickname?.trim()) {
-    return { success: false, error: "닉네임을 입력해주세요." };
+  if (!result.success) {
+    const firstError = result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
+    return { success: false, error: firstError };
   }
+
+  const { nickname, introduction, comment } = result.data;
 
   try {
     await updateUserProfile(client, {
       userId: user.id,
-      nickname: nickname.trim(),
-      introduction: introduction?.trim() || undefined,
-      comment: comment?.trim() || undefined,
+      nickname,
+      introduction: introduction || undefined,
+      comment: comment || undefined,
     });
 
     return { success: true };
