@@ -9,6 +9,7 @@ import DatePicker from "~/common/components/date-picker";
 import { z } from "zod";
 import { makeSSRClient } from "~/supa-client";
 import { actionErrorResponse } from "~/lib/error-handler";
+import { validateImageFile } from "~/lib/validate-image";
 import {
   createChild,
   createGrowthRecord,
@@ -74,6 +75,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     // 프로필 이미지 업로드
     if (profileImage && profileImage.size > 0) {
+      const imageError = validateImageFile(profileImage);
+      if (imageError) return { error: imageError };
       await uploadChildProfileImage(client, user.id, child.id, profileImage);
     }
 

@@ -10,6 +10,12 @@
 
 ## 2026-04-03
 
+### [KEND] 이미지 업로드 사전 검증 추가
+
+- **`app/lib/validate-image.ts` 신규 생성**: `validateImageFile()` — 5MB 이하, JPG/PNG/WebP만 허용
+- **프로필 수정(`edit-profile-page.tsx`)**: 클라이언트 이미지 선택 시점에 검증, 실패 시 alert 표시
+- **자녀 등록/수정(`submit-child-page.tsx`, `edit-child-page.tsx`)**: 서버 action에서 업로드 전 검증, 실패 시 에러 반환
+
 ### [KEND] 폼 Validation Zod 스키마 확대 적용
 
 - **자녀 등록/수정**: `childSchema` — 닉네임(필수, 20자), 생년월일(필수), 이름(20자), 성별. `submit-child-page.tsx`, `edit-child-page.tsx`에 적용
