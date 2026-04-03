@@ -7,6 +7,7 @@ import DaumPostCodeModal from "~/common/components/daum-post-code-modal";
 import { Button } from "~/common/components/ui/button";
 import { Switch } from "~/common/components/ui/switch";
 import { Label } from "~/common/components/ui/label";
+import { toast } from "sonner";
 import { addAddressSchema } from "~/features/users/schema.validation";
 import { useAlert } from "~/hooks/useAlert";
 import type { UserAddress } from "~/features/users/queries";
@@ -143,8 +144,7 @@ export default function AddressAddModal({
       e.preventDefault();
       const firstError =
         result.error.errors[0]?.message ?? "입력값을 확인해주세요.";
-      // TODO: toast로 변경 예정
-      console.error(firstError);
+      toast.error(firstError);
       return;
     }
 

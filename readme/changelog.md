@@ -10,6 +10,18 @@
 
 ## 2026-04-03
 
+### [KEND] ErrorBoundary Fallback UI 개선
+
+- **`root.tsx` ErrorBoundary 재작성**: 영문 기본 메시지 → 한국어 안내 ("문제가 발생했어요", "페이지를 찾을 수 없어요")
+- **복구 버튼 추가**: "홈으로" (a 태그) + "다시 시도" (window.location.reload) 버튼 제공
+- **프로덕션 스택트레이스 비노출**: DEV 환경에서만 에러 스택 표시
+
+### [KEND] Toast(sonner) 연동
+
+- **`root.tsx`에 `<Toaster />` 마운트**: `position="top-center"`, `richColors`, `duration={3000}` 설정
+- **`address-add-modal.tsx` 적용**: 기존 TODO 주석(`console.error`) → `toast.error()`로 교체
+- **사용 기준 정립**: 가벼운 에러 피드백은 toast, 사용자 확인/선택이 필요한 경우는 기존 `useAlert` 유지
+
 ### [KEND] Auth 토큰 만료 자동 감지 및 로그인 리다이렉트
 
 - **`app/hooks/useAuthListener.ts` 신규 생성**: Supabase `onAuthStateChange`로 `SIGNED_OUT` 이벤트 구독, 세션 만료 시 자동으로 `/auth/login`으로 이동
