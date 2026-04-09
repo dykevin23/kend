@@ -8,6 +8,16 @@
 
 ---
 
+## 2026-04-09
+
+### [KEND] 글로벌 페이지 전환 로딩 인디케이터 추가
+
+- **`root.tsx`에 `GlobalLoadingBar` 컴포넌트 추가**: `useNavigation()` 상태 감지, 페이지 이동 시 상단에 secondary 색상 프로그레스 바 표시
+- **`app.css`에 `animate-progress` 애니메이션 추가**: 0%→95% ease-out 2초, 로딩 완료 시 자동 해제
+- **배경**: React Router SSR 특성상 loader 실행 중 시각적 피드백이 없어 "눌렸는지 모르겠다" UX 문제 해결
+
+---
+
 ## 2026-04-03
 
 ### [KEND] 이미지 업로드 사전 검증 추가
