@@ -7,6 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
+  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -76,6 +77,19 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   return { user: null, cartCount: 0 };
 };
 
+function GlobalLoadingBar() {
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
+
+  if (!isLoading) return null;
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-gray-200">
+      <div className="h-full bg-secondary animate-progress" />
+    </div>
+  );
+}
+
 export default function App() {
   useAuthListener();
   const { pathname } = useLocation();
@@ -83,6 +97,7 @@ export default function App() {
 
   return (
     <div className="h-screen overflow-hidden">
+      <GlobalLoadingBar />
       <Outlet />
       {(naviMenus.includes(pathname) ||
         (pathname.includes("/children")

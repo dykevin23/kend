@@ -146,6 +146,17 @@
   flex: 1 0 0;
 }
 
+/* 글로벌 페이지 전환 로딩 바 */
+@keyframes progress {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 95%; }
+}
+
+.animate-progress {
+  animation: progress 2s ease-out forwards;
+}
+
 *,
 ::before,
 ::after {
