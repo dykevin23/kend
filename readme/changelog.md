@@ -10,6 +10,12 @@
 
 ## 2026-04-10
 
+### [KEND] Google OAuth 딥링크 토큰 전달 방식 구현
+
+- **`social-complete-page.tsx` 수정**: Google OAuth 콜백에서 세션 교환 후 `kend://auth/callback?access_token=...&refresh_token=...`으로 딥링크 redirect
+- **배경**: 외부 브라우저(WebBrowser.openAuthSessionAsync) ↔ WebView 간 쿠키 미공유 → 토큰을 딥링크로 전달, RN에서 `setSession()`으로 세션 설정
+- **카카오**: WebView 내부에서 동작하므로 기존 방식(`/` redirect) 유지
+
 ### [KEND] 네이버 로그인 Edge Function redirect URL 환경변수화
 
 - **`create-naver-user.ts` 수정**: `redirectTo` 하드코딩(`http://localhost:5173`) → `Deno.env.get("SITE_URL")` 환경변수로 변경
