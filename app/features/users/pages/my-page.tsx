@@ -15,13 +15,16 @@ import {
   User,
   LogOut,
 } from "lucide-react";
-import { Link, useLoaderData, useNavigate } from "react-router";
+import { Link, useLoaderData, useNavigate, useFetcher } from "react-router";
+import { createClient } from "@supabase/supabase-js";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import { makeSSRClient, browserClient } from "~/supa-client";
+import { actionErrorResponse } from "~/lib/error-handler";
 import { getUserOrderCount } from "~/features/orders/queries";
 import { getUserProfile } from "../queries";
+import { useAlert } from "~/hooks/useAlert";
 import type { Route } from "./+types/my-page";
 
 /**
@@ -140,11 +143,73 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   }
 };
 
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client } = makeSSRClient(request);
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "로그인이 필요합니다." };
+  }
+
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "deleteAccount") {
+    try {
+      // service_role 클라이언트로 사용자 삭제 (cascade로 하위 데이터 자동 삭제)
+      const adminClient = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      const { error } = await adminClient.auth.admin.deleteUser(user.id);
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      return actionErrorResponse(error);
+    }
+  }
+
+  return { success: false, error: "잘못된 요청입니다." };
+};
+
 export default function MyPage() {
   const { profile, orderCount, storageImageUrl } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const navigate = useNavigate();
+  const { confirm } = useAlert();
+
+  // 회원탈퇴 성공 시 로그인 페이지로 이동
+  useEffect(() => {
+    if (fetcher.data?.success && fetcher.state === "idle") {
+      browserClient.auth.signOut();
+      navigate("/auth/login", { replace: true });
+    }
+  }, [fetcher.data, fetcher.state, navigate]);
+
+  const handleDeleteAccount = () => {
+    confirm({
+      title: "회원 탈퇴",
+      message: "정말 탈퇴하시겠습니까? 모든 데이터가 삭제되며 복구할 수 없습니다.",
+      primaryButton: {
+        label: "탈퇴하기",
+        onClick: () => {
+          fetcher.submit(
+            { intent: "deleteAccount" },
+            { method: "post" }
+          );
+        },
+      },
+      secondaryButton: {
+        label: "취소",
+        onClick: () => {},
+      },
+    });
+  };
 
   const handleLogout = async () => {
     await browserClient.auth.signOut();
@@ -335,8 +400,8 @@ export default function MyPage() {
           ))}
         </div>
 
-        {/* 로그아웃 버튼 */}
-        <div className="px-4 py-6">
+        {/* 로그아웃 / 회원탈퇴 */}
+        <div className="px-4 py-6 flex flex-col gap-3">
           <Button
             onClick={handleLogout}
             className="w-full py-3 rounded-lg"
@@ -344,6 +409,13 @@ export default function MyPage() {
             <LogOut className="w-4 h-4" />
             로그아웃
           </Button>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={fetcher.state !== "idle"}
+            className="text-sm text-gray-400 underline"
+          >
+            {fetcher.state !== "idle" ? "처리 중..." : "회원탈퇴"}
+          </button>
         </div>
       </div>
     </Content>

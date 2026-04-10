@@ -10,6 +10,13 @@
 
 ## 2026-04-10
 
+### [KEND] 회원탈퇴 기능 추가
+
+- **`my-page.tsx`에 action 추가**: `service_role` 키로 `auth.admin.deleteUser()` 호출, CASCADE로 하위 데이터(profiles, children, addresses, carts, likes, orders 등) 자동 삭제
+- **`.env`에 `SUPABASE_SERVICE_ROLE_KEY` 추가**: 서버 사이드 Admin API 호출용
+- **UI**: 로그아웃 버튼 하단에 "회원탈퇴" 텍스트 링크, `useAlert(confirm)`으로 2단계 확인 후 처리
+- **탈퇴 완료 후**: 클라이언트 signOut + 로그인 페이지로 redirect
+
 ### [KEND] Link Prefetch 적용 및 클라이언트 렌더링 전환 계획 수립
 
 - **주요 네비게이션에 `prefetch="intent"` 적용**: 사용자가 터치하는 순간 loader를 미리 호출하여 페이지 전환 체감 속도 개선
