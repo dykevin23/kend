@@ -12,6 +12,7 @@ export default function StoreCard({ store }: StoreCardProps) {
   return (
     <Link
       to={`/stores/${store.sellerCode}`}
+      prefetch="intent"
       className="flex flex-col w-full h-34 px-4 items-start"
     >
       <StoreInfo

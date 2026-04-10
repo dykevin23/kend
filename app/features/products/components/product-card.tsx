@@ -11,6 +11,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/products/${product.productCode}`}
+      prefetch="intent"
       className="flex w-full flex-col items-start gap-1.5 shrink-0"
     >
       {/* 상품 이미지 */}

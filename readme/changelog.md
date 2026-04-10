@@ -8,6 +8,18 @@
 
 ---
 
+## 2026-04-10
+
+### [KEND] Link Prefetch 적용 및 클라이언트 렌더링 전환 계획 수립
+
+- **주요 네비게이션에 `prefetch="intent"` 적용**: 사용자가 터치하는 순간 loader를 미리 호출하여 페이지 전환 체감 속도 개선
+  - BottomNavigation (스토어, 성장기록, 좋아요, 마이페이지)
+  - CartIcon (장바구니)
+  - StoreCard (스토어 상세), ProductCard (상품 상세), LikeProductCard (좋아요 상품), ChildCard (자녀 편집)
+- **`readme/client-rendering-plan.md` 작성**: SSR loader → React Query + clientLoader 전환 장기 계획 정리 (Phase 0: Prefetch, Phase 1: React Query 도입)
+
+---
+
 ## 2026-04-09
 
 ### [KEND] 글로벌 페이지 전환 로딩 인디케이터 추가

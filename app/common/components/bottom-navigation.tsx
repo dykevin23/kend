@@ -16,7 +16,7 @@ export default function BottomNavigation() {
         "z-50"
       )}
     >
-      <NavLink to="/stores">
+      <NavLink to="/stores" prefetch="intent">
         {({ isActive }) => (
           <div className="flex flex-col w-18 items-center gap-1">
             <div className="flex flex-col items-center">
@@ -34,7 +34,7 @@ export default function BottomNavigation() {
         )}
       </NavLink>
 
-      <NavLink to="/children">
+      <NavLink to="/children" prefetch="intent">
         {({ isActive }) => (
           <div className="flex flex-col w-18 items-center gap-1">
             <div className="flex flex-col items-center">
@@ -52,7 +52,7 @@ export default function BottomNavigation() {
         )}
       </NavLink>
 
-      <NavLink to="/likes">
+      <NavLink to="/likes" prefetch="intent">
         {({ isActive }) => (
           <div className="flex flex-col w-18 items-center gap-1">
             <div className="flex flex-col items-center">
@@ -70,7 +70,7 @@ export default function BottomNavigation() {
         )}
       </NavLink>
 
-      <NavLink to="/myPage">
+      <NavLink to="/myPage" prefetch="intent">
         {({ isActive }) => (
           <div className="flex flex-col w-18 items-center gap-1">
             <div className="flex flex-col items-center">

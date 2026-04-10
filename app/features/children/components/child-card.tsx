@@ -52,7 +52,7 @@ export default function ChildCard({ child, profileImageUrl }: ChildCardProps) {
       </div>
 
       {/* 설정 아이콘 */}
-      <Link to={`/children/${child.code}/edit`}>
+      <Link to={`/children/${child.code}/edit`} prefetch="intent">
         <Settings size={24} className="text-muted-foreground" />
       </Link>
     </div>

@@ -11,6 +11,7 @@ export default function LikeProductCard({ productId }: LikeProductCardProps) {
   return (
     <Link
       to={`/products/${productId}`}
+      prefetch="intent"
       className="flex px-4 items-start gap-4 self-stretch"
     >
       <div className="flex pb-6 items-start gap-4 flex-gsb self-stretch border-b-1 border-b-muted/30">

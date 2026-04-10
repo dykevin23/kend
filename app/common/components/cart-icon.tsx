@@ -10,7 +10,7 @@ export default function CartIcon() {
   const cartCount = data?.cartCount ?? 0;
 
   return (
-    <Link to="/carts" className="relative">
+    <Link to="/carts" prefetch="intent" className="relative">
       <ShoppingBag className="size-7" />
       {cartCount > 0 && (
         <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-4 h-4 px-1 text-xs font-bold text-white bg-accent rounded-full">
