@@ -10,6 +10,12 @@
 
 ## 2026-04-10
 
+### [KEND] 네이버 로그인 Edge Function redirect URL 환경변수화
+
+- **`create-naver-user.ts` 수정**: `redirectTo` 하드코딩(`http://localhost:5173`) → `Deno.env.get("SITE_URL")` 환경변수로 변경
+- **Supabase Edge Function Secrets에 `SITE_URL` 추가**: `https://kend-seven.vercel.app` 설정 후 재배포
+- **Vercel CLI 연동**: `vercel link`로 프로젝트 연결, 환경변수 확인 체계 구축
+
 ### [KEND] 회원탈퇴 기능 추가
 
 - **`my-page.tsx`에 action 추가**: `service_role` 키로 `auth.admin.deleteUser()` 호출, CASCADE로 하위 데이터(profiles, children, addresses, carts, likes, orders 등) 자동 삭제

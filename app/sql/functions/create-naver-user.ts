@@ -5,29 +5,31 @@ serve(async (req) => {
   try {
     const supabase = createClient(
       Deno.env.get("PROJECT_URL"),
-      Deno.env.get("SERVICE_ROLE_KEY")
+      Deno.env.get("SERVICE_ROLE_KEY"),
     );
 
     const { id, nickname, profile_image, email, name } = await req.json();
 
     // 먼저 유저 생성 시도
-    const { error: createError } =
-      await supabase.auth.admin.createUser({
-        email: email ?? `${id}@naver-user.local`,
-        email_confirm: true,
-        user_metadata: {
-          id,
-          name,
-          nickname,
-          profile_image,
-          email,
-          provider: "naver",
-        },
-      });
+    const { error: createError } = await supabase.auth.admin.createUser({
+      email: email ?? `${id}@naver-user.local`,
+      email_confirm: true,
+      user_metadata: {
+        id,
+        name,
+        nickname,
+        profile_image,
+        email,
+        provider: "naver",
+      },
+    });
 
     // 이미 존재하는 유저면 createError 발생 → 무시하고 link 발급으로 진행
     if (createError) {
-      console.log("User already exists, proceeding to generate link:", createError.message);
+      console.log(
+        "User already exists, proceeding to generate link:",
+        createError.message,
+      );
     }
 
     // 세션 토큰 발급 (Magic Link)
@@ -36,7 +38,7 @@ serve(async (req) => {
         type: "magiclink",
         email: email,
         options: {
-          redirectTo: "http://localhost:5173/auth/naver/callback",
+          redirectTo: `${Deno.env.get("SITE_URL")}/auth/naver/callback`,
         },
       });
 
@@ -49,7 +51,7 @@ serve(async (req) => {
       {
         headers: { "Content-Type": "application/json" },
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.error("Error in create-naver-user:", error);
