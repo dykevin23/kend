@@ -8,6 +8,20 @@
 
 ---
 
+## 2026-04-13
+
+### [KEND] BottomNavigation `/children` 인덱스 페이지 미표시 수정
+
+- **`root.tsx` BottomNavigation 표시 조건 재작성**: 기존 `naviMenus.includes()` + 복잡한 children 분기 → 명시적 경로 매칭(`/stores`, `/children`, `/children/숫자`, `/likes`, `/myPage`)으로 단순화
+- **원인**: `/children` 인덱스 경로가 조건에서 빠져있어 성장기록 첫 페이지에서 하단 네비게이션 미노출
+
+### [KEND] Google OAuth 302 redirect → JS redirect 변경
+
+- **`social-complete-page.tsx` 수정**: 서버 302 redirect(`redirect("kend://...")`) → 클라이언트 페이지 렌더 후 `window.location.href`로 딥링크 전달 방식 변경
+- **배경**: Vercel/외부 브라우저에서 `kend://` 커스텀 스킴에 대한 302 redirect가 차단되어 앱으로 돌아오지 못하는 문제 해결
+
+---
+
 ## 2026-04-10
 
 ### [KEND] Google OAuth 딥링크 토큰 전달 방식 구현

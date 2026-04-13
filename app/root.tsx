@@ -93,16 +93,18 @@ function GlobalLoadingBar() {
 export default function App() {
   useAuthListener();
   const { pathname } = useLocation();
-  const naviMenus = ["/stores", "/children/:childId", "/likes", "/myPage"];
+  const showBottomNav =
+    pathname === "/stores" ||
+    pathname === "/children" ||
+    /^\/children\/\d+$/.test(pathname) ||
+    pathname === "/likes" ||
+    pathname === "/myPage";
 
   return (
     <div className="h-screen overflow-hidden">
       <GlobalLoadingBar />
       <Outlet />
-      {(naviMenus.includes(pathname) ||
-        (pathname.includes("/children")
-          ? !isNaN(Number(pathname.split("/children/").at(-1)))
-          : false)) && <BottomNavigation />}
+      {showBottomNav && <BottomNavigation />}
     </div>
   );
 }
