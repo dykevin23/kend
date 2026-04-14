@@ -1,31 +1,44 @@
 import { ArrowLeft, Search, ShoppingBag } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLoaderData, useNavigate } from "react-router";
 import { Input } from "~/common/components/ui/input";
 import RecommendProducts from "~/features/products/components/recommend-products";
+import { makeSSRClient } from "~/supa-client";
+import { getRandomProducts } from "~/features/products/queries";
+import type { Route } from "./+types/search-page";
+
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const recommendProducts = await getRandomProducts(client, 10);
+  return { recommendProducts };
+};
+
+const searchs = [
+  ["우주복", "여름옷", "내복", "반팔", "후드티"],
+  ["신생아", "양말", "손싸개", "봄옷", "청바지"],
+];
 
 export default function SearchPage() {
+  const { recommendProducts } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   return (
     <div>
       <div className="flex p-4 items-center gap-2.5 self-stretch">
         <ArrowLeft size={28} onClick={() => navigate(-1)} />
-        <div className="flex py-2 px-4 items-center flex-gsb rounded-xl bg-muted/10">
-          <div className="flex w-56 h-3.5 items-center">
-            <Input
-              className="h-3.5 border-0 text-left text-xs font-bold leading-3.5 "
-              placeholder="검색어를 입력해주세요."
-            />
-          </div>
-          <Search className="size-3.5 aspect-square" />
+        <div className="flex flex-1 py-2 px-4 items-center rounded-xl bg-muted/10">
+          <Input
+            className="flex-1 h-3.5 border-0 text-left text-xs font-bold leading-3.5"
+            placeholder="검색어를 입력해주세요."
+          />
+          <Search className="size-3.5 shrink-0" />
         </div>
         <Link to="/carts">
           <ShoppingBag className="size-7" />
         </Link>
       </div>
 
-      <div className="flex h-94 py-4 flex-col items-start gap-1 shrink-0">
-        <RecommendProducts />
-        <div className="flex px-4 flex-col items-start shrink-0">
+      <div className="flex w-full py-4 flex-col items-start gap-6">
+        <RecommendProducts products={recommendProducts} />
+        <div className="flex w-full px-4 flex-col items-start">
           <div className="flex w-full items-center">
             <div className="flex w-full h-6 flex-col justify-center shrink-0">
               <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
@@ -33,61 +46,26 @@ export default function SearchPage() {
               </span>
             </div>
           </div>
-          <div className="flex px-2.5 items-center gap-1 shrink-0 self-stretch">
-            <div className="flex w-40 py-4 flex-col justify-center items-start gap-2.5">
-              {Array.from({ length: 5 }).map((_, index) => {
-                return (
-                  <div className="flex w-40 items-center gap-5">
-                    <div className="w-5 shrink-0">
-                      <span className="text-right text-xs font-bold leading-[100%] tracking-[-0.4px]">
-                        {index + 1}
-                      </span>
-                    </div>
-                    <span className="text-xs leading-[100%] tracking-[-0.4px]">
-                      키득키득
-                    </span>
-                    <div className="flex justify-end items-center gap-5 flex-gsb">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 12 12"
-                        fill="none"
-                      >
-                        <path d="M3 7.5L6 4.5L9 7.5" stroke="#FF0000" />
-                      </svg>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex w-40 py-4 flex-col justify-center items-start gap-2.5">
-              {Array.from({ length: 5 }).map((_, index) => {
-                return (
-                  <div className="flex w-40 items-center gap-5">
-                    <div className="w-5 shrink-0">
-                      <span className="text-right text-xs font-bold leading-[100%] tracking-[-0.4px]">
-                        {index + 6}
-                      </span>
-                    </div>
-                    <span className="text-xs leading-[100%] tracking-[-0.4px]">
-                      키득키득
-                    </span>
-                    <div className="flex justify-end items-center gap-5 flex-gsb">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 12 12"
-                        fill="none"
-                      >
-                        <path d="M3 7.5L6 4.5L9 7.5" stroke="#FF0000" />
-                      </svg>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-2 w-full px-2.5 py-4 gap-y-2.5 gap-x-4">
+            {searchs[0].map((left, i) => {
+              const right = searchs[1][i];
+              return [
+                { label: left, num: i + 1 },
+                { label: right, num: i + 6 },
+              ];
+            }).flat().map(({ label, num }) => (
+              <div key={num} className="flex items-center gap-3">
+                <span className="w-5 shrink-0 text-right text-xs font-bold leading-[100%] tracking-[-0.4px]">
+                  {num}
+                </span>
+                <span className="flex-1 text-xs leading-[100%] tracking-[-0.4px]">
+                  {label}
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0">
+                  <path d="M3 7.5L6 4.5L9 7.5" stroke="#FF0000" />
+                </svg>
+              </div>
+            ))}
           </div>
         </div>
       </div>

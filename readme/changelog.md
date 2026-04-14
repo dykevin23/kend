@@ -10,6 +10,12 @@
 
 ## 2026-04-14
 
+### [KEND] 좋아요 페이지 실데이터 연결 + 추천 상품 랜덤 표시
+
+- **좋아요 페이지 실데이터 연결**: `likes-page.tsx`에 loader 추가, `getLikedProducts` 쿼리로 실제 좋아요 상품 표시. `like-product-card.tsx`를 `LikedProduct` 타입 기반으로 재작성 (상품명, 이미지, 가격, 할인율, 판매자)
+- **추천 상품 랜덤 표시**: `products/queries.ts`에 `getRandomProducts()` 쿼리 추가, `recommend-products.tsx`를 props 기반으로 재작성. 검색(`search-page`), 장바구니(`shopping-cart-page`), 상품 상세(`product-page`) 3곳 적용
+- **검색 페이지 레이아웃 개선**: 검색 입력 고정 폭(`w-56`) → `flex-1`, 급상승 검색어 고정 폭(`w-40`) → `grid grid-cols-2`로 화면 너비에 맞춤 처리
+
 ### [KEND] 소셜 로그인(Google/Kakao) OAuth 콜백 임시 처리
 
 - **`home-page.tsx` 수정**: Supabase PKCE flow가 Site URL(`/`)로 `?code=xxx`를 보내는 문제 대응 — `/?code=`가 있으면 `exchangeCodeForSession`으로 세션 교환 후 `/stores`로 redirect

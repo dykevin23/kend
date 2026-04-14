@@ -19,6 +19,7 @@ import {
 } from "../mutations";
 import { type OrderItem, cartItemToOrderItem } from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
+import { getRandomProducts } from "~/features/products/queries";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -28,16 +29,17 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await client.auth.getUser();
 
   if (!user) {
-    return { cartItems: [], profile: null, address: null };
+    return { cartItems: [], profile: null, address: null, recommendProducts: [] };
   }
 
-  const [cartItems, profile, address] = await Promise.all([
+  const [cartItems, profile, address, recommendProducts] = await Promise.all([
     getCartItems(client, user.id),
     getUserProfile(client, user.id),
     getDefaultAddress(client, user.id),
+    getRandomProducts(client, 10),
   ]);
 
-  return { cartItems, profile, address };
+  return { cartItems, profile, address, recommendProducts };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -81,7 +83,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 };
 
 export default function ShoppingCartPage() {
-  const { cartItems, address } = useLoaderData<typeof loader>();
+  const { cartItems, address, recommendProducts } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const [searchParams, setSearchParams] = useSearchParams();
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -342,7 +344,7 @@ export default function ShoppingCartPage() {
       )}
 
       <div className="flex pt-4 flex-col items-start gap-1">
-        <RecommendProducts />
+        <RecommendProducts products={recommendProducts} />
       </div>
 
       {/* 결제 모달 */}

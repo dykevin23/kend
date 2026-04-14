@@ -1,25 +1,27 @@
 import { Link } from "react-router";
-import { productSample3 } from "~/assets/images";
+import { formatCurrency } from "~/lib/utils";
+import type { ProductListItem } from "~/features/stores/queries";
 
-export default function RecommendProducts() {
+interface RecommendProductsProps {
+  products: ProductListItem[];
+}
+
+export default function RecommendProducts({ products }: RecommendProductsProps) {
+  if (products.length === 0) return null;
+
   return (
     <div className="flex w-full px-4 flex-col items-start">
       <div className="flex w-full justify-between items-center">
-        <div className="flex w-27 h-6 shrink-0">
+        <div className="flex h-6 shrink-0">
           <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-            성장 Data 추천
-          </span>
-        </div>
-        <div className="flex w-40 h-6 shrink-0">
-          <span className="text-[10px] text-right leading-[120%] text-muted/30">
-            |신장: 85cm |발사이즈: 14cm |머리 둘레: 48cm |체중: 13kg
+            추천 상품
           </span>
         </div>
       </div>
       <div className="flex pt-1 flex-col items-start overflow-x-auto max-w-full overflow-y-hidden">
         <div className="flex items-center gap-0.5">
-          {Array.from({ length: 10 }).map(() => (
-            <RecommendProduct />
+          {products.map((product) => (
+            <RecommendProduct key={product.id} product={product} />
           ))}
         </div>
       </div>
@@ -27,36 +29,43 @@ export default function RecommendProducts() {
   );
 }
 
-const RecommendProduct = () => {
+function RecommendProduct({ product }: { product: ProductListItem }) {
   return (
-    <Link to="/products/product-1">
+    <Link to={`/products/${product.productCode}`} prefetch="intent">
       <div className="flex w-27.5 flex-col items-center gap-0.25">
         <div className="flex w-full h-33.5 pb-0.25 flex-col justify-center items-center">
-          <img src={productSample3} className="h-33.5" />
+          {product.mainImage ? (
+            <img
+              src={product.mainImage}
+              alt={product.name}
+              className="h-33.5 w-full object-cover rounded-md"
+            />
+          ) : (
+            <div className="h-33.5 w-full bg-gray-200 rounded-md flex items-center justify-center">
+              <span className="text-xs text-muted">No Image</span>
+            </div>
+          )}
         </div>
         <div className="flex px-0.5 items-center self-stretch">
-          <span className="text-[10px] font-bold leading-[140%] tracking-[-0.8px] flex-gsb">
-            코유코유
-          </span>
-        </div>
-        <div className="flex px-0.5 items-center self-stretch">
-          <span className="text-[10px] font-bold leading-[140%] tracking-[-0.8px] flex-gsb">
-            꽈베기 상하의 빨리빨리...
+          <span className="text-[10px] font-bold leading-[140%] tracking-[-0.8px] flex-gsb line-clamp-1">
+            {product.name}
           </span>
         </div>
         <div className="flex px-0.5 items-center gap-0.5 self-stretch">
-          <div className="flex justify-center items-center gap-2.5">
-            <span className="text-sm font-bold leading-[100%] tracking-[-0.4px] text-accent">
-              42%
-            </span>
-          </div>
+          {product.discountRate > 0 && (
+            <div className="flex justify-center items-center gap-2.5">
+              <span className="text-sm font-bold leading-[100%] tracking-[-0.4px] text-accent">
+                {product.discountRate}%
+              </span>
+            </div>
+          )}
           <div className="flex justify-center items-center gap-2.5 flex-gsb">
             <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-              22,000
+              {formatCurrency(product.salePrice)}
             </span>
           </div>
         </div>
       </div>
     </Link>
   );
-};
+}

@@ -169,3 +169,70 @@ export const getProductByCode = async (client: Client, productCode: string) => {
 };
 
 export type ProductDetail = Awaited<ReturnType<typeof getProductByCode>>;
+
+/**
+ * 랜덤 상품 조회 (추천 상품 영역용)
+ * - 판매 가능한 상품 중 랜덤으로 N개 반환
+ */
+export const getRandomProducts = async (client: Client, limit = 10) => {
+  const { data, error } = await client
+    .from("products")
+    .select(
+      `
+      id,
+      product_code,
+      name,
+      status,
+      main_category,
+      sub_category,
+      product_images!product_images_product_id_products_id_fk (
+        url,
+        type
+      ),
+      product_stock_keepings!product_stock_keepings_product_id_products_id_fk (
+        regular_price,
+        sale_price,
+        stock,
+        status
+      )
+    `
+    )
+    .neq("status", "REGISTERED")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  const available = data.filter((product) =>
+    product.product_stock_keepings.some((sku) => sku.status !== "REGISTERED")
+  );
+
+  const shuffled = available.sort(() => Math.random() - 0.5).slice(0, limit);
+
+  return shuffled.map((product) => {
+    const mainImage = product.product_images.find((img) => img.type === "MAIN");
+    const availableSkus = product.product_stock_keepings
+      .filter((sku) => sku.status !== "REGISTERED" && sku.stock > 0)
+      .sort((a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0));
+
+    const activeSku = availableSkus[0];
+    const regularPrice = activeSku?.regular_price ?? 0;
+    const salePrice = activeSku?.sale_price ?? 0;
+    const discountRate =
+      regularPrice > 0
+        ? Math.round(((regularPrice - salePrice) / regularPrice) * 100)
+        : 0;
+
+    return {
+      id: product.id,
+      productCode: product.product_code,
+      name: product.name,
+      mainCategory: product.main_category,
+      mainImage: mainImage?.url ?? null,
+      regularPrice,
+      salePrice,
+      discountRate,
+    };
+  });
+};
+
+export type RandomProduct = Awaited<ReturnType<typeof getRandomProducts>>[number];
