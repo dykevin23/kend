@@ -10,6 +10,13 @@
 
 ## 2026-04-14
 
+### [KEND] 상품 검색 기능 추가 + 추천 상품 안정화 + Apple 로그인 준비중 처리
+
+- **상품명 LIKE 검색 추가**: `features/search/queries.ts`에 `searchProductsByName()` 추가(`.ilike("name", "%q%")`, 최대 50건, 판매 가능 상품만). `search-page.tsx` loader가 `?q=` 쿼리를 읽어 결과 반환, Form GET으로 제출. 검색 결과는 2열 그리드로 표시하고 결과 없음/빈 상태 처리
+- **추천 상품 라우팅 시 재섞임 방지**: `recommend-products.tsx`를 모듈 스코프 캐시 기반 클라이언트 페치로 재작성(`browserClient` + `getRandomProducts(20)` 1회 로드). 페이지 이동/리페치 시 추천 목록이 먼저 업데이트되어 흔들리던 문제 해결
+- **추천 상품 현재 화면 상품 제외**: `RecommendProducts`에 `excludeIds` prop 추가. 상품 상세(`product-page`)는 현재 상품 ID, 장바구니(`shopping-cart-page`)는 담긴 상품 ID, 검색(`search-page`)은 검색 결과 상품 ID를 전달해 중복 노출 제거. 각 페이지 loader에서 `getRandomProducts` 호출 제거
+- **Apple 소셜 로그인 준비중 팝업**: `social-buttons.tsx`의 Apple 버튼을 `useAlert`로 "준비중입니다" 안내 팝업 표시하도록 변경(나머지 소셜 provider는 그대로 유지)
+
 ### [KEND] 좋아요 페이지 실데이터 연결 + 추천 상품 랜덤 표시
 
 - **좋아요 페이지 실데이터 연결**: `likes-page.tsx`에 loader 추가, `getLikedProducts` 쿼리로 실제 좋아요 상품 표시. `like-product-card.tsx`를 `LikedProduct` 타입 기반으로 재작성 (상품명, 이미지, 가격, 할인율, 판매자)

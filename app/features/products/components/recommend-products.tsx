@@ -1,13 +1,60 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { formatCurrency } from "~/lib/utils";
-import type { ProductListItem } from "~/features/stores/queries";
+import { browserClient } from "~/supa-client";
+import {
+  getRandomProducts,
+  type RandomProduct,
+} from "~/features/products/queries";
 
 interface RecommendProductsProps {
-  products: ProductListItem[];
+  excludeIds?: Array<string | number>;
+  limit?: number;
 }
 
-export default function RecommendProducts({ products }: RecommendProductsProps) {
-  if (products.length === 0) return null;
+// 라우팅/리페치 시 추천 목록이 흔들리지 않도록 모듈 스코프 캐시로 1회만 로드
+let cachedRecommends: RandomProduct[] | null = null;
+let cachePromise: Promise<RandomProduct[]> | null = null;
+
+export default function RecommendProducts({
+  excludeIds = [],
+  limit = 10,
+}: RecommendProductsProps) {
+  const [products, setProducts] = useState<RandomProduct[]>(
+    cachedRecommends ?? []
+  );
+
+  useEffect(() => {
+    if (cachedRecommends) {
+      setProducts(cachedRecommends);
+      return;
+    }
+    if (!cachePromise) {
+      cachePromise = getRandomProducts(browserClient, 20)
+        .then((data) => {
+          cachedRecommends = data;
+          return data;
+        })
+        .catch((error) => {
+          cachePromise = null;
+          throw error;
+        });
+    }
+    let cancelled = false;
+    cachePromise.then((data) => {
+      if (!cancelled) setProducts(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const excludeSet = new Set(excludeIds.map((id) => String(id)));
+  const filtered = products
+    .filter((p) => !excludeSet.has(String(p.id)))
+    .slice(0, limit);
+
+  if (filtered.length === 0) return null;
 
   return (
     <div className="flex w-full px-4 flex-col items-start">
@@ -20,7 +67,7 @@ export default function RecommendProducts({ products }: RecommendProductsProps) 
       </div>
       <div className="flex pt-1 flex-col items-start overflow-x-auto max-w-full overflow-y-hidden">
         <div className="flex items-center gap-0.5">
-          {products.map((product) => (
+          {filtered.map((product) => (
             <RecommendProduct key={product.id} product={product} />
           ))}
         </div>
@@ -29,7 +76,7 @@ export default function RecommendProducts({ products }: RecommendProductsProps) 
   );
 }
 
-function RecommendProduct({ product }: { product: ProductListItem }) {
+function RecommendProduct({ product }: { product: RandomProduct }) {
   return (
     <Link to={`/products/${product.productCode}`} prefetch="intent">
       <div className="flex w-27.5 flex-col items-center gap-0.25">

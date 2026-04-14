@@ -28,7 +28,6 @@ import RecommendProducts from "../components/recommend-products";
 import type { OrderItem } from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
 import { addUserAddress } from "~/features/users/mutations";
-import { getRandomProducts } from "../queries";
 import { useAlert } from "~/hooks/useAlert";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
@@ -57,9 +56,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     address = defaultAddress;
   }
 
-  const recommendProducts = await getRandomProducts(client, 10);
-
-  return { product, isLiked, profile, address, recommendProducts };
+  return { product, isLiked, profile, address };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -124,7 +121,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 
 export default function ProductPage() {
-  const { product, isLiked, address, recommendProducts } = useLoaderData<typeof loader>();
+  const { product, isLiked, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const { confirm } = useAlert();
@@ -403,7 +400,7 @@ export default function ProductPage() {
           <Divider className="w-full" />
 
           {/* 추천상품 */}
-          <RecommendProducts products={recommendProducts} />
+          <RecommendProducts excludeIds={[product.id]} />
         </div>
       </Content>
 
