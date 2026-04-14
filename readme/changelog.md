@@ -8,6 +8,24 @@
 
 ---
 
+## 2026-04-14
+
+### [KEND] 소셜 로그인(Google/Kakao) OAuth 콜백 임시 처리
+
+- **`home-page.tsx` 수정**: Supabase PKCE flow가 Site URL(`/`)로 `?code=xxx`를 보내는 문제 대응 — `/?code=`가 있으면 `exchangeCodeForSession`으로 세션 교환 후 `/stores`로 redirect
+- **원인**: Supabase는 프로젝트당 Site URL이 하나라서, 프로덕션(`vercel.app`)으로 설정하면 `redirectTo` 파라미터가 무시되고 Site URL 기준으로 콜백이 옴
+- **Supabase 프로젝트 dev/prod 분리 시 제거 예정**
+
+### [KEND] 환경 분리 계획 문서 작성
+
+- **`readme/environment-separation-plan.md` 작성**: Supabase dev/prod 프로젝트 분리 계획, 현재 임시 처리 내용, 운영 규칙 정리
+
+### [KEND] 소셜 로그인 디버그 로그 정리
+
+- `social-start-page.tsx`, `social-complete-page.tsx`, `naver-callback-page.tsx`에서 디버그용 `console.log` 제거
+
+---
+
 ## 2026-04-13
 
 ### [KEND] BottomNavigation `/children` 인덱스 페이지 미표시 수정

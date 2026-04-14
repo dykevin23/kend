@@ -10,7 +10,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
   if (accessToken && refreshToken) {
     const { client, headers } = makeSSRClient(request);
-    const { data, error } = await client.auth.setSession({
+    const { error } = await client.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
@@ -19,9 +19,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       console.error("Session set error:", error);
     }
 
-    console.log("✅ Session stored:", data);
-
-    // ❗ 여기서 동기적으로 redirect 반환해야 Remix가 적용함
+    // 세션 설정 후 홈으로 redirect
     return redirect("/", { headers });
   }
 };
@@ -33,7 +31,6 @@ export default function NaverCallbackPage() {
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       const query = params.toString();
-      console.log("### query => ", query);
       window.location.replace(`/auth/naver/callback?${query}`);
     }
   }, []);
