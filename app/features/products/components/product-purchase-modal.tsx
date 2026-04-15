@@ -12,6 +12,9 @@ import {
 import type { UserAddress } from "~/features/users/queries";
 import { useAlert } from "~/hooks/useAlert";
 
+// 결제 기능 미구현 - iOS 심사 대응용 "서비스 준비 중" 모드
+const PAYMENT_COMING_SOON = true;
+
 interface ProductPurchaseModalProps {
   open: boolean;
   onClose: () => void;
@@ -86,6 +89,7 @@ export default function ProductPurchaseModal({
 
   // 모달이 열릴 때 TossPayments 위젯 초기화
   useEffect(() => {
+    if (PAYMENT_COMING_SOON) return;
     if (!open || totalAmount <= 0) {
       setPaymentWidget(null);
       setIsWidgetReady(false);
@@ -272,11 +276,13 @@ export default function ProductPurchaseModal({
           variant="secondary"
           className="flex w-full h-12.5 rounded-full"
           onClick={handleSubmitOrder}
-          disabled={isSubmitting || !isWidgetReady}
+          disabled={PAYMENT_COMING_SOON || isSubmitting || !isWidgetReady}
         >
-          {isSubmitting
-            ? "주문 처리중..."
-            : `${totalAmount.toLocaleString()}원 결제하기`}
+          {PAYMENT_COMING_SOON
+            ? "서비스 준비 중"
+            : isSubmitting
+              ? "주문 처리중..."
+              : `${totalAmount.toLocaleString()}원 결제하기`}
         </Button>
       }
     >
@@ -314,19 +320,34 @@ export default function ProductPurchaseModal({
         </div>
       </div>
 
-      {/* 결제 수단 섹션 - TossPayments 위젯 */}
+      {/* 결제 수단 섹션 */}
       <div className="flex w-full flex-col py-5 px-4 items-start gap-4 bg-white border-t-4 border-t-muted/10">
         <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
           결제 수단
         </span>
-        <div id="toss-payment-method" className="w-full" />
-        <div id="toss-agreement" className="w-full" />
-        {!isWidgetReady && (
-          <div className="flex w-full h-32 items-center justify-center">
-            <span className="text-sm text-muted">
-              결제 수단을 불러오는 중...
+        {PAYMENT_COMING_SOON ? (
+          <div className="flex w-full flex-col items-center justify-center gap-2 py-10 px-4 rounded-lg bg-muted/5">
+            <span className="text-base font-bold leading-5 tracking-[-0.4px]">
+              서비스 준비 중입니다
+            </span>
+            <span className="text-sm text-muted text-center leading-5">
+              결제 기능은 곧 제공될 예정입니다.
+              <br />
+              조금만 기다려주세요.
             </span>
           </div>
+        ) : (
+          <>
+            <div id="toss-payment-method" className="w-full" />
+            <div id="toss-agreement" className="w-full" />
+            {!isWidgetReady && (
+              <div className="flex w-full h-32 items-center justify-center">
+                <span className="text-sm text-muted">
+                  결제 수단을 불러오는 중...
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Modal>

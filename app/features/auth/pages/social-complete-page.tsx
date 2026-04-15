@@ -4,7 +4,7 @@ import { makeSSRClient } from "~/supa-client";
 import type { Route } from "./+types/social-complete-page";
 
 const paramsSchema = z.object({
-  provider: z.enum(["kakao", "google"]),
+  provider: z.enum(["kakao", "google", "apple"]),
 });
 
 export const loader = async ({ params, request }: Route.LoaderArgs) => {
@@ -15,7 +15,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
   const code = url.searchParams.get("code");
   if (!code) return redirect("/auth/login");
 
-  if (["kakao", "google"].includes(data.provider)) {
+  if (["kakao", "google", "apple"].includes(data.provider)) {
     const { client, headers } = makeSSRClient(request);
     const { error } = await client.auth.exchangeCodeForSession(code);
     if (error) throw error;

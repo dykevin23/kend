@@ -34,6 +34,12 @@ export default [
     index("features/users/pages/my-page.tsx"),
     route("/addresses", "features/users/pages/addresses-page.tsx"),
     route("/profile/edit", "features/users/pages/edit-profile-page.tsx"),
+    route("/recent-products", "features/users/pages/recent-products-page.tsx"),
+    route("/notifications", "features/users/pages/notifications-page.tsx"),
+    route("/notices", "features/users/pages/notices-page.tsx"),
+    route("/support", "features/users/pages/support-page.tsx"),
+    route("/terms", "features/users/pages/terms-page.tsx"),
+    route("/privacy", "features/users/pages/privacy-page.tsx"),
   ]),
   ...prefix("orders", [
     index("features/orders/pages/orders-page.tsx"),

@@ -290,7 +290,7 @@ export default function MyPage() {
         {
           icon: <Package className="w-5 h-5" />,
           label: "최근 본 상품",
-          href: "/recent-products",
+          href: "/myPage/recent-products",
         },
         {
           icon: <MapPin className="w-5 h-5" />,
@@ -305,27 +305,27 @@ export default function MyPage() {
         {
           icon: <Bell className="w-5 h-5" />,
           label: "알림 설정",
-          href: "/settings/notifications",
+          href: "/myPage/notifications",
         },
         {
           icon: <CircleHelp className="w-5 h-5" />,
           label: "공지사항 및 FAQ",
-          href: "/notices",
+          href: "/myPage/notices",
         },
         {
           icon: <Headphones className="w-5 h-5" />,
           label: "고객지원",
-          href: "/support",
+          href: "/myPage/support",
         },
         {
           icon: <FileText className="w-5 h-5" />,
           label: "이용 약관",
-          href: "/terms",
+          href: "/myPage/terms",
         },
         {
           icon: <ShieldCheck className="w-5 h-5" />,
           label: "개인정보 처리 방침",
-          href: "/privacy",
+          href: "/myPage/privacy",
         },
       ],
     },

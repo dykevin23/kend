@@ -4,7 +4,7 @@ import { makeSSRClient } from "~/supa-client";
 import type { Route } from "./+types/social-start-page";
 
 const paramsSchema = z.object({
-  provider: z.enum(["kakao", "google"]),
+  provider: z.enum(["kakao", "google", "apple"]),
 });
 
 export const loader = async ({ params, request }: Route.LoaderArgs) => {
@@ -16,7 +16,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
   const redirectTo = `${process.env.REDIRECT_LOGIN_URL}/auth/social/${provider}/complete`;
   const { client, headers } = makeSSRClient(request);
 
-  if (provider === "google" || provider === "kakao") {
+  if (provider === "google" || provider === "kakao" || provider === "apple") {
     const {
       data: { url },
       error,

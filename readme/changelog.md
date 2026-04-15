@@ -8,6 +8,44 @@
 
 ---
 
+## 2026-04-15
+
+### [KEND] 이용약관 전문 교체
+
+- **`terms-page.tsx` 약관 내용 전면 교체**: 기존 9개 간이 조항 → KEND 서비스 이용약관 전문(제1장 총칙 / 제2장 KEND 플랫폼 서비스 / 제3장 기타 사항, 제1~36조 + 부칙)으로 교체
+- **장(章) 구조 렌더링**: `TermsEntry` 타입을 `chapter | article` 판별 유니언으로 도입해 장 헤더와 조문을 구분 표시
+
+### [KEND] 결제 기능 "서비스 준비 중" 처리 (iOS 심사 대응)
+
+- **`product-purchase-modal.tsx`**: `PAYMENT_COMING_SOON` 플래그 추가. true인 동안 TossPayments 위젯 초기화(`useEffect`)를 스킵하고, 결제 수단 영역에 "서비스 준비 중입니다" 안내 박스 표시, 결제 버튼은 비활성화 + "서비스 준비 중" 라벨 노출
+- **배경**: 4/14 iOS 심사 반려(`readme/ios-review-rejection-apr14.md`) 대응 — 결제 미구현 상태로 노출되는 것을 회피
+
+### [KEND] Apple 소셜 로그인 연결
+
+- **`social-buttons.tsx`**: Apple 버튼을 기존 "준비중" 알림 → `/auth/social/apple/start` 링크로 전환. `useAlert` 의존 제거
+- **`social-start-page.tsx` / `social-complete-page.tsx`**: provider zod enum 및 분기 조건에 `"apple"` 추가 (Supabase `signInWithOAuth` + `exchangeCodeForSession` 경로 그대로 재사용)
+- **`scripts/generate-apple-secret.cjs` 추가**: Apple Sign In client secret JWT 생성 스크립트(`jsonwebtoken` 사용)
+- **`package.json`**: `jsonwebtoken ^9.0.3` devDependency 추가
+- **`.gitignore`**: Apple `*.p8` / `AuthKey_*.p8` 키 파일 커밋 방지 규칙 추가
+
+### [KEND] 마이페이지 하위 페이지 신설 및 라우팅 정리
+
+- **신규 페이지 6종 추가** (`app/features/users/pages/`):
+  - `recent-products-page.tsx` — 최근 본 상품 (placeholder)
+  - `notifications-page.tsx` — 알림 설정
+  - `notices-page.tsx` — 공지사항 및 FAQ
+  - `support-page.tsx` — 고객지원
+  - `terms-page.tsx` — 이용약관
+  - `privacy-page.tsx` — 개인정보 처리방침
+- **`routes.ts`**: `myPage` prefix 하위에 위 6개 라우트 등록
+- **`my-page.tsx`**: 메뉴 링크를 전부 `/myPage/*` 경로로 이전 (`/recent-products`, `/settings/notifications`, `/notices`, `/support`, `/terms`, `/privacy` → `/myPage/...`)
+
+### [KEND] iOS 심사 반려 문서화
+
+- **`readme/ios-review-rejection-apr14.md` 작성**: 4/14 Apple iOS 심사 반려 사유 및 대응 기록
+
+---
+
 ## 2026-04-14
 
 ### [KEND] 상품 검색 기능 추가 + 추천 상품 안정화 + Apple 로그인 준비중 처리
