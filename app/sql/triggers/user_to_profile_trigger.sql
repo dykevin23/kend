@@ -43,6 +43,16 @@ begin
             insert into public.profiles (profile_id, username, nickname, avatar)
             values (new.id, new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'full_name' || substr(md5(random()::text), 1, 5), new.raw_user_meta_data ->> 'avatar_url');
         end if;
+
+        if new.raw_app_meta_data ? 'provider' AND new.raw_app_meta_data ->> 'provider' = 'apple' then
+            insert into public.profiles (profile_id, username, nickname, avatar)
+            values (
+                new.id,
+                coalesce(new.raw_user_meta_data ->> 'name', split_part(new.email, '@', 1), 'Anonymous'),
+                coalesce(new.raw_user_meta_data ->> 'name', 'mr.' || substr(md5(random()::text), 1, 8)),
+                new.raw_user_meta_data ->> 'picture'
+            );
+        end if;
     end if;
     return new;
 end;

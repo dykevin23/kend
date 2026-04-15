@@ -10,6 +10,12 @@
 
 ## 2026-04-15
 
+### [KEND] Apple 가입자 profiles row 자동 생성 트리거 추가
+
+- **`user_to_profile_trigger.sql`**: `handle_new_user` 트리거에 `apple` provider 분기 추가. Apple은 메타데이터가 빈약해 `username`은 `name` → email 앞부분 → `'Anonymous'` 순으로, `nickname`은 `name` → `mr.XXXXXXXX` 랜덤 생성 순으로 fallback 처리
+- **원인**: 기존 트리거가 `email`/`kakao`/`google`만 처리하고 `apple`은 무시해서, Apple 가입 시 `auth.users`에는 row가 생성되지만 `public.profiles`에는 row가 만들어지지 않음. 이로 인해 프로필 수정 페이지 loader(`getUserProfile`)가 throw → UI에 "로그인이 필요합니다" 오메시지 노출
+- **적용 방법**: Drizzle schema가 아닌 raw SQL 파일이라 Supabase SQL Editor에서 수동 적용 필요
+
 ### [KEND] 이용약관 전문 교체
 
 - **`terms-page.tsx` 약관 내용 전면 교체**: 기존 9개 간이 조항 → KEND 서비스 이용약관 전문(제1장 총칙 / 제2장 KEND 플랫폼 서비스 / 제3장 기타 사항, 제1~36조 + 부칙)으로 교체

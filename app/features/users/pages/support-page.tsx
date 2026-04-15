@@ -1,7 +1,7 @@
 import { Mail, Clock } from "lucide-react";
 import Content from "~/common/components/content";
 
-const SUPPORT_EMAIL = "support@kend.app";
+const SUPPORT_EMAIL = "dyk0203@naver.com";
 const BUSINESS_HOURS = "평일 10:00 - 18:00 (주말 및 공휴일 제외)";
 
 export default function SupportPage() {
