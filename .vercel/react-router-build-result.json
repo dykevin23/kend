@@ -26,10 +26,18 @@
       "features/users/pages/my-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/users/pages/addresses-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/users/pages/edit-profile-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/recent-products-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/notifications-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/notices-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/support-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/terms-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "features/users/pages/privacy-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/orders/pages/orders-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/orders/pages/order-action": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/payments/pages/payment-success-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/payments/pages/payment-fail-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "common/pages/terms-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "common/pages/privacy-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/auth/pages/login-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/auth/pages/join-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "features/auth/pages/social-start-page": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
@@ -201,6 +209,60 @@
           "runtime": "nodejs"
         }
       },
+      "features/users/pages/recent-products-page": {
+        "id": "features/users/pages/recent-products-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/recent-products-page.tsx",
+        "path": "myPage/recent-products",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/notifications-page": {
+        "id": "features/users/pages/notifications-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/notifications-page.tsx",
+        "path": "myPage/notifications",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/notices-page": {
+        "id": "features/users/pages/notices-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/notices-page.tsx",
+        "path": "myPage/notices",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/support-page": {
+        "id": "features/users/pages/support-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/support-page.tsx",
+        "path": "myPage/support",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/terms-page": {
+        "id": "features/users/pages/terms-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/terms-page.tsx",
+        "path": "myPage/terms",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "features/users/pages/privacy-page": {
+        "id": "features/users/pages/privacy-page",
+        "parentId": "root",
+        "file": "app/features/users/pages/privacy-page.tsx",
+        "path": "myPage/privacy",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
       "features/orders/pages/orders-page": {
         "id": "features/orders/pages/orders-page",
         "parentId": "root",
@@ -234,6 +296,24 @@
         "parentId": "root",
         "file": "app/features/payments/pages/payment-fail-page.tsx",
         "path": "payments/fail",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "common/pages/terms-page": {
+        "id": "common/pages/terms-page",
+        "parentId": "root",
+        "file": "app/common/pages/terms-page.tsx",
+        "path": "/terms",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "common/pages/privacy-page": {
+        "id": "common/pages/privacy-page",
+        "parentId": "root",
+        "file": "app/common/pages/privacy-page.tsx",
+        "path": "/privacy",
         "config": {
           "runtime": "nodejs"
         }
@@ -427,6 +507,42 @@
         "file": "features/users/pages/edit-profile-page.tsx",
         "path": "myPage/profile/edit"
       },
+      "features/users/pages/recent-products-page": {
+        "id": "features/users/pages/recent-products-page",
+        "parentId": "root",
+        "file": "features/users/pages/recent-products-page.tsx",
+        "path": "myPage/recent-products"
+      },
+      "features/users/pages/notifications-page": {
+        "id": "features/users/pages/notifications-page",
+        "parentId": "root",
+        "file": "features/users/pages/notifications-page.tsx",
+        "path": "myPage/notifications"
+      },
+      "features/users/pages/notices-page": {
+        "id": "features/users/pages/notices-page",
+        "parentId": "root",
+        "file": "features/users/pages/notices-page.tsx",
+        "path": "myPage/notices"
+      },
+      "features/users/pages/support-page": {
+        "id": "features/users/pages/support-page",
+        "parentId": "root",
+        "file": "features/users/pages/support-page.tsx",
+        "path": "myPage/support"
+      },
+      "features/users/pages/terms-page": {
+        "id": "features/users/pages/terms-page",
+        "parentId": "root",
+        "file": "features/users/pages/terms-page.tsx",
+        "path": "myPage/terms"
+      },
+      "features/users/pages/privacy-page": {
+        "id": "features/users/pages/privacy-page",
+        "parentId": "root",
+        "file": "features/users/pages/privacy-page.tsx",
+        "path": "myPage/privacy"
+      },
       "features/orders/pages/orders-page": {
         "id": "features/orders/pages/orders-page",
         "parentId": "root",
@@ -451,6 +567,18 @@
         "parentId": "root",
         "file": "features/payments/pages/payment-fail-page.tsx",
         "path": "payments/fail"
+      },
+      "common/pages/terms-page": {
+        "id": "common/pages/terms-page",
+        "parentId": "root",
+        "file": "common/pages/terms-page.tsx",
+        "path": "/terms"
+      },
+      "common/pages/privacy-page": {
+        "id": "common/pages/privacy-page",
+        "parentId": "root",
+        "file": "common/pages/privacy-page.tsx",
+        "path": "/privacy"
       },
       "features/auth/pages/login-page": {
         "id": "features/auth/pages/login-page",
