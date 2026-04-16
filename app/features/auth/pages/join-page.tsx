@@ -61,10 +61,10 @@ export default function JoinPage() {
 
   return (
     <div
-      className="flex flex-col min-h-screen bg-primary/50"
+      className="flex flex-col min-h-screen bg-primary/50 overflow-y-auto"
       style={{
         paddingTop: "max(3.125rem, var(--safe-area-inset-top))",
-        paddingBottom: "max(0px, var(--safe-area-inset-bottom))",
+        paddingBottom: "max(1.5rem, var(--safe-area-inset-bottom))",
       }}
     >
       {/* LOGO start */}
@@ -162,7 +162,7 @@ export default function JoinPage() {
         </div>
 
         {/* 약관 */}
-        <div className="flex flex-col items-center gap-6 self-stretch mt-auto pb-6">
+        <div className="flex flex-col items-center gap-6 self-stretch pt-4 pb-6">
           <div className="flex items-center gap-6">
             <Link to="/terms">
               <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-secondary">

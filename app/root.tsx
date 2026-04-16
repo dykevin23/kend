@@ -70,7 +70,8 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } else {
     const url = new URL(request.url);
     const pathname = url.pathname;
-    if (!pathname.startsWith("/auth")) {
+    const publicPaths = ["/auth", "/terms", "/privacy"];
+    if (!publicPaths.some((p) => pathname.startsWith(p))) {
       return redirect("/auth/login", { headers });
     }
   }

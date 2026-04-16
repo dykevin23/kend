@@ -1,1 +1,2 @@
 - [Error Handling Roadmap](project_error_handling_roadmap.md) — 출시 전 에러/완성도 강화 3주 로드맵 (2026-04-01~)
+- [상태값 표기 통일](feedback_status_wording.md) — 문서 상태값은 "완료"로 통일, 변형 금지
