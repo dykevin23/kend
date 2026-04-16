@@ -61,7 +61,7 @@ export default function JoinPage() {
 
   return (
     <div
-      className="flex flex-col min-h-screen bg-primary/50 overflow-y-auto"
+      className="flex flex-col h-screen bg-primary/50 overflow-y-auto"
       style={{
         paddingTop: "max(3.125rem, var(--safe-area-inset-top))",
         paddingBottom: "max(1.5rem, var(--safe-area-inset-bottom))",
