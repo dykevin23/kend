@@ -149,7 +149,7 @@ export default function ProductPage() {
   const [showTopButton, setShowTopButton] = useState(false);
 
   useEffect(() => {
-    const main = document.querySelector("main");
+    const main = document.querySelector('[data-slot="content-main"]');
     if (!main) return;
     const handleScroll = () => setShowTopButton(main.scrollTop > 300);
     main.addEventListener("scroll", handleScroll, { passive: true });
@@ -157,7 +157,7 @@ export default function ProductPage() {
   }, []);
 
   const scrollToTop = () => {
-    document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+    document.querySelector('[data-slot="content-main"]')?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // 섹션 refs

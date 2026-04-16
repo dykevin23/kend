@@ -17,7 +17,7 @@ export default function Content({
   return (
     <div className="flex flex-col w-full h-screen overflow-x-hidden">
       <Header {...headerPorps} />
-      <main className="flex-1 min-h-0 overflow-y-auto w-full">
+      <main data-slot="content-main" className="flex-1 min-h-0 overflow-y-auto w-full">
         <div className={cn({ "pb-[5.5rem]": footer })}>{children}</div>
       </main>
       {footer && <BottomButtonArea>{footer}</BottomButtonArea>}

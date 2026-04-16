@@ -145,7 +145,7 @@ export default function GrowthChart({
       </div>
 
       {/* 그래프 카드 */}
-      <div className={cn("flex w-full flex-col items-start gap-2.5", !isLast && "pb-8 border-b border-b-muted-foreground/30")}>
+      <div className={cn("flex w-full flex-col items-start gap-2.5", isLast ? "pb-2" : "pb-8 border-b border-b-muted-foreground/30")}>
         <div className="flex w-full pt-6 flex-col items-start gap-6 rounded-2xl bg-white border border-muted-foreground/30">
           {/* 제목 & 순위 텍스트 */}
           <div className="flex flex-col items-start gap-6 self-stretch">

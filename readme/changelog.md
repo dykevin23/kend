@@ -22,6 +22,11 @@
 - **하위 페이지 홈버튼**: `header.tsx`의 뒤로가기 버튼 옆에 홈(스토어) 아이콘 추가
 - **테스트 결과 문서화**: `readme/internal-test-1st.md` 작성 (18건 항목, 수정 대상/상태 표)
 
+### [KEND] 1차 내부 테스트 피드백 반영
+
+- **머리둘레 차트 하단 여백 추가 조정**: `isLast`일 때 `pb-2`로 변경하여 카드 간 간격과 동일한 수준으로 축소
+- **floating top 버튼 미노출 수정**: `content.tsx`에 `data-slot="content-main"` 추가, `product-page.tsx`에서 해당 selector로 스크롤 컨테이너 정확히 타겟팅. 기존에는 `root.tsx`의 `<main>`이 먼저 잡혀 scrollTop이 항상 0이라 버튼이 표시되지 않던 문제 해결
+
 ---
 
 ## 2026-04-15
