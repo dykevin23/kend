@@ -160,7 +160,7 @@ export default function ChildrenPage() {
   }, [heightPercentileHistory]);
 
   return (
-    <div className="pb-20">
+    <div className="pb-16">
       {/* 자녀 카드 */}
       <ChildCard child={child} profileImageUrl={storageImageUrl} />
 

@@ -491,11 +491,12 @@ export default function ProductPage() {
           type="button"
           onClick={scrollToTop}
           className={cn(
-            "fixed bottom-24 right-4 z-40",
+            "fixed right-4 z-40",
             "w-10 h-10 rounded-full",
             "flex items-center justify-center",
             "bg-white border border-muted/30 shadow-md",
           )}
+          style={{ bottom: "calc(5rem + var(--safe-area-inset-bottom, 0px))" }}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M4 10L8 6L12 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
