@@ -88,9 +88,9 @@ export default function JoinPage() {
               <span className="text-center text-xl leading-[130%] tracking-[-0.4px] text-secondary self-stretch">
                 가입하기
               </span>
-              <div className="flex justify-center self-stretch">
+              <div className="flex justify-center gap-2 self-stretch">
                 <span className="text-center text-base leading-[140%] tracking-[-0.4px]">
-                  이미 회원이신가요?{" "}
+                  이미 회원이신가요?
                 </span>
                 <Link to="/auth/login">
                   <span className="text-base leading-[140%] tracking-[-0.4px] text-secondary underline">

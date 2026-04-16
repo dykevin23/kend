@@ -74,9 +74,9 @@ export default function LoginPage() {
               <span className="text-center text-xl leading-[130%] tracking-[-0.4px] text-secondary self-stretch">
                 로그인 하기
               </span>
-              <div className="flex justify-center self-stretch">
+              <div className="flex justify-center gap-2 self-stretch">
                 <span className="text-center text-base leading-[140%] tracking-[-0.4px]">
-                  아직 회원이 아니신가요?{" "}
+                  아직 회원이 아니신가요?
                 </span>
                 <Link to="/auth/join">
                   <span className="text-base leading-[140%] tracking-[-0.4px] text-secondary underline">
