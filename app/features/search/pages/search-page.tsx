@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Form,
@@ -47,17 +47,26 @@ export default function SearchPage() {
         <Form
           method="get"
           action="/search"
-          className="flex flex-1 py-2 px-4 items-center rounded-xl bg-muted/10"
+          className="flex flex-1 py-2.5 px-4 items-center gap-2 rounded-xl bg-muted/10"
         >
           <Input
             name="q"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="flex-1 h-3.5 border-0 text-left text-xs font-bold leading-3.5"
+            className="flex-1 border-0 shadow-none focus-visible:ring-0 text-left text-xs font-bold leading-4 p-0 h-auto"
             placeholder="검색어를 입력해주세요."
           />
+          {keyword && (
+            <button
+              type="button"
+              onClick={() => setKeyword("")}
+              className="shrink-0"
+            >
+              <X className="size-4 text-muted" />
+            </button>
+          )}
           <button type="submit" className="shrink-0">
-            <Search className="size-3.5" />
+            <Search className="size-4" />
           </button>
         </Form>
         <Link to="/carts">
@@ -66,10 +75,12 @@ export default function SearchPage() {
       </div>
 
       {hasQuery ? (
-        <div className="flex w-full flex-col gap-4 px-4 py-2">
-          <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-            "{q}" 검색 결과 {results.length}건
-          </span>
+        <div className="flex w-full flex-col gap-4 py-2">
+          <div className="px-4">
+            <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
+              "{q}" 검색 결과 {results.length}건
+            </span>
+          </div>
           {results.length === 0 ? (
             <div className="flex w-full py-10 justify-center items-center">
               <span className="text-muted text-sm">
@@ -77,7 +88,7 @@ export default function SearchPage() {
               </span>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-5">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4">
               {results.map((product) => (
                 <Link
                   key={product.id}
@@ -139,7 +150,11 @@ export default function SearchPage() {
                 })
                 .flat()
                 .map(({ label, num }) => (
-                  <div key={num} className="flex items-center gap-3">
+                  <Link
+                    key={num}
+                    to={`/search?q=${encodeURIComponent(label)}`}
+                    className="flex items-center gap-3"
+                  >
                     <span className="w-5 shrink-0 text-right text-xs font-bold leading-[100%] tracking-[-0.4px]">
                       {num}
                     </span>
@@ -156,7 +171,7 @@ export default function SearchPage() {
                     >
                       <path d="M3 7.5L6 4.5L9 7.5" stroke="#FF0000" />
                     </svg>
-                  </div>
+                  </Link>
                 ))}
             </div>
           </div>

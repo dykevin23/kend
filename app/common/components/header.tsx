@@ -1,4 +1,4 @@
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Home, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import CartIcon from "./cart-icon";
@@ -20,7 +20,14 @@ export default function Header({ title, useRight = true }: HeaderProps) {
 
   return (
     <div className="flex p-4 justify-between items-center self-stretch">
-      {!isNaviMenu && <ArrowLeft onClick={() => navigate(-1)} />}
+      {!isNaviMenu ? (
+        <div className="flex items-center gap-3">
+          <ArrowLeft onClick={() => navigate(-1)} />
+          <Link to="/stores">
+            <Home className="size-5" />
+          </Link>
+        </div>
+      ) : null}
       {isNaviMenu ? (
         <span className="text-2xl leading-6 tracking-[-0.4px]">{title}</span>
       ) : title ? (

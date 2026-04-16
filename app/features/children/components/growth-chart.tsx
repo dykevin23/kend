@@ -10,6 +10,7 @@ import {
   Area,
 } from "recharts";
 import type { GrowthRecordByType, GrowthPercentilePoint } from "../queries";
+import { cn } from "~/lib/utils";
 import {
   heightForAge,
   weightForAge,
@@ -27,6 +28,7 @@ interface GrowthChartProps {
   gender?: Gender;
   birthDate?: string;
   percentileHistory?: GrowthPercentilePoint[];
+  isLast?: boolean;
 }
 
 const MEASUREMENT_CONFIG: Record<
@@ -83,6 +85,7 @@ export default function GrowthChart({
   childNickname,
   records,
   percentileHistory,
+  isLast = false,
 }: GrowthChartProps) {
   const config = MEASUREMENT_CONFIG[type];
 
@@ -142,7 +145,7 @@ export default function GrowthChart({
       </div>
 
       {/* 그래프 카드 */}
-      <div className="flex w-full pb-8 flex-col items-start gap-2.5 border-b border-b-muted-foreground/30">
+      <div className={cn("flex w-full flex-col items-start gap-2.5", !isLast && "pb-8 border-b border-b-muted-foreground/30")}>
         <div className="flex w-full pt-6 flex-col items-start gap-6 rounded-2xl bg-white border border-muted-foreground/30">
           {/* 제목 & 순위 텍스트 */}
           <div className="flex flex-col items-start gap-6 self-stretch">

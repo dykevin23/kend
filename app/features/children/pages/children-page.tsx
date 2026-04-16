@@ -291,6 +291,7 @@ export default function ChildrenPage() {
             gender={gender}
             birthDate={child.birthDate ?? undefined}
             percentileHistory={headCircumferencePercentileHistory}
+            isLast
           />
         </div>
       </div>

@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-04-16
+
+### [KEND] 1차 내부 테스트 기반 UI/UX 개선 (10건)
+
+- **입력필드 줌 방지**: `root.tsx` viewport meta에 `maximum-scale=1, user-scalable=no` 추가. iOS에서 input focus 시 화면 확대 후 복귀되지 않던 문제 해결
+- **가로 스크롤바 숨김**: `app.css`에 `overflow-x-auto/scroll` 요소의 scrollbar 숨김 CSS 추가 (스토어 상품 목록, 추천 상품 등)
+- **상품 이미지 dot indicator**: `product-page.tsx`에 Embla Carousel API 연동으로 이미지 하단에 현재 슬라이드 dot 표시
+- **검색 UI 개선 4건**: 검색어 clear(X) 버튼 추가, 검색필드 내부 input 라인 제거 및 크기 조정, 급상승 검색어 클릭 시 검색 연결(`Link`), 검색결과 하단 추천상품 width 중첩(`px-4`) 제거
+- **성장기록 차트 개선**: 마지막 차트(머리둘레) 하단 `border-b` 및 과도한 `pb-8` 제거 (`isLast` prop 추가)
+- **자녀 삭제 확인 팝업**: `edit-child-page.tsx`에서 인라인 확인란 → `useAlert`의 `confirm()` 팝업으로 교체
+- **상품상세 floating top 버튼**: 스크롤 300px 초과 시 우하단에 맨 위로 이동 버튼 표시
+- **하위 페이지 홈버튼**: `header.tsx`의 뒤로가기 버튼 옆에 홈(스토어) 아이콘 추가
+- **테스트 결과 문서화**: `readme/internal-test-1st.md` 작성 (18건 항목, 수정 대상/상태 표)
+
+---
+
 ## 2026-04-15
 
 ### [KEND] Apple 가입자 profiles row 자동 생성 트리거 추가

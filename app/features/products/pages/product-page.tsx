@@ -14,6 +14,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "~/common/components/ui/carousel";
 import { addToCart } from "~/features/carts/mutations";
 import { isProductLiked } from "~/features/likes/queries";
@@ -126,12 +127,38 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const { confirm } = useAlert();
 
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [slideCount, setSlideCount] = useState(0);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    setSlideCount(carouselApi.scrollSnapList().length);
+    setCurrentSlide(carouselApi.selectedScrollSnap());
+    carouselApi.on("select", () => {
+      setCurrentSlide(carouselApi.selectedScrollSnap());
+    });
+  }, [carouselApi]);
+
   const [activeTab, setActiveTab] = useState<TabKey>("information");
   const [isOptionSheetOpen, setIsOptionSheetOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [buyOption, setBuyOption] = useState<Record<string, string>>({});
   const [cartQuantity, setCartQuantity] = useState(1);
   const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
+  const [showTopButton, setShowTopButton] = useState(false);
+
+  useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    const handleScroll = () => setShowTopButton(main.scrollTop > 300);
+    main.addEventListener("scroll", handleScroll, { passive: true });
+    return () => main.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // 섹션 refs
   const informationRef = useRef<HTMLDivElement>(null);
@@ -288,19 +315,34 @@ export default function ProductPage() {
       <Content footer={<ProductFooter product={product} isLiked={isLiked} onBuyClick={handleBuyClick} />}>
         {/* 상품 이미지 캐러셀 */}
         {product.images.length > 0 ? (
-          <Carousel className="w-full">
-            <CarouselContent className="ml-0">
-              {product.images.map((image, index) => (
-                <CarouselItem key={image.id} className="pl-0">
-                  <img
-                    src={image.url}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full aspect-square object-cover"
+          <div className="relative">
+            <Carousel className="w-full" setApi={setCarouselApi}>
+              <CarouselContent className="ml-0">
+                {product.images.map((image, index) => (
+                  <CarouselItem key={image.id} className="pl-0">
+                    <img
+                      src={image.url}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full aspect-square object-cover"
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+            {slideCount > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {Array.from({ length: slideCount }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "size-2 rounded-full transition-colors",
+                      i === currentSlide ? "bg-white" : "bg-white/40"
+                    )}
                   />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+                ))}
+              </div>
+            )}
+          </div>
         ) : (
           <div className="w-full aspect-square bg-gray-400" />
         )}
@@ -442,6 +484,24 @@ export default function ProductPage() {
         items={purchaseItems}
         address={address}
       />
+
+      {/* 맨 위로 버튼 */}
+      {showTopButton && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className={cn(
+            "fixed bottom-24 right-4 z-40",
+            "w-10 h-10 rounded-full",
+            "flex items-center justify-center",
+            "bg-white border border-muted/30 shadow-md",
+          )}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 10L8 6L12 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
     </>
   );
 }

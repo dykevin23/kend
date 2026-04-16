@@ -5,7 +5,9 @@ import {
   useActionData,
   useLoaderData,
   useNavigation,
+  useSubmit,
 } from "react-router";
+import { useAlert } from "~/hooks/useAlert";
 import Camera from "~/assets/images/camera";
 import Content from "~/common/components/content";
 import Select from "~/common/components/select";
@@ -140,10 +142,11 @@ export default function EditChildPage() {
   const isSubmitting = navigation.state === "submitting";
 
   // 폼 상태 (기존 값으로 초기화)
+  const submit = useSubmit();
+  const { confirm } = useAlert();
   const [gender, setGender] = useState<string>(child.gender || "");
   const [birthDate, setBirthDate] = useState<string>(child.birthDate);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 파일 선택 핸들러
@@ -262,43 +265,31 @@ export default function EditChildPage() {
 
         {/* 삭제 버튼 */}
         <div className="px-4 pb-8">
-          {!showDeleteConfirm ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full py-6 rounded-full text-red-500 border-red-500 hover:bg-red-50"
-            >
-              <Trash2 size={18} />
-              자녀 삭제
-            </Button>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-center text-muted-foreground mb-2">
-                정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-5 rounded-full"
-                >
-                  취소
-                </Button>
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="delete"
-                  variant="destructive"
-                  disabled={isSubmitting}
-                  className="flex-1 py-5 rounded-full"
-                >
-                  {isSubmitting ? "삭제 중..." : "삭제"}
-                </Button>
-              </div>
-            </div>
-          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              confirm({
+                title: "자녀 삭제",
+                message: "정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+                primaryButton: {
+                  label: "삭제",
+                  onClick: () => {
+                    const formData = new FormData();
+                    formData.set("intent", "delete");
+                    submit(formData, { method: "post" });
+                  },
+                },
+                secondaryButton: {
+                  label: "취소",
+                },
+              });
+            }}
+            className="w-full py-6 rounded-full text-red-500 border-red-500 hover:bg-red-50"
+          >
+            <Trash2 size={18} />
+            자녀 삭제
+          </Button>
         </div>
       </Form>
     </Content>
