@@ -20,14 +20,7 @@ export default function Header({ title, useRight = true }: HeaderProps) {
 
   return (
     <div className="flex p-4 justify-between items-center self-stretch">
-      {!isNaviMenu ? (
-        <div className="flex items-center gap-3">
-          <ArrowLeft onClick={() => navigate(-1)} />
-          <Link to="/stores">
-            <Home className="size-5" />
-          </Link>
-        </div>
-      ) : null}
+      {!isNaviMenu && <ArrowLeft onClick={() => navigate(-1)} />}
       {isNaviMenu ? (
         <span className="text-2xl leading-6 tracking-[-0.4px]">{title}</span>
       ) : title ? (
@@ -37,9 +30,15 @@ export default function Header({ title, useRight = true }: HeaderProps) {
       ) : null}
       {useRight ? (
         <div className="flex items-center gap-6">
-          <Link to="/search">
-            <Search className="size-7" />
-          </Link>
+          {isNaviMenu ? (
+            <Link to="/search">
+              <Search className="size-7" />
+            </Link>
+          ) : (
+            <Link to="/stores">
+              <Home className="size-7" />
+            </Link>
+          )}
           <CartIcon />
         </div>
       ) : (

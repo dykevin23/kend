@@ -8,6 +8,19 @@
 
 ---
 
+## 2026-04-17
+
+### [KEND] 1차 내부 테스트 피드백 반영 (회원가입/약관/헤더/캐시)
+
+- **이메일 가입 페이지 하단 짤림 수정**: `join-page.tsx`에서 `min-h-screen` → `h-screen`으로 변경하고 `overflow-y-auto` 추가. 부모 레이아웃(`h-screen overflow-hidden`)에서 스크롤 불가하던 문제 해결. 약관 영역 `mt-auto` 제거
+- **이용약관/개인정보 404 해결**: 비로그인 상태에서 로그인 페이지의 `/terms`, `/privacy` 링크 클릭 시 404 발생하던 문제. `common/pages/terms-page.tsx`, `privacy-page.tsx`를 신규 생성해 최상위 라우트 등록, `root.tsx`의 `publicPaths`에 추가
+- **약관/개인정보 콘텐츠 공통 컴포넌트화**: `common/components/terms-content.tsx`, `privacy-content.tsx`로 데이터+렌더링 분리. `features/users/pages/terms-page.tsx`, `privacy-page.tsx`와 `common/pages/`의 두 공개 페이지가 동일 컴포넌트를 렌더링하도록 통합 (마이페이지 진입 경로와 비로그인 공개 경로 모두 지원)
+- **로그인/가입 링크 텍스트 간격**: 로그인 페이지의 "아직 회원이 아니신가요? 가입하기"와 가입 페이지의 "이미 회원이신가요? 로그인하기"에 `gap-2` 적용
+- **헤더 홈버튼 UX 재설계**: 하위 페이지 헤더의 우측 검색 돋보기를 홈 아이콘으로 대체. 1depth(bottom nav 노출 페이지)는 검색+장바구니, 하위 페이지는 홈+장바구니 구조로 통일
+- **SSR Cache-Control 헤더 설정 (bfcache 대응)**: `app/entry.server.tsx` 신규 생성. iOS WKWebView 스와이프 뒤로가기 시 이전 화면이 잠깐 보였다가 재로드되는 현상(bfcache 미작동)을 개선하기 위해 `/auth/*`는 `no-store`, 그 외 경로는 `private, max-age=0, must-revalidate`로 Cache-Control 자동 설정
+
+---
+
 ## 2026-04-16
 
 ### [KEND] 1차 내부 테스트 기반 UI/UX 개선 (10건)
