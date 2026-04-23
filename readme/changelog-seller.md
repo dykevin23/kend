@@ -1,10 +1,10 @@
-# Changelog (KEND-SELLER)
+# Changelog — KEND-SELLER
 
 KEND-SELLER 판매자 관리자 웹의 주요 변경사항을 날짜별로 기록한다.
 
+> - 이 파일은 모든 프로젝트에서 수동으로 동기화한다.
 > - 최신 내용이 위로 오도록 역순(최신순)으로 작성한다.
-> - 다른 시스템 변경 이력: [changelog-kend.md](./changelog-kend.md), [changelog-native.md](./changelog-native.md)
-> - Kend / Kend-Seller 양쪽에서 수동으로 동기화한다.
+> - 항목 제목 맨 앞에 `[KEND-SELLER]` prefix를 사용한다.
 
 ---
 
