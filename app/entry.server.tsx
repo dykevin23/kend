@@ -9,17 +9,31 @@ import { renderToPipeableStream } from "react-dom/server";
 
 export const streamTimeout = 5_000;
 
-const AUTH_PATH_PREFIXES = ["/auth"];
+const NO_STORE_PREFIXES = ["/auth", "/payments"];
+const NO_STORE_EXACT = new Set(["/children/submit"]);
+const NO_STORE_REGEXES = [
+  /^\/children\/[^/]+\/edit$/,
+  /^\/children\/[^/]+\/growth$/,
+];
+
+function isNoStorePath(pathname: string): boolean {
+  if (NO_STORE_EXACT.has(pathname)) return true;
+  if (
+    NO_STORE_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(p + "/")
+    )
+  ) {
+    return true;
+  }
+  return NO_STORE_REGEXES.some((r) => r.test(pathname));
+}
 
 function applyCacheControl(request: Request, headers: Headers) {
   if (headers.has("Cache-Control")) return;
   const url = new URL(request.url);
-  const isAuthPath = AUTH_PATH_PREFIXES.some((p) =>
-    url.pathname.startsWith(p)
-  );
   headers.set(
     "Cache-Control",
-    isAuthPath ? "no-store" : "private, max-age=0, must-revalidate"
+    isNoStorePath(url.pathname) ? "no-store" : "private, max-age=60"
   );
 }
 

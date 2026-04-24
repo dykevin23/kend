@@ -74,12 +74,17 @@
 - **참고**: [ios-review-rejection-apr14.md](active/ios-review-rejection-apr14.md)
 - **Sub-task**: (착수 시 추가)
 
-#### 🟡 P0-2. 1차 내부 테스트 잔여 처리
+#### 🟢 P0-2. 1차 내부 테스트 잔여 처리
 - **Due**: 2026-05-01
 - **참고**: [internal-test-1st.md](active/internal-test-1st.md)
 - **포함**: 스와이프 캐시 최종 테스트, 네이티브 스와이프 차단 URL blacklist 적용
 - **제외**: 휴대폰 인증 연계 2건 (→ Phase 1에서 통합)
-- **Sub-task**: (착수 시 추가)
+- **Sub-task**:
+  - [x] Cache-Control 정책 조정 — [app/entry.server.tsx](../app/entry.server.tsx) (`/auth`, `/payments`, `/children` 민감 경로 `no-store` / 그 외 `private, max-age=60`)
+  - [ ] Vercel 프리뷰 배포
+  - [ ] iOS 실기기 bfcache 동작 확인 (`/stores` → 상품 상세 → 스와이프 뒤로가기)
+  - [ ] Safari 개발자 도구 응답 헤더 검증 (CDN 헤더 덮어쓰기 여부 포함)
+  - [ ] 네이티브 스와이프 차단 URL blacklist 최종 적용
 
 #### 🟡 P0-3. 에러 핸들링 Week 2-3 + WebView 에러 브리지 마무리
 - **Due**: 2026-05-01
@@ -267,6 +272,7 @@
 - 로드맵 확정, 마일스톤 보드 생성
 - Toss 심사 대비 체크리스트 별도 작성
 - 다음 주(4/27)부터 Phase 0 본격 착수
+- **P0-2 착수**: `app/entry.server.tsx` Cache-Control 정책 조정 완료 → 프리뷰 배포 + iOS 실기기 검증 남음
 
 ---
 
