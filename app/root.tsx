@@ -8,6 +8,7 @@ import {
   ScrollRestoration,
   useLocation,
   useNavigation,
+  type ShouldRevalidateFunction,
 } from "react-router";
 import { useEffect, useState } from "react";
 
@@ -78,6 +79,20 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     }
   }
   return { user: null, cartCount: 0 };
+};
+
+// 뒤로가기(POP) 등 단순 경로 변경에서는 root loader 재실행 방지.
+// form action(로그인/로그아웃/장바구니 담기 등) 후에는 정상 revalidate.
+// 같은 URL 내 쿼리 변경 등에선 기본 동작 유지.
+export const shouldRevalidate: ShouldRevalidateFunction = ({
+  currentUrl,
+  nextUrl,
+  formMethod,
+  defaultShouldRevalidate,
+}) => {
+  if (formMethod && formMethod !== "GET") return true;
+  if (currentUrl.pathname !== nextUrl.pathname) return false;
+  return defaultShouldRevalidate;
 };
 
 function GlobalLoadingBar() {
