@@ -14,6 +14,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { Settings } from "luxon";
 import BottomNavigation from "./common/components/bottom-navigation";
+import DebugBanner from "./common/components/debug-banner";
 import { makeSSRClient } from "./supa-client";
 import { Toaster } from "sonner";
 import { AlertProvider } from "./hooks/useAlert";
@@ -104,6 +105,7 @@ export default function App() {
   return (
     <div className="h-screen overflow-hidden">
       <GlobalLoadingBar />
+      <DebugBanner />
       <Outlet />
       {showBottomNav && <BottomNavigation />}
     </div>
