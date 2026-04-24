@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useNavigation } from "react-router";
 
 type BfcacheState = "unknown" | "hit" | "miss";
 
@@ -11,11 +11,21 @@ const LAST_HIDE_KEY = "kend-debug-last-pagehide";
  */
 export default function DebugBanner() {
   const { pathname } = useLocation();
+  const navigation = useNavigation();
   const [bfcache, setBfcache] = useState<BfcacheState>("unknown");
   const [cacheControl, setCacheControl] = useState<string>("…");
   const [lastEventAt, setLastEventAt] = useState<string>("");
   const [navType, setNavType] = useState<string>("?");
   const [lastPagehide, setLastPagehide] = useState<string>("?");
+  const [loadCount, setLoadCount] = useState<number>(0);
+
+  // 페이지 "실제" 로드 횟수 카운트 — SPA 내부 네비게이션으로는 증가 안 함
+  useEffect(() => {
+    const prev = parseInt(sessionStorage.getItem("kend-debug-load") || "0");
+    const next = prev + 1;
+    sessionStorage.setItem("kend-debug-load", String(next));
+    setLoadCount(next);
+  }, []);
 
   useEffect(() => {
     const onPageShow = (e: PageTransitionEvent) => {
@@ -71,7 +81,12 @@ export default function DebugBanner() {
         {lastEventAt ? ` · ${lastEventAt}` : ""}
       </div>
       <div style={{ opacity: 0.9 }}>
-        navType: {navType} · lastPagehide.persisted: {lastPagehide}
+        navType: {navType} · lastPagehide: {lastPagehide} · loadCount:{" "}
+        {loadCount}
+      </div>
+      <div style={{ opacity: 0.9 }}>
+        RR state: <strong>{navigation.state}</strong>
+        {navigation.location ? ` → ${navigation.location.pathname}` : ""}
       </div>
       <div style={{ opacity: 0.85 }}>CC: {cacheControl}</div>
     </div>
