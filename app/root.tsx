@@ -9,6 +9,7 @@ import {
   useLocation,
   useNavigation,
 } from "react-router";
+import { useEffect, useState } from "react";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -82,8 +83,20 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 function GlobalLoadingBar() {
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
+  const [shouldShow, setShouldShow] = useState(false);
 
-  if (!isLoading) return null;
+  // 짧은 전환(뒤로가기 등)에서 progress bar가 번쩍이는 걸 막기 위한 delay.
+  // 200ms 내 끝나는 로딩은 bar 표시 안 함.
+  useEffect(() => {
+    if (!isLoading) {
+      setShouldShow(false);
+      return;
+    }
+    const timer = setTimeout(() => setShouldShow(true), 200);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  if (!shouldShow) return null;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-gray-200">
