@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLoaderData, type ShouldRevalidateFunction } from "react-router";
+import { useLoaderData } from "react-router";
 import type { Route } from "./+types/stores-page";
 import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
@@ -16,17 +16,6 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     getRandomBanners(client),
   ]);
   return { stores, domains, bannerImages };
-};
-
-export const shouldRevalidate: ShouldRevalidateFunction = ({
-  currentUrl,
-  nextUrl,
-  formMethod,
-  defaultShouldRevalidate,
-}) => {
-  if (formMethod && formMethod !== "GET") return true;
-  if (currentUrl.pathname !== nextUrl.pathname) return false;
-  return defaultShouldRevalidate;
 };
 
 export default function StoresPage() {
