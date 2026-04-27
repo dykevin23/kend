@@ -54,7 +54,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <AlertProvider>{children}</AlertProvider>
         </main>
         <Toaster position="top-center" richColors duration={3000} />
-        <ScrollRestoration />
+        {/* iOS swipe back UX 테스트: ScrollRestoration이 원인인지 확인 위해 임시 비활성화 */}
+        {/* <ScrollRestoration /> */}
         <Scripts />
       </body>
     </html>
