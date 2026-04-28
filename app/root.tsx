@@ -54,8 +54,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <AlertProvider>{children}</AlertProvider>
         </main>
         <Toaster position="top-center" richColors duration={3000} />
-        {/* iOS swipe back UX 테스트: ScrollRestoration이 원인인지 확인 위해 임시 비활성화 */}
-        {/* <ScrollRestoration /> */}
+        <ScrollRestoration />
         <Scripts />
       </body>
     </html>
@@ -122,6 +121,36 @@ function GlobalLoadingBar() {
 
 export default function App() {
   useAuthListener();
+
+  // 임시 진단: iOS WebView swipe-back 동작 확인용. 진단 후 제거.
+  useEffect(() => {
+    const log = (label: string, extra?: unknown) => {
+      console.log(
+        `[SWIPE_DIAG] ${new Date().toISOString().slice(11, 23)} ${label}`,
+        extra ?? ""
+      );
+    };
+    const onPageShow = (e: PageTransitionEvent) =>
+      log("pageshow", { persisted: e.persisted, url: location.pathname });
+    const onPageHide = (e: PageTransitionEvent) =>
+      log("pagehide", { persisted: e.persisted, url: location.pathname });
+    const onPopState = (e: PopStateEvent) =>
+      log("popstate", { url: location.pathname, state: e.state });
+    const onBeforeUnload = () =>
+      log("beforeunload", { url: location.pathname });
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("popstate", onPopState);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    log("mount", { url: location.pathname });
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, []);
+
   const { pathname } = useLocation();
   const showBottomNav =
     pathname === "/stores" ||
