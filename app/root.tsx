@@ -119,30 +119,55 @@ function GlobalLoadingBar() {
   );
 }
 
-export default function App() {
-  useAuthListener();
+// 임시 진단: iOS WebView swipe-back 동작 확인용. 진단 후 제거.
+// sessionStorage에 누적해서 풀 리로드도 견딤.
+const SWIPE_DIAG_KEY = "swipeDiagLogs";
 
-  // 임시 진단: iOS WebView swipe-back 동작 확인용. 진단 후 제거.
+function SwipeDiagOverlay() {
+  const [logs, setLogs] = useState<string[]>([]);
+
   useEffect(() => {
-    const log = (label: string, extra?: unknown) => {
-      console.log(
-        `[SWIPE_DIAG] ${new Date().toISOString().slice(11, 23)} ${label}`,
-        extra ?? ""
-      );
+    const readLogs = (): string[] => {
+      try {
+        const raw = sessionStorage.getItem(SWIPE_DIAG_KEY);
+        return raw ? (JSON.parse(raw) as string[]) : [];
+      } catch {
+        return [];
+      }
     };
+    const writeLogs = (entries: string[]) => {
+      try {
+        sessionStorage.setItem(SWIPE_DIAG_KEY, JSON.stringify(entries));
+      } catch {
+        // ignore
+      }
+    };
+    const append = (label: string, extra?: unknown) => {
+      const ts = new Date().toISOString().slice(11, 23);
+      const entry = `${ts} ${label} ${extra !== undefined ? JSON.stringify(extra) : ""}`;
+      const current = readLogs();
+      const next = [...current, entry].slice(-20);
+      writeLogs(next);
+      setLogs(next);
+    };
+
+    setLogs(readLogs());
+
     const onPageShow = (e: PageTransitionEvent) =>
-      log("pageshow", { persisted: e.persisted, url: location.pathname });
+      append("pageshow", { persisted: e.persisted, url: location.pathname });
     const onPageHide = (e: PageTransitionEvent) =>
-      log("pagehide", { persisted: e.persisted, url: location.pathname });
-    const onPopState = (e: PopStateEvent) =>
-      log("popstate", { url: location.pathname, state: e.state });
+      append("pagehide", { persisted: e.persisted, url: location.pathname });
+    const onPopState = () =>
+      append("popstate", { url: location.pathname });
     const onBeforeUnload = () =>
-      log("beforeunload", { url: location.pathname });
+      append("beforeunload", { url: location.pathname });
+
     window.addEventListener("pageshow", onPageShow);
     window.addEventListener("pagehide", onPageHide);
     window.addEventListener("popstate", onPopState);
     window.addEventListener("beforeunload", onBeforeUnload);
-    log("mount", { url: location.pathname });
+    append("mount", { url: location.pathname });
+
     return () => {
       window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("pagehide", onPageHide);
@@ -151,6 +176,55 @@ export default function App() {
     };
   }, []);
 
+  const handleClear = () => {
+    sessionStorage.removeItem(SWIPE_DIAG_KEY);
+    setLogs([]);
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 4,
+        right: 4,
+        zIndex: 99999,
+        maxWidth: "70vw",
+        maxHeight: "40vh",
+        overflowY: "auto",
+        background: "rgba(0,0,0,0.85)",
+        color: "#0f0",
+        fontSize: 9,
+        fontFamily: "monospace",
+        padding: 4,
+        borderRadius: 4,
+        pointerEvents: "auto",
+      }}
+    >
+      <button
+        onClick={handleClear}
+        style={{
+          background: "#900",
+          color: "#fff",
+          fontSize: 9,
+          border: "none",
+          padding: "2px 6px",
+          marginBottom: 2,
+          borderRadius: 2,
+        }}
+      >
+        clear
+      </button>
+      {logs.map((l, i) => (
+        <div key={i} style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+          {l}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function App() {
+  useAuthListener();
   const { pathname } = useLocation();
   const showBottomNav =
     pathname === "/stores" ||
@@ -164,6 +238,7 @@ export default function App() {
       <GlobalLoadingBar />
       <Outlet />
       {showBottomNav && <BottomNavigation />}
+      <SwipeDiagOverlay />
     </div>
   );
 }
