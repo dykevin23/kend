@@ -125,33 +125,29 @@ const SWIPE_DIAG_KEY = "swipeDiagLogs";
 
 function SwipeDiagOverlay() {
   const [logs, setLogs] = useState<string[]>([]);
+  const navigation = useNavigation();
+
+  const append = (label: string, extra?: unknown) => {
+    const ts = new Date().toISOString().slice(11, 23);
+    const entry = `${ts} ${label} ${extra !== undefined ? JSON.stringify(extra) : ""}`;
+    try {
+      const raw = sessionStorage.getItem(SWIPE_DIAG_KEY);
+      const current = raw ? (JSON.parse(raw) as string[]) : [];
+      const next = [...current, entry].slice(-20);
+      sessionStorage.setItem(SWIPE_DIAG_KEY, JSON.stringify(next));
+      setLogs(next);
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
-    const readLogs = (): string[] => {
-      try {
-        const raw = sessionStorage.getItem(SWIPE_DIAG_KEY);
-        return raw ? (JSON.parse(raw) as string[]) : [];
-      } catch {
-        return [];
-      }
-    };
-    const writeLogs = (entries: string[]) => {
-      try {
-        sessionStorage.setItem(SWIPE_DIAG_KEY, JSON.stringify(entries));
-      } catch {
-        // ignore
-      }
-    };
-    const append = (label: string, extra?: unknown) => {
-      const ts = new Date().toISOString().slice(11, 23);
-      const entry = `${ts} ${label} ${extra !== undefined ? JSON.stringify(extra) : ""}`;
-      const current = readLogs();
-      const next = [...current, entry].slice(-20);
-      writeLogs(next);
-      setLogs(next);
-    };
-
-    setLogs(readLogs());
+    try {
+      const raw = sessionStorage.getItem(SWIPE_DIAG_KEY);
+      setLogs(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      // ignore
+    }
 
     const onPageShow = (e: PageTransitionEvent) =>
       append("pageshow", { persisted: e.persisted, url: location.pathname });
@@ -174,7 +170,16 @@ function SwipeDiagOverlay() {
       window.removeEventListener("popstate", onPopState);
       window.removeEventListener("beforeunload", onBeforeUnload);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // navigation.state 변화를 추적: idle → loading → idle 이면 loader 재실행됨
+  useEffect(() => {
+    append(`nav:${navigation.state}`, {
+      to: navigation.location?.pathname,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation.state, navigation.location?.pathname]);
 
   const handleClear = () => {
     sessionStorage.removeItem(SWIPE_DIAG_KEY);
