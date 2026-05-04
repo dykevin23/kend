@@ -5,6 +5,7 @@ import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { makeSSRClient } from "~/supa-client";
+import { makeCachedClientLoader } from "~/lib/cached-client-loader";
 import {
   getStoreByCode,
   getProductsBySeller,
@@ -27,6 +28,10 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
 
   return { store, products, mainCategories, bannerImages };
 };
+
+export const clientLoader =
+  makeCachedClientLoader<Awaited<ReturnType<typeof loader>>>();
+clientLoader.hydrate = true as const;
 
 export default function StorePage() {
   const { store, products, mainCategories, bannerImages } = useLoaderData<typeof loader>();
