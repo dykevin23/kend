@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLoaderData, type ShouldRevalidateFunction } from "react-router";
+import { useLoaderData } from "react-router";
 import type { Route } from "./+types/stores-page";
 import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
@@ -18,16 +18,25 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   return { stores, domains, bannerImages };
 };
 
-export const shouldRevalidate: ShouldRevalidateFunction = ({
-  currentUrl,
-  nextUrl,
-  formMethod,
-  defaultShouldRevalidate,
-}) => {
-  if (formMethod && formMethod !== "GET") return true;
-  if (currentUrl.pathname !== nextUrl.pathname) return false;
-  return defaultShouldRevalidate;
+// 클라이언트 측 캐시: swipe back 등 라우트 재진입 시 loader 재실행 방지.
+// React Router v7의 single fetch는 매 navigation마다 loader를 재실행하므로,
+// clientLoader로 직접 캐시한다. mutation 후엔 별도 무효화 필요.
+const clientCache = new Map<string, unknown>();
+
+export const clientLoader = async ({
+  request,
+  serverLoader,
+}: Route.ClientLoaderArgs) => {
+  const url = new URL(request.url);
+  const key = url.pathname + url.search;
+  if (clientCache.has(key)) {
+    return clientCache.get(key) as Awaited<ReturnType<typeof loader>>;
+  }
+  const data = await serverLoader();
+  clientCache.set(key, data);
+  return data;
 };
+clientLoader.hydrate = true as const;
 
 export default function StoresPage() {
   const { stores, domains, bannerImages } = useLoaderData<typeof loader>();
