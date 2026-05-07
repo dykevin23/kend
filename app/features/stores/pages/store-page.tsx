@@ -5,7 +5,7 @@ import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { makeSSRClient } from "~/supa-client";
-import { makeCachedClientLoader } from "~/lib/cached-client-loader";
+import { withClientCache } from "~/lib/with-client-cache";
 import {
   getStoreByCode,
   getProductsBySeller,
@@ -15,23 +15,21 @@ import {
 import { StoreInfo } from "../components/store-card";
 import ProductCard from "~/features/products/components/product-card";
 
-export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  const { client } = makeSSRClient(request);
-  const { storeId: sellerCode } = params;
+export const { loader, clientLoader } = withClientCache(
+  async ({ request, params }: Route.LoaderArgs) => {
+    const { client } = makeSSRClient(request);
+    const { storeId: sellerCode } = params;
 
-  const store = await getStoreByCode(client, sellerCode);
-  const [products, mainCategories, bannerImages] = await Promise.all([
-    getProductsBySeller(client, store.id),
-    getMainCategories(client, store.domainId ?? undefined),
-    getSellerBanners(client, store.id),
-  ]);
+    const store = await getStoreByCode(client, sellerCode);
+    const [products, mainCategories, bannerImages] = await Promise.all([
+      getProductsBySeller(client, store.id),
+      getMainCategories(client, store.domainId ?? undefined),
+      getSellerBanners(client, store.id),
+    ]);
 
-  return { store, products, mainCategories, bannerImages };
-};
-
-export const clientLoader =
-  makeCachedClientLoader<Awaited<ReturnType<typeof loader>>>();
-clientLoader.hydrate = true as const;
+    return { store, products, mainCategories, bannerImages };
+  }
+);
 
 export default function StorePage() {
   const { store, products, mainCategories, bannerImages } = useLoaderData<typeof loader>();
