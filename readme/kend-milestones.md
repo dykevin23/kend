@@ -77,13 +77,13 @@
 #### 🟢 P0-2. 1차 내부 테스트 잔여 처리
 - **Due**: 2026-05-01
 - **참고**: [internal-test-1st.md](active/internal-test-1st.md)
-- **포함**: 스와이프 캐시 최종 테스트, 네이티브 스와이프 차단 URL blacklist 적용
+- **포함**: 스와이프 뒤로가기 UX 개선, 네이티브 스와이프 차단 URL blacklist 적용
 - **제외**: 휴대폰 인증 연계 2건 (→ Phase 1에서 통합)
 - **Sub-task**:
   - [x] Cache-Control 정책 조정 — [app/entry.server.tsx](../app/entry.server.tsx) (`/auth`, `/payments`, `/children` 민감 경로 `no-store` / 그 외 `private, max-age=60`)
-  - [ ] Vercel 프리뷰 배포
-  - [ ] iOS 실기기 bfcache 동작 확인 (`/stores` → 상품 상세 → 스와이프 뒤로가기)
-  - [ ] Safari 개발자 도구 응답 헤더 검증 (CDN 헤더 덮어쓰기 여부 포함)
+  - [x] iOS 실기기 swipe back 진단 (가설: bfcache 미작동 → 결과: **bfcache가 아닌 React Router single fetch의 loader 재실행**이 원인)
+  - [x] `clientLoader` 캐시 헬퍼 도입 + `/stores`, `/stores/:storeId` 2개 라우트 적용 → swipe back 시 loader 단계 없이 즉시 복귀 확인
+  - [ ] **나머지 라우트로 펼치기** (저위험 일괄 + 고위험 invalidation 인프라) → [client-loader-cache-rollout](todo/client-loader-cache-rollout.md)
   - [ ] 네이티브 스와이프 차단 URL blacklist 최종 적용
 
 #### 🟡 P0-3. 에러 핸들링 Week 2-3 + WebView 에러 브리지 마무리

@@ -119,115 +119,6 @@ function GlobalLoadingBar() {
   );
 }
 
-// 임시 진단: iOS WebView swipe-back 동작 확인용. 진단 후 제거.
-// sessionStorage에 누적해서 풀 리로드도 견딤.
-const SWIPE_DIAG_KEY = "swipeDiagLogs";
-
-function SwipeDiagOverlay() {
-  const [logs, setLogs] = useState<string[]>([]);
-  const navigation = useNavigation();
-
-  const append = (label: string, extra?: unknown) => {
-    const ts = new Date().toISOString().slice(11, 23);
-    const entry = `${ts} ${label} ${extra !== undefined ? JSON.stringify(extra) : ""}`;
-    try {
-      const raw = sessionStorage.getItem(SWIPE_DIAG_KEY);
-      const current = raw ? (JSON.parse(raw) as string[]) : [];
-      const next = [...current, entry].slice(-20);
-      sessionStorage.setItem(SWIPE_DIAG_KEY, JSON.stringify(next));
-      setLogs(next);
-    } catch {
-      // ignore
-    }
-  };
-
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(SWIPE_DIAG_KEY);
-      setLogs(raw ? (JSON.parse(raw) as string[]) : []);
-    } catch {
-      // ignore
-    }
-
-    const onPageShow = (e: PageTransitionEvent) =>
-      append("pageshow", { persisted: e.persisted, url: location.pathname });
-    const onPageHide = (e: PageTransitionEvent) =>
-      append("pagehide", { persisted: e.persisted, url: location.pathname });
-    const onPopState = () =>
-      append("popstate", { url: location.pathname });
-    const onBeforeUnload = () =>
-      append("beforeunload", { url: location.pathname });
-
-    window.addEventListener("pageshow", onPageShow);
-    window.addEventListener("pagehide", onPageHide);
-    window.addEventListener("popstate", onPopState);
-    window.addEventListener("beforeunload", onBeforeUnload);
-    append("mount", { url: location.pathname });
-
-    return () => {
-      window.removeEventListener("pageshow", onPageShow);
-      window.removeEventListener("pagehide", onPageHide);
-      window.removeEventListener("popstate", onPopState);
-      window.removeEventListener("beforeunload", onBeforeUnload);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // navigation.state 변화를 추적: idle → loading → idle 이면 loader 재실행됨
-  useEffect(() => {
-    append(`nav:${navigation.state}`, {
-      to: navigation.location?.pathname,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation.state, navigation.location?.pathname]);
-
-  const handleClear = () => {
-    sessionStorage.removeItem(SWIPE_DIAG_KEY);
-    setLogs([]);
-  };
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: 4,
-        right: 4,
-        zIndex: 99999,
-        maxWidth: "70vw",
-        maxHeight: "40vh",
-        overflowY: "auto",
-        background: "rgba(0,0,0,0.85)",
-        color: "#0f0",
-        fontSize: 9,
-        fontFamily: "monospace",
-        padding: 4,
-        borderRadius: 4,
-        pointerEvents: "auto",
-      }}
-    >
-      <button
-        onClick={handleClear}
-        style={{
-          background: "#900",
-          color: "#fff",
-          fontSize: 9,
-          border: "none",
-          padding: "2px 6px",
-          marginBottom: 2,
-          borderRadius: 2,
-        }}
-      >
-        clear
-      </button>
-      {logs.map((l, i) => (
-        <div key={i} style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-          {l}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function App() {
   useAuthListener();
   const { pathname } = useLocation();
@@ -243,7 +134,6 @@ export default function App() {
       <GlobalLoadingBar />
       <Outlet />
       {showBottomNav && <BottomNavigation />}
-      <SwipeDiagOverlay />
     </div>
   );
 }

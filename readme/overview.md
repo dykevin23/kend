@@ -21,6 +21,7 @@
 
 ## ✅ 최근 완료 (2주 이내)
 
+- 2026-05-07: iOS swipe back UX 진단 + 부분 해결 (`clientLoader` 캐시 도입 — `/stores`, `/stores/:storeId` 2개 라우트, 나머지는 후속 작업)
 - 2026-04-17: 회원가입/약관/헤더/캐시 개선 6건 (iOS bfcache 대응 포함)
 - 2026-04-16: 1차 내부 테스트 UI/UX 개선 10건 (dot indicator, 스크롤바 숨김, 팝업 등)
 - 2026-04-15: Apple Sign In 연결, 이용약관 전문 교체, 결제 "준비 중" 처리 (iOS 심사 대응)

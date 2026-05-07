@@ -3,6 +3,8 @@
 > **목표**: SSR loader 의존으로 인한 페이지 전환 지연을 해소하고, 네이티브 앱에 가까운 반응 속도를 확보한다.  
 > **상태**: 장기 계획 (출시 후 점진적 전환)
 
+> **2026-05-07 추가 메모**: iOS swipe back UX 개선을 위해 `app/lib/with-client-cache.ts`의 `makeCachedClientLoader<T>()`로 일부 라우트(`/stores`, `/stores/:storeId`)에 좁은 범위의 `clientLoader` 캐시를 임시 도입함 (자세한 배경은 [changelog-kend.md 2026-05-07](../changelog-kend.md), 후속은 [client-loader-cache-rollout.md](./client-loader-cache-rollout.md)). 본 문서의 "clientLoader 캐싱은 React Query 재발명" 입장은 *전체 데이터 페칭 전략* 관점에서 여전히 유효함. 해당 임시 캐시는 React Query 도입 시 자연스럽게 흡수/제거 예정.
+
 ---
 
 ## 현재 문제

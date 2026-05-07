@@ -11,7 +11,7 @@
 | 구분 | 내용 | 수정 대상 | 상태 |
 |------|------|-----------|------|
 | 개선 | iOS에서는 좌→우 밀어서 뒤로가기, 안드로이드에서는 back버튼에 대한 정의 — 어느 화면에서 허용하고 말지를 정해야 함 | kend-native | 진행중 (blacklist 문서 전달) |
-| 개선 | iOS에서 좌→우 밀어서 뒤로가기 시, 캐시 때문인지 이전 화면이 보였다가 다시 현 화면으로 돌아와 progress 이후 이전 화면으로 가는 오류 | kend + kend-native | 일부 완료 (Cache-Control 설정, 테스트 필요) |
+| 개선 | iOS에서 좌→우 밀어서 뒤로가기 시, 이전 화면이 보였다가 다시 현 화면으로 돌아와 progress 이후 이전 화면으로 가는 오류 | kend + kend-native | 진단 완료 + 부분 적용 (`/stores`, `/stores/:storeId` 2개 라우트만 적용. 나머지는 [client-loader-cache-rollout](../todo/client-loader-cache-rollout.md)) |
 | 개선 | 스크롤이 없는 화면에서 화면이 좌우로는 밀리지 않는데, 위아래로는 밀리는 현상 (웹뷰 bounce) | kend-native | 완료 |
 | 개선 | navigation 메뉴 기준 최초 1depth 페이지 말고 하위 페이지들에서 home으로 접근하기 위한 방법 필요 (상단에 홈버튼 추가) | kend | 완료 |
 | 개선 | 입력필드 선택(키패드 올라온 뒤) 시 줌이 되는데, 닫히면 다시 원래대로 돌아오도록 (줌이 안되도록) | kend + kend-native | 완료 |
@@ -61,7 +61,7 @@
 
 - 전체: 18건
 - 완료: 15건
-- 일부 완료 / 테스트 필요: 1건 (스와이프 뒤로가기 캐시)
+- 진단 완료 + 부분 적용 (후속 작업 분리): 1건 (스와이프 뒤로가기 → [client-loader-cache-rollout](../todo/client-loader-cache-rollout.md))
 - 진행중 (kend-native 후속): 1건 (스와이프 URL blacklist)
 - 보류 (휴대폰 인증 도입 시 통합 처리): 2건
   - 아이디/비밀번호 찾기
