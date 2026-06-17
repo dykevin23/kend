@@ -129,7 +129,7 @@ export default function LoginPage() {
                 <div className="flex items-center justify-center">
                   <Link to="/auth/find-password">
                     <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-secondary">
-                      비밀번호 찾기
+                      비밀번호 재설정
                     </span>
                   </Link>
                 </div>

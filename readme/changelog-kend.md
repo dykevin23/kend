@@ -9,6 +9,12 @@ KEND 웹앱(React Router SSR + WebView)의 주요 변경사항을 날짜별로 �
 
 ## 2026-06-17
 
+### [KEND] 로그인/비밀번호 재설정 UX 수정
+
+- **문구 통일**: 로그인 화면의 "비밀번호 찾기" → "비밀번호 재설정" (find-password 페이지 제목도 동일하게 변경)
+- **로그인 실패 메시지 수정**: 비밀번호 오류 시 "알 수 없는 오류"로 표시되던 문제 해결. `error-handler` 가 Supabase `AuthError`(Error 인스턴스이면서 `code` 보유)를 `instanceof Error` 로 먼저 처리해 `code`(invalid_credentials) 매핑을 건너뛰던 순서 버그 → code 우선 확인하도록 수정 + 메시지 fallback 추가 → "이메일 또는 비밀번호가 올바르지 않아요" 정상 표시
+- **token_hash 재설정 검증**: 메일 링크의 화면 미입력 검증은 브라우저 네이티브(`required`) 사용 중 — 폼 validation 표준화는 별도 todo 로 분리 ([form-validation-standard.md](./todo/form-validation-standard.md))
+
 ### [KEND] 이메일 기반 비밀번호 재설정 추가 + 아이디 찾기 제거
 
 - **비밀번호 찾기** (`/auth/find-password`): 이메일 입력 → Supabase `resetPasswordForEmail` 로 재설정 링크 발송(redirectTo = `REDIRECT_LOGIN_URL/auth/reset-password`). 이메일 존재 여부/계정 유형은 노출하지 않고 항상 동일 응답(열거 방지)

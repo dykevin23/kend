@@ -58,7 +58,7 @@ export default function FindPasswordPage() {
       <div className="flex w-full flex-col items-start gap-8 pt-10 px-6 flex-1">
         <div className="flex flex-col gap-2 self-stretch">
           <span className="text-xl leading-[130%] tracking-[-0.4px] text-secondary text-center">
-            비밀번호 찾기
+            비밀번호 재설정
           </span>
           <span className="text-sm leading-[140%] text-center text-muted-foreground">
             가입한 이메일로 재설정 링크를 보내드려요.

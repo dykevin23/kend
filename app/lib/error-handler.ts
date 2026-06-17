@@ -33,14 +33,16 @@ export function parseSupabaseError(error: unknown): AppError {
 
   const err = error as Record<string, unknown>;
 
-  // Error 인스턴스 (mutation에서 throw new Error() 한 경우)
-  if (error instanceof Error) {
-    return parseErrorMessage(error.message, error);
+  // Supabase 에러 객체 ({ code, message, details }).
+  // ⚠️ AuthError 는 Error 인스턴스이면서 code(예: invalid_credentials)를 가지므로,
+  //    code 를 instanceof Error 보다 먼저 확인해야 올바른 메시지로 매핑된다.
+  if ("code" in err && err.code) {
+    return parseErrorCode(String(err.code), err);
   }
 
-  // Supabase 에러 객체 ({ code, message, details })
-  if ("code" in err) {
-    return parseErrorCode(String(err.code), err);
+  // code 없는 Error 인스턴스 (mutation에서 throw new Error() 한 경우)
+  if (error instanceof Error) {
+    return parseErrorMessage(error.message, error);
   }
 
   // Supabase Storage 에러 ({ statusCode, error, message })
@@ -146,6 +148,9 @@ function parseErrorMessage(message: string, original: unknown): AppError {
   }
   if (lower.includes("not authenticated") || lower.includes("unauthorized")) {
     return { code: "AUTH_REQUIRED", message: "로그인이 필요해요.", originalError: original };
+  }
+  if (lower.includes("invalid login credentials") || lower.includes("invalid credentials")) {
+    return { code: "AUTH_FAILED", message: "이메일 또는 비밀번호가 올바르지 않아요.", originalError: original };
   }
   if (lower.includes("network") || lower.includes("fetch failed")) {
     return { code: "NETWORK", message: "인터넷 연결을 확인하고 다시 시도해주세요.", originalError: original };
