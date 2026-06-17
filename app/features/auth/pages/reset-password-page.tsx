@@ -26,16 +26,30 @@ const schema = z
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client, headers } = makeSSRClient(request);
   const url = new URL(request.url);
+  const tokenHash = url.searchParams.get("token_hash");
+  const type = url.searchParams.get("type");
   const code = url.searchParams.get("code");
 
-  if (code) {
-    const { error } = await client.auth.exchangeCodeForSession(code);
+  // 1순위: token_hash 방식(무상태) — PKCE verifier 쿠키에 의존하지 않아
+  // 외부 브라우저/다른 기기에서 메일 링크를 열어도 동작. (WebView 앱 대응)
+  if (tokenHash && type) {
+    const { error } = await client.auth.verifyOtp({
+      type: type as "recovery",
+      token_hash: tokenHash,
+    });
     if (error) return { valid: false };
-    // 세션 쿠키 세팅 + 단발성 code 제거를 위해 깨끗한 URL 로 redirect
+    // 세션 쿠키 세팅 + 토큰 파라미터 제거를 위해 깨끗한 URL 로 redirect
     return redirect("/auth/reset-password", { headers });
   }
 
-  // code 없이 들어온 경우: 복구 세션이 살아있으면 폼 노출, 아니면 무효 링크
+  // 2순위(fallback): PKCE code 방식 (같은 브라우저에서만 동작)
+  if (code) {
+    const { error } = await client.auth.exchangeCodeForSession(code);
+    if (error) return { valid: false };
+    return redirect("/auth/reset-password", { headers });
+  }
+
+  // 파라미터 없이 들어온 경우: 복구 세션이 살아있으면 폼 노출, 아니면 무효 링크
   const {
     data: { user },
   } = await client.auth.getUser();
