@@ -54,6 +54,8 @@ export default [
   ...prefix("auth", [
     route("/login", "features/auth/pages/login-page.tsx"),
     route("/join", "features/auth/pages/join-page.tsx"),
+    route("/find-password", "features/auth/pages/find-password-page.tsx"),
+    route("/reset-password", "features/auth/pages/reset-password-page.tsx"),
     ...prefix("/social/:provider", [
       route("/start", "features/auth/pages/social-start-page.tsx"),
       route("/complete", "features/auth/pages/social-complete-page.tsx"),

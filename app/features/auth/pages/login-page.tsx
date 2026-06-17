@@ -126,12 +126,7 @@ export default function LoginPage() {
                 >
                   로그인
                 </Button>
-                <div className="flex items-center gap-6">
-                  <Link to="/auth/find-id">
-                    <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-secondary">
-                      아이디 찾기
-                    </span>
-                  </Link>
+                <div className="flex items-center justify-center">
                   <Link to="/auth/find-password">
                     <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-secondary">
                       비밀번호 찾기

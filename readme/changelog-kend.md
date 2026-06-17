@@ -7,6 +7,25 @@ KEND 웹앱(React Router SSR + WebView)의 주요 변경사항을 날짜별로 �
 
 ---
 
+## 2026-06-17
+
+### [KEND] 이메일 기반 비밀번호 재설정 추가 + 아이디 찾기 제거
+
+- **비밀번호 찾기** (`/auth/find-password`): 이메일 입력 → Supabase `resetPasswordForEmail` 로 재설정 링크 발송(redirectTo = `REDIRECT_LOGIN_URL/auth/reset-password`). 이메일 존재 여부/계정 유형은 노출하지 않고 항상 동일 응답(열거 방지)
+- **비밀번호 재설정** (`/auth/reset-password`): 메일 링크 도착지. loader 가 `code` 를 세션으로 교환(소셜 콜백과 동일 패턴) 후 깨끗한 URL 로 redirect, 새 비밀번호 입력 → `updateUser` → 로그아웃 후 로그인 이동. 무효/만료 링크 안내 포함
+- **아이디 찾기 제거**: 본인 인증 수단(휴대폰 등) 없이는 이메일을 안전하게 되돌려줄 방법이 없어 기능 제외. 로그인 페이지에서 "아이디 찾기" 링크 삭제(404 나던 링크 정리)
+- 소셜 가입자가 자기 소셜 이메일로 재설정하면 비밀번호가 추가되어 이메일 로그인도 가능해짐(허용)
+- 참고: 로그인 시도제한/캡차 등 하드닝은 별도 항목으로 보류
+
+### [KEND] 휴대폰 인증(SMS OTP) 출시 후로 보류 결정
+
+- **결정**: 휴대폰 SMS 인증을 MVP에서 제외하고 출시 후로 이연. SMS OTP는 본인인증(NICE)이 아니라 번호 점유 확인일 뿐이고, 비밀번호 찾기는 Supabase 이메일 재설정으로 대체 가능하며 출시 블로커가 아님
+- **코드 보존**: 휴대폰 인증 전체 구현(가입 게이트/OTP Edge Function/추가정보/아이디·비번 찾기/번호 중복방지/트리거 정비)은 **`feature/phone-auth` 브랜치(commit d6ec2b0)** 에 커밋해 보존. kend-newbuild 에는 미반영(원복)
+- **대체**: 출시 전 계정 복구는 이메일 기반 비밀번호 재설정으로 처리
+- 상세: [readme/todo/phone-auth-plan.md](./todo/phone-auth-plan.md) 상단 보류 배너 참조
+
+---
+
 ## 2026-05-07
 
 ### [KEND] iOS swipe back UX 개선 — clientLoader 캐시 도입 (부분 적용)
