@@ -9,6 +9,12 @@ KEND 웹앱(React Router SSR + WebView)의 주요 변경사항을 날짜별로 �
 
 ## 2026-06-24
 
+### [KEND] 디버그 console.log 정리 (P0-3 에러 핸들링)
+
+- 결제/주문 플로우 디버그 로그(`product-purchase-modal` 3건, `order-action` 3건) + `select-accordion`·`address-manage-modal` 디버그 로그 제거 (총 8건)
+- `console.error`(에러 로깅 17건)와 `create-naver-user` Edge Function 서버 로그는 유지 — PostHog 전환은 별도 작업
+- 동작 영향 없는 로그 삭제 (타입체크 통과로 검증)
+
 ### [KEND] 오프라인 감지 추가 (P0-3 에러 핸들링)
 
 - **`useNetworkStatus` 훅** (`app/hooks/useNetworkStatus.ts`): `useSyncExternalStore` 기반 online/offline 감지. SSR 안전을 위해 `getServerSnapshot`(서버에선 항상 online 가정) 포함 → hydration mismatch 방지

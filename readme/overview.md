@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-06-23
+> 최종 업데이트: 2026-06-24
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -12,22 +12,21 @@
 
 ---
 
-## 🚦 지금 상황 (2026-06-23)
+## 🚦 지금 상황 (2026-06-24)
 
 - 🚨 **iOS App Store 심사 2달+ 정체** — 1달 전 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate(전화 콜백) → 빌드 리셋 재제출 트랙으로 대응. **개발은 병렬 진행**
 - **계정/인증 트랙 정리 완료**: 이메일 비밀번호 재설정 구현 / 휴대폰 SMS 인증은 출시 후로 이연(이메일 재설정으로 대체) / 아이디 찾기 제거
 - **주문/결제 도메인 거의 구현됨**: 결제는 `PAYMENT_COMING_SOON`으로 막아둠. 남은 건 코딩이 아니라 **Toss 테스트 키(EXT-3) 발급 + E2E 검증**
-- **다음 개발**: P0-3 에러 핸들링 잔여 — 오프라인 감지 완료, 다음은 console.log 정리·PostHog·WebView 브리지
+- **다음 개발**: P0-3 에러 핸들링 잔여 — 오프라인 감지·console.log 정리 완료, 다음은 PostHog·WebView 브리지·Edge Function 표준화
 
 ---
 
 ## ✅ 최근 완료
 
+- 2026-06-24: **디버그 console.log 정리** (P0-3, 8건 제거)
 - 2026-06-24: **오프라인 감지** (useNetworkStatus 훅 + 오프라인 배너, root 연동) — 실기기 비행기모드로 동작 확인 ✅
 - 2026-06-24: 문서 체계 정비 — overview 대시보드 복구 + structure-guide §8 + /changelog 명령어 개편
 - 2026-06-23: 계획 문서(roadmap/milestones) 현실화 — 휴대폰 인증 이연 / 결제·주문 거의 완료 / RLS 전체 범위 반영
-- 2026-06-17: 이메일 기반 비밀번호 재설정 + 로그인/재설정 UX 수정, 아이디 찾기 제거
-- 2026-05-07: iOS swipe back 진단 + `clientLoader` 캐시 부분 적용 (`/stores`, `/stores/:storeId`)
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
@@ -48,7 +47,7 @@
 
 | 항목 | 우선순위 | 비고 |
 |------|---------|------|
-| P0-3 잔여 — console.log 정리 / PostHog / WebView 브리지 | 다음 | 오프라인 감지 완료(6/24) |
+| P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 다음 | 오프라인·console.log 완료(6/24) |
 | 결제 E2E 검증 | 대기 | Toss 테스트 키(EXT-3) 발급 후 |
 | kend-seller Phase 2 (판매자 기반 → 주문관리) | 다음 큰 블록 | 시드 주문으로 결제 없이도 진행 가능 |
 | 환불/취소/구매확정 (P1-5) | 출시 전 | 결제 후속 |
