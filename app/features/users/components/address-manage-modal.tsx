@@ -53,7 +53,6 @@ export default function AddressManageModal({
 
   const handleFindByLocation = () => {
     // TODO: 현재 위치로 주소 찾기 (Native 기능)
-    console.log("Find by location");
   };
 
   const addresses = fetcher.data?.addresses ?? [];

@@ -160,13 +160,6 @@ export default function ProductPurchaseModal({
 
   // 주문 결과 처리 → 서버 응답 후 requestPayment() 호출
   useEffect(() => {
-    console.log("[결제] fetcher 상태 변경:", {
-      state: fetcher.state,
-      data: fetcher.data,
-      hasHandled: hasHandledRef.current,
-      paymentWidgetReady: !!paymentWidget,
-    });
-
     if (fetcher.data && !hasHandledRef.current) {
       hasHandledRef.current = true;
 
@@ -176,13 +169,6 @@ export default function ProductPurchaseModal({
           items.length > 1
             ? `${items[0].product.name} 외 ${items.length - 1}건`
             : items[0].product.name;
-
-        console.log("[결제] 주문 생성 성공, requestPayment 호출:", {
-          orderNumber,
-          orderName,
-          successUrl: `${window.location.origin}/payments/success`,
-          failUrl: `${window.location.origin}/payments/fail`,
-        });
 
         // 장바구니 정리용 ID를 sessionStorage에 저장
         if (cartItemIds && cartItemIds.length > 0) {
@@ -246,13 +232,6 @@ export default function ProductPurchaseModal({
     }
 
     hasHandledRef.current = false;
-
-    console.log("[결제] 주문 생성 요청 시작", {
-      address: selectedAddress,
-      sellerGroups,
-      items,
-      deliveryMessage,
-    });
 
     fetcher.submit(
       {

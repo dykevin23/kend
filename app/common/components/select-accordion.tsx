@@ -33,7 +33,6 @@ export const SelectAccordion = ({
   const handleClick =
     (value: string, parent: string) =>
     (event: React.MouseEvent<HTMLDivElement>) => {
-      console.log("### handleClick => ", value, parent);
       onChange(value, parent);
 
       setAccordionValues((prev) => prev.filter((v) => v !== parent));
