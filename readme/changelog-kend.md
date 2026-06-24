@@ -7,6 +7,31 @@ KEND 웹앱(React Router SSR + WebView)의 주요 변경사항을 날짜별로 �
 
 ---
 
+## 2026-06-24
+
+### [KEND] 오프라인 감지 추가 (P0-3 에러 핸들링)
+
+- **`useNetworkStatus` 훅** (`app/hooks/useNetworkStatus.ts`): `useSyncExternalStore` 기반 online/offline 감지. SSR 안전을 위해 `getServerSnapshot`(서버에선 항상 online 가정) 포함 → hydration mismatch 방지
+- **`OfflineBanner`** (`app/common/components/offline-banner.tsx`): 오프라인 시 화면 상단 고정 배너("인터넷 연결을 확인해주세요"), iOS safe-area(`--safe-area-inset-top`) 반영. `root.tsx` Layout에 연동
+- 실기기 비행기모드 테스트로 WebView 동작 확인 완료 → 네이티브 netinfo 브리지(에러 핸들링 로드맵 N-3) 보강 불필요
+
+### [KEND] 문서 체계 정비 (overview/changelog 운영 방식)
+
+- **overview.md를 단일 대시보드로 복구**(stale 4월본 → 현재 상태) + 작성 표준을 `core/readme-structure-guide.md §8`(방식 vs 내용 구분)로 명문화 — 3개 프로젝트 공통
+- **`/changelog` 명령어 개편**: changelog(git 기준 누락분 append) + overview(현황 CRUD)를 함께 갱신하도록. kend/native/seller 동일 적용
+
+---
+
+## 2026-06-23
+
+### [KEND] 계획 문서 현실화 (milestones / roadmap)
+
+- 코드 실측으로 보드 정정: **주문/결제 도메인 거의 구현됨**(주문 스키마 전체·주문 생성·TossPayments Confirm API·결제 success/fail 페이지·결제 위젯). 남은 건 `PAYMENT_COMING_SOON` 해제 + Toss 테스트 키(EXT-3) + E2E 테스트
+- **휴대폰 인증(SMS OTP) 출시 후로 이연** 반영(이메일 비밀번호 재설정으로 대체, 아이디 찾기 제거). **RLS 전무(DB 전체 ~33개 테이블) → 출시 전 하드닝(P4-3)으로 일정화**
+- iOS 심사 2달+ 정체 대응 트랙(ASC 상태/Resolution Center 확인 → escalate → 빌드 리셋 재제출) 명시
+
+---
+
 ## 2026-06-17
 
 ### [KEND] 로그인/비밀번호 재설정 UX 수정
