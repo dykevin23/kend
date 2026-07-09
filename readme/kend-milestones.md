@@ -9,20 +9,13 @@
 
 ---
 
-## 🔖 현재 상태 (2026-06-18 기준)
+## 🔖 현재 상태
 
-> 4/24 계획 이후 실제 진행을 반영한 요약. 상세는 각 Story 및 하단 체크포인트 로그 참조.
-
-- **🔒 RLS 전무 — 출시 전 하드닝으로 일정화 (6/18 결정)**: 실제 DB ~33개 테이블 전부 RLS 미적용 확정. anon 키가 클라이언트 공개라 RLS 없으면 전 회원 데이터 노출 구조. **단, 현재 실사용자 데이터 없음(미출시) → 긴급도 낮음**으로 판단, 출시 전 하드닝(P4-3)으로 이연. **원래 설계 원칙**([database.md](core/database.md) §64/§105: 접근제어=DB레벨 RLS)이라 계획상 정당한 항목이었으나 미구현 상태였음. ⚠️ 두 가지 단서: ①**공개 배포 URL에 실데이터가 생기면 즉시 재평가** ②켜면 createOrder·browserClient 조회가 깨지므로 **정책 작성·테스트는 막판 아닌 개발단계에서** 미리. 상세 → P1-3 / P4-3
-
-- **계정/인증 트랙 정리 완료**
-  - ✅ **이메일 기반 비밀번호 재설정** 구현 (`/auth/find-password` → `/auth/reset-password`, token_hash 방식 포함). 로그인/재설정 UX 수정 완료
-  - ❌ **휴대폰 SMS 인증 → 출시 후로 이연 결정 (6/17)**. 전체 구현은 `feature/phone-auth` 브랜치(commit d6ec2b0)에 보존, kend-newbuild 미반영. → EXT-2(SMS 벤더)도 출시 후로 보류
-  - ⏸ 아이디 찾기 제거 / 소셜 추가정보 flow → 휴대폰 인증과 함께 출시 후로 이연
-- **iOS swipe back**: clientLoader 캐시 부분 적용(`/stores`, `/stores/:storeId`), 나머지 라우트 rollout + 네이티브 swipe blacklist 적용은 잔여
-- **주문/결제 도메인 — 보드 정정**: 4/24 보드는 "미착수"로 적었으나 **코드 확인 결과 거의 구현됨**. 주문 스키마 전체 + 주문 생성 + TossPayments Confirm API + 결제 success/fail 페이지 + 결제 위젯까지 존재. **결제는 코딩이 아니라 `PAYMENT_COMING_SOON` 플래그 해제 + Toss 키(EXT-3) + 실테스트가 남은 것.** 미구현은 환불/취소 실행 로직·구매확정(P1-5 일부)
-- **🚨 iOS 심사 2달+ 정체**: 1달 전 문의에도 "곧 처리" 답변만 받고 진척 없음. App Store Connect 상태/Resolution Center 확인 → escalate(전화 콜백) → 빌드 리셋 재제출 순으로 대응 필요. **개발은 병렬로 계속**
-- **❓ 확인 필요**: P0-3(에러 핸들링) 일부 — 오프라인 감지·PostHog·WebView 브리지 미구현(상세는 P0-3 항목)
+> near-term 현황 요약은 **[overview.md](overview.md)** (단일 대시보드)에서 본다. 본 문서는 **Phase별 전체 트래커** — 출시까지 남은 전 범위를 추적한다.
+>
+> **2026-07-09 핵심**: 🎉 법인+계좌 완료 → 실키·정산·NICE 언블록 / ✅ 결제 루프 E2E 검증 완료(테스트 키, 실키 심사 대기) / ✅ P0-3 오프라인 감지·console.log 완료 / 🚨 iOS 심사 3달+ 정체 / 🔒 RLS는 출시 전 하드닝 유지 / **다음 = P1-5 환불·취소·구매확정**
+>
+> ⚠️ **스케줄 슬립 — 재산정 필요**: 아래 Phase 종료일(5~7월)은 모두 지났고, 실제로는 아직 **Phase 1 마무리(결제)** 단계. 내부 타겟 2026-09-30은 현재 진척 기준 빠듯 → 대표와 일정 재조율 필요.
 
 ---
 
@@ -70,12 +63,12 @@
 
 | ID | 항목 | 상태 | Due | 비고 |
 |----|------|------|-----|------|
-| EXT-1 | 법인 설립 (+ 통신판매업 신고 동시 위임) | ⏸ Holding | **2026-06-05** | 대표 진행, 법무사 지인 소개. Phase 1 완료 시점 Due |
-| EXT-2 | SMS 벤더 선택 (알리고 vs NHN Cloud) | ⏸ Holding (출시 후) | — | 휴대폰 인증 출시 후 이연(6/17)에 따라 함께 보류 |
-| EXT-3 | TossPayments 개발자 계정 + 테스트 키 | 🔴 Todo (블로커化) | **지연** | ★ 결제(P1-4)가 코드상 거의 완성 → **테스트 키만 있으면 E2E 검증 가능**. 발급 우선순위 최상 |
-| EXT-4 | 스마트택배 API 신청 | 🟡 Todo | **2026-06-01** | 영업일 단위 발급, Phase 2 전 |
-| EXT-5 | TossPayments 실키 전환 신청 | ⏸ Holding | **2026-07-03** (심사 완료) | **법인 완료 당일 신청 ★** 심사 2~4주 |
-| EXT-6 | NICE 본인확인 계약 | ⏸ Holding | **2026-07-20** | 법인 직후 신청, Phase 4 전 완료 |
+| EXT-1 | 법인 설립 (+ 통신판매업 신고) | ✅ **Done** (2026-07 초) | — | 완료 → 실키·정산계좌·NICE 언블록 |
+| EXT-2 | SMS 벤더 선택 | ⏸ Holding (출시 후) | — | 휴대폰 인증 이연에 따라 보류 |
+| EXT-3 | TossPayments 테스트 키 | 🟢 **대체 검증 완료** | — | docs 테스트 키로 E2E 검증 완료. 본인 테스트 키는 법인 상점 가입 시 발급 |
+| EXT-4 | 스마트택배 API 신청 | 🟡 Todo (미신청) | Phase 2 전 | 영업일 단위 발급 → 배송(P2-3) 전 걸어둬야 함 |
+| EXT-5 | TossPayments 실키 전환 | 🟢 **신청 완료 (심사 대기)** | ~2~4주 | 법인으로 신청(기본 결제 패키지). 승인 시 라이브 키 |
+| EXT-6 | NICE 본인확인 | 🟡 **미신청 (확인/신청 필요)** | ~2~4주 | 법인으로 신청 가능, 아직 안 함 |
 
 > 📌 Toss 심사 대비 체크리스트: [tosspayments-review-checklist.md](tosspayments-review-checklist.md)
 
@@ -85,10 +78,10 @@
 
 ### Phase 0 — 잔여 마무리 (2026-04-27 ~ 2026-05-01)
 
-#### 🚨 P0-1. iOS 심사 — **2달+ 정체 (블로커, 진행 중)**
+#### 🚨 P0-1. iOS 심사 — **3달+ 정체 (블로커, 진행 중)**
 - **Due**: 2026-05-01 → **미해결**
 - **우선순위**: 🔴 블로커
-- **상황**: 결제 "서비스 준비 중" 처리 후 재제출했으나 **2개월 넘게 심사 정체**. 1달 전 문의에도 "곧 처리" 답변만 받고 진척 없음
+- **상황**: 결제 "서비스 준비 중" 처리 후 재제출했으나 **3개월 넘게 심사 정체**. 문의에도 "곧 처리" 답변만 받고 진척 없음
 - **대응 트랙**:
   - [ ] App Store Connect 상태 확인 — 진짜 "심사 중"인지 / Resolution Center에 미확인 메시지(우리 회신 대기) 있는지
   - [ ] Apple Developer Support **전화 콜백 예약** + 기존 케이스 escalate (expedite 약속 미이행 명시)
@@ -112,11 +105,11 @@
 - **Due**: 2026-05-01 (잔여 진행 중)
 - **참고**: [kend-error-handling-roadmap.md](todo/kend-error-handling-roadmap.md)
 - **✅ 구현됨**: 공통 에러 핸들러 `app/lib/error-handler.ts`(`parseSupabaseError` 10개 파일 적용) · Auth 만료 `useAuthListener.ts` · Toast(`<Toaster/>` 마운트) · 이미지 검증 `validate-image.ts`
-- **❌ 잔여 Sub-task**:
-  - [ ] **오프라인 감지** — `useNetworkStatus` 훅 + `offline-banner` (← 다음 착수 후보, 자기완결·외부의존 없음)
+- **잔여 Sub-task**:
+  - [x] **오프라인 감지** — `useNetworkStatus` 훅 + `offline-banner` (실기기 비행기모드 확인, 2026-07-09)
+  - [x] console.log 정리 (디버그 로그 8건 제거, 2026-07-09)
   - [ ] PostHog 에러 추적 (패키지 미설치) — QA(Phase 4) 전까지면 됨
   - [ ] Edge Function 응답 표준화 `_shared/response.ts`
-  - [ ] console.log 정리 (order-action 등 디버그 로그 잔존)
   - [ ] WebView 에러 브리지 (N-2, kend-native 연동 필요)
   - [ ] 폼 validation 표준화 → [form-validation-standard.md](todo/form-validation-standard.md)로 분리
 
@@ -145,18 +138,15 @@
 - **🟡 누락 — 배치**: 설계 §9.2/§10의 `payment_in_progress` → `failed` 미응답 정리 배치(cron) 미구현 → 미완료 주문 적체 위험
 - **연계**: RLS는 P0-3의 "RLS 전수 점검"과 묶어서 처리
 
-#### 🟢 P1-4. TossPayments 결제창 + 주문-결제 트랜잭션 — **거의 완료 (차단/테스트만 남음)**
-- **Due**: 2026-05-22
-- **우선순위**: 🔴 최우선
-- **선행**: EXT-3 (Toss 테스트 키) ← **실제 남은 블로커**
-- **✅ 구현됨**: 주문 생성 [order-action.ts](../app/features/orders/pages/order-action.ts) · TossPayments Confirm API [payments/mutations.server.ts](../app/features/payments/pages/mutations.server.ts) · 결제 success/fail 페이지 · 결제 위젯([product-purchase-modal.tsx](../app/features/products/components/product-purchase-modal.tsx))
+#### ✅ P1-4. TossPayments 결제창 + 주문-결제 트랜잭션 — **E2E 검증 완료 (실키 전환만 남음)**
+- **Due**: 2026-05-22 → 검증 2026-07-09
+- **✅ 완료**: 주문 생성 · TossPayments Confirm API · 결제 success/fail · 결제 위젯. **docs 테스트 키로 주문→결제→confirm→`paid` 전 흐름 E2E 검증 완료** (payments 저장·장바구니 정리·주문내역 노출, 실패 시 `payment_in_progress` 비노출 확인). console.log 정리·타입 오류 수정 완료
 - **❌ 남은 일**:
-  - [ ] `PAYMENT_COMING_SOON = true` 플래그 해제 (현재 결제 차단 중)
-  - [ ] EXT-3 Toss 테스트 키 발급 → 실제 결제 플로우 E2E 테스트
+  - [ ] **실키 전환** — EXT-5 승인 후 `.env`를 라이브 키로 교체 + `PAYMENT_COMING_SOON` 해제 (출시 시)
   - [ ] 웹훅 처리 확인 (구현 여부 미검증)
-  - [ ] console.log 정리 (order-action 디버그 로그)
+  - [ ] 미완료결제(`payment_in_progress`) → `failed` 정리 cron (P1-3 배치 항목)
 
-#### 🟡 P1-5. 결제 환불/취소 + 조회 UI + 차단 플래그 — **부분 구현**
+#### 🟡 P1-5. 결제 환불/취소 + 조회 UI + 차단 플래그 — **부분 구현 (← 다음 착수)**
 - **Due**: 2026-05-29
 - **선행**: P1-4
 - **✅ 구현됨**: 주문 내역 조회 UI([orders-page.tsx](../app/features/orders/pages/orders-page.tsx) 상태탭 포함) · 차단 플래그(`PAYMENT_COMING_SOON`)
@@ -213,7 +203,7 @@
 
 #### 🟡 P3-2. 정산 계좌 등록
 - **Due**: 2026-07-08
-- **선행**: EXT-1 (법인 완료 → 실계좌)
+- **선행**: EXT-1 (법인 완료) ✅ → 이제 착수 가능 (실계좌 확보)
 - **포함**: 정산 계좌 등록 UI, 1원 인증
 - **Sub-task**: (착수 시 추가)
 
@@ -324,6 +314,15 @@
 - **오늘 작업 결정**: 외부 의존성 없는 **P0-3 오프라인 감지**부터 착수 (결제는 Toss 키 대기라 오늘 단독 완결 불가)
 - **EXT-3 Toss 테스트 키**: 결제 완성의 실질 블로커로 부상 → 발급 우선순위 ↑
 
+### 2026-07-09 (목) — 법인 완료 + 결제 E2E 검증
+- **🎉 법인 설립·법인 계좌 완료** → EXT-1 완료. 결제 실키·정산 계좌·NICE 언블록
+- **✅ 결제 루프 E2E 검증 완료**: docs 테스트 키로 주문→결제→confirm→`paid` 전 흐름 동작 확인. `payment-success` 타입 오류 수정, 로컬 소셜로그인 리다이렉트 수정(Supabase `/*`→`/**`). 코드는 `PAYMENT_COMING_SOON=true`로 재차단(실키+출시 때 켬)
+- **✅ P0-3 진행**: 오프라인 감지(실기기 확인) + console.log 정리 완료
+- **외부 신청**: TossPayments 실키(EXT-5) 신청 완료(심사 대기). NICE(EXT-6)는 미신청 → 확인/신청 필요
+- **문서 체계 정비**: overview 대시보드 운영 + `/changelog` 명령어 + CLAUDE.md(3개 프로젝트 자동 로드) + changelog sync 스크립트
+- **다음**: P1-5 환불/취소·구매확정 (테스트 키로 환불까지 검증 가능)
+- **⚠️ 스케줄**: Phase 1 마무리 단계인데 계획상 이미 Phase 3 시기 → 일정 재산정 필요
+
 ---
 
-*최종 업데이트: 2026-06-18*
+*최종 업데이트: 2026-07-09*
