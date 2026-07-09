@@ -13,7 +13,7 @@
 
 > near-term 현황 요약은 **[overview.md](overview.md)** (단일 대시보드)에서 본다. 본 문서는 **Phase별 전체 트래커** — 출시까지 남은 전 범위를 추적한다.
 >
-> **2026-07-09 핵심**: 🎉 법인+계좌 완료 → 실키·정산·NICE 언블록 / ✅ 결제 루프 E2E 검증 완료(테스트 키, 실키 심사 대기) / ✅ P0-3 오프라인 감지·console.log 완료 / 🚨 iOS 심사 3달+ 정체 / 🔒 RLS는 출시 전 하드닝 유지 / **다음 = P1-5 환불·취소·구매확정**
+> **2026-07-09 핵심**: 🎉 법인+계좌 완료 → 실키·정산 언블록 / ✅ 결제 루프 E2E 검증 완료(테스트 키, 실키 심사 대기) / ✅ P0-3 오프라인 감지·console.log 완료 / 🚨 iOS 심사 3달+ 정체 / 🔒 RLS는 출시 전 하드닝 유지 / 본인확인(NICE·휴대폰)은 불필요 방향 / **다음 = P1-5 환불·취소·구매확정**
 >
 > ⚠️ **스케줄 슬립 — 재산정 필요**: 아래 Phase 종료일(5~7월)은 모두 지났고, 실제로는 아직 **Phase 1 마무리(결제)** 단계. 내부 타겟 2026-09-30은 현재 진척 기준 빠듯 → 대표와 일정 재조율 필요.
 
@@ -68,7 +68,7 @@
 | EXT-3 | TossPayments 테스트 키 | 🟢 **대체 검증 완료** | — | docs 테스트 키로 E2E 검증 완료. 본인 테스트 키는 법인 상점 가입 시 발급 |
 | EXT-4 | 스마트택배 API 신청 | 🟡 Todo (미신청) | Phase 2 전 | 영업일 단위 발급 → 배송(P2-3) 전 걸어둬야 함 |
 | EXT-5 | TossPayments 실키 전환 | 🟢 **신청 완료 (심사 대기)** | ~2~4주 | 법인으로 신청(기본 결제 패키지). 승인 시 라이브 키 |
-| EXT-6 | NICE 본인확인 | 🟡 **미신청 (확인/신청 필요)** | ~2~4주 | 법인으로 신청 가능, 아직 안 함 |
+| EXT-6 | NICE 본인확인 | ⏸ **Holding (필요성 낮음)** | — | 본인확인 불필요 방향(휴대폰 인증도 이연). 먼 미래 재검토, 안 할 수도 있음 |
 
 > 📌 Toss 심사 대비 체크리스트: [tosspayments-review-checklist.md](tosspayments-review-checklist.md)
 
@@ -261,8 +261,8 @@
 
 #### 🟡 P4-3. 실운영 전환 체크리스트
 - **Due**: 2026-08-07
-- **선행**: EXT-5, EXT-6 완료
-- **포함**: 실키 전환, NICE 실서비스, Supabase prod 확인, 도메인/SSL, PostHog 프로덕션, 1호 판매자 온보딩, 차단 플래그 테스트, 무결성 쿼리, 약관 최신화
+- **선행**: EXT-5(실키) 완료  *(EXT-6 NICE는 Holding — 본인확인 불필요 방향)*
+- **포함**: 실키 전환, ~~NICE 실서비스~~(Holding), Supabase prod 확인, 도메인/SSL, PostHog 프로덕션, 1호 판매자 온보딩, 차단 플래그 테스트, 무결성 쿼리, 약관 최신화
   - **🔒 전체 테이블 RLS 적용·검증** (~33개, kend/seller 공유 DB라 seller 조율 필요). 전수점검 쿼리는 [error-handling-roadmap](todo/kend-error-handling-roadmap.md) 1-5. **정책 작성은 이 단계 전 개발기간에 선행**(켜면 createOrder 등 깨지므로 테스트 버퍼 필수)
 - **참고**: [tosspayments-review-checklist.md](tosspayments-review-checklist.md)
 - **Sub-task**: (착수 시 추가)
@@ -318,7 +318,7 @@
 - **🎉 법인 설립·법인 계좌 완료** → EXT-1 완료. 결제 실키·정산 계좌·NICE 언블록
 - **✅ 결제 루프 E2E 검증 완료**: docs 테스트 키로 주문→결제→confirm→`paid` 전 흐름 동작 확인. `payment-success` 타입 오류 수정, 로컬 소셜로그인 리다이렉트 수정(Supabase `/*`→`/**`). 코드는 `PAYMENT_COMING_SOON=true`로 재차단(실키+출시 때 켬)
 - **✅ P0-3 진행**: 오프라인 감지(실기기 확인) + console.log 정리 완료
-- **외부 신청**: TossPayments 실키(EXT-5) 신청 완료(심사 대기). NICE(EXT-6)는 미신청 → 확인/신청 필요
+- **외부 신청**: TossPayments 실키(EXT-5) 신청 완료(심사 대기). **NICE(EXT-6)는 Holding** — 본인확인 불필요 방향으로 결정(휴대폰 인증도 이연), 먼 미래 재검토
 - **문서 체계 정비**: overview 대시보드 운영 + `/changelog` 명령어 + CLAUDE.md(3개 프로젝트 자동 로드) + changelog sync 스크립트
 - **다음**: P1-5 환불/취소·구매확정 (테스트 키로 환불까지 검증 가능)
 - **⚠️ 스케줄**: Phase 1 마무리 단계인데 계획상 이미 Phase 3 시기 → 일정 재산정 필요
