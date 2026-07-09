@@ -5,6 +5,7 @@ import {
   confirmPayment,
   mapTossMethodToEnum,
 } from "~/features/payments/mutations.server";
+import type { Json } from "database.types";
 
 /**
  * 결제 성공 콜백 페이지 (TossPayments → 리다이렉트)
@@ -109,7 +110,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     easy_pay_amount: (easyPay?.amount as number) ?? null,
     easy_pay_discount_amount: (easyPay?.discountAmount as number) ?? null,
     receipt_url: (receipt?.url as string) ?? null,
-    raw_response: paymentData ?? null,
+    raw_response: (paymentData ?? null) as Json,
   });
 
   // 5. 장바구니 정리 (서버에서 처리)
