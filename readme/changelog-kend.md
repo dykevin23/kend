@@ -7,6 +7,21 @@ KEND 웹앱(React Router SSR + WebView)의 주요 변경사항을 날짜별로 �
 
 ---
 
+## 2026-07-09
+
+### [KEND] 결제 루프 E2E 검증 완료 (테스트 키)
+
+- 주문 생성 → TossPayments 결제(docs 테스트 키) → confirm → `order_groups.status=paid` + payments 저장 + 장바구니 정리 + 주문내역 노출까지 **전 흐름 로컬 동작 검증**
+- 실패/중단 결제는 `payment_in_progress`로 남고 주문내역 UI에서 비노출됨(설계대로) 확인. (미완료 → `failed` 정리 cron은 여전히 미구현)
+- `payment-success-page`의 `raw_response`를 `Json`으로 캐스팅해 tsc 오류 해소
+- (참고) 법인 설립·법인 계좌 완료로 결제/정산 외부 의존성 해소. TossPayments 실키(기본 결제 패키지)·NICE 본인확인 신청 → 심사 2~4주 대기
+
+### [KEND] 로컬 소셜 로그인 리다이렉트 수정
+
+- 로컬 dev에서 소셜 로그인 시 Vercel로 튕기던 문제 해결. 원인: Supabase Auth Redirect URLs의 localhost 항목이 `http://localhost:5173/*`(단일 `*`)라 다단계 콜백 경로(`/auth/social/kakao/complete`)를 매칭 못 해 Site URL(Vercel)로 폴백 → `/*`를 `/**`로 수정
+
+---
+
 ## 2026-06-24
 
 ### [KEND] 디버그 console.log 정리 (P0-3 에러 핸들링)

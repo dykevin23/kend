@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-06-24
+> 최종 업데이트: 2026-07-09
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -12,21 +12,22 @@
 
 ---
 
-## 🚦 지금 상황 (2026-06-24)
+## 🚦 지금 상황 (2026-07-09)
 
-- 🚨 **iOS App Store 심사 2달+ 정체** — 1달 전 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate(전화 콜백) → 빌드 리셋 재제출 트랙으로 대응. **개발은 병렬 진행**
-- **계정/인증 트랙 정리 완료**: 이메일 비밀번호 재설정 구현 / 휴대폰 SMS 인증은 출시 후로 이연(이메일 재설정으로 대체) / 아이디 찾기 제거
-- **주문/결제 도메인 거의 구현됨**: 결제는 `PAYMENT_COMING_SOON`으로 막아둠. 남은 건 코딩이 아니라 **Toss 테스트 키(EXT-3) 발급 + E2E 검증**
-- **다음 개발**: P0-3 에러 핸들링 잔여 — 오프라인 감지·console.log 정리 완료, 다음은 PostHog·WebView 브리지·Edge Function 표준화
+- 🚨 **iOS App Store 심사 3달+ 정체** — 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate → 빌드 리셋 재제출 트랙. **개발은 병렬 진행**
+- 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키·NICE 본인확인 신청 완료(심사 2~4주 대기)**
+- ✅ **결제 루프 E2E 검증 완료** (docs 테스트 키): 주문→결제→confirm→`paid` 전 흐름 동작 확인. 코드는 `PAYMENT_COMING_SOON=true`로 다시 차단(실키+출시 때 켬)
+- **계정/인증**: 이메일 비밀번호 재설정 완료 / 휴대폰 SMS 인증은 출시 후 이연
+- **다음 개발 후보**: P1-5 환불/취소·구매확정(결제 이어서) / 미완료결제 정리 cron / P0-3 잔여(PostHog·WebView 브리지)
 
 ---
 
 ## ✅ 최근 완료
 
+- 2026-07-09: **결제 루프 E2E 검증 완료** (테스트 키로 주문→결제→paid 전 흐름) + 로컬 소셜로그인 리다이렉트 수정 ✅
 - 2026-06-24: **디버그 console.log 정리** (P0-3, 8건 제거)
 - 2026-06-24: **오프라인 감지** (useNetworkStatus 훅 + 오프라인 배너, root 연동) — 실기기 비행기모드로 동작 확인 ✅
 - 2026-06-24: 문서 체계 정비 — overview 대시보드 복구 + structure-guide §8 + /changelog 명령어 개편
-- 2026-06-23: 계획 문서(roadmap/milestones) 현실화 — 휴대폰 인증 이연 / 결제·주문 거의 완료 / RLS 전체 범위 반영
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
@@ -47,14 +48,14 @@
 
 | 항목 | 우선순위 | 비고 |
 |------|---------|------|
-| P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 다음 | 오프라인·console.log 완료(6/24) |
-| 결제 E2E 검증 | 대기 | Toss 테스트 키(EXT-3) 발급 후 |
+| 환불/취소·구매확정 (P1-5) | **다음** | 결제 이어서. Toss cancel API + 상태 전환 |
+| 미완료결제 정리 cron (`payment_in_progress`→`failed`) | 출시 전 | 가벼움 |
+| P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 대기 | |
 | kend-seller Phase 2 (판매자 기반 → 주문관리) | 다음 큰 블록 | 시드 주문으로 결제 없이도 진행 가능 |
-| 환불/취소/구매확정 (P1-5) | 출시 전 | 결제 후속 |
 | 전체 테이블 RLS 적용 (~33개) | 출시 전 하드닝 | 실데이터 없어 긴급도 낮음. 정책은 개발단계 선행 |
 | PostHog / WebView 에러 브리지 | 출시 전(QA) | |
 
-> 외부 의존성 신청 (리드타임): **EXT-3 Toss 테스트 키**, **EXT-4 스마트택배 API** — 막진 않지만 미리 걸어둬야 함
+> 외부 의존성: **Toss 실키·NICE 심사 대기(2~4주)** / **EXT-4 스마트택배 API** 신청 필요(Phase 2 배송용)
 
 ---
 
@@ -64,7 +65,7 @@
 - **kend-native** (앱): React Native + WebView (iOS/Android)
 - **kend-seller** (판매자 관리자): 웹 전용
 - **단일 Supabase DB**: PostgreSQL + Drizzle ORM (RLS로 권한 제어 — ⚠️ **현재 미적용, 출시 전 하드닝 예정**)
-- **결제**: TossPayments (현재 `PAYMENT_COMING_SOON` 차단, 테스트 키 대기)
+- **결제**: TossPayments (E2E 검증 완료/테스트 키, `PAYMENT_COMING_SOON`로 차단 중, 실키 심사 대기)
 - **소셜 로그인**: Google, Kakao, Naver, Apple
 
 > 상세: [core/application-architecture.md](./core/application-architecture.md)
@@ -88,7 +89,7 @@
 ## 🚧 출시 전 반드시 필요한 작업 (체크리스트)
 
 - [ ] iOS 심사 통과
-- [ ] 결제 E2E 검증 + 실키 전환 (TossPayments 테스트키 → 라이브키, 본인확인)
+- [x] 결제 E2E 검증 (테스트 키) → [ ] 실키 전환(라이브키) + NICE 본인확인 (심사 대기)
 - [ ] 환불/취소/구매확정 구현 (P1-5)
 - [ ] Supabase dev/prod 환경 분리
 - [ ] 전체 테이블 RLS 적용·검증 (~33개, kend/seller 공유 DB)
