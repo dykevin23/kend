@@ -1,5 +1,6 @@
 import { makeSSRClient } from "~/supa-client";
 import { createOrder } from "~/features/orders/mutations";
+import { cancelOrderGroup } from "~/features/orders/mutations.server";
 import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/order-action";
 import type { OrderItem, SellerOrderGroup } from "~/features/orders/types";
@@ -39,6 +40,32 @@ export const action = async ({ request }: Route.ActionArgs) => {
         sellerGroups,
         items,
         deliveryMessage,
+      });
+
+      return {
+        success: true,
+        orderGroupId: result.orderGroupId,
+        orderNumber: result.orderNumber,
+      };
+    } catch (error) {
+      return actionErrorResponse(error);
+    }
+  }
+
+  if (intent === "cancel") {
+    try {
+      const orderGroupId = formData.get("orderGroupId") as string;
+      const cancelReason =
+        (formData.get("cancelReason") as string) || "구매자 주문 취소";
+
+      if (!orderGroupId) {
+        return { success: false, error: "주문 정보가 없습니다." };
+      }
+
+      const result = await cancelOrderGroup(client, {
+        userId: user.id,
+        orderGroupId,
+        cancelReason,
       });
 
       return {
