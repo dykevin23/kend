@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-07-09
+> 최종 업데이트: 2026-07-10
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -12,22 +12,22 @@
 
 ---
 
-## 🚦 지금 상황 (2026-07-09)
+## 🚦 지금 상황 (2026-07-10)
 
 - 🚨 **iOS App Store 심사 3달+ 정체** — 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate → 빌드 리셋 재제출 트랙. **개발은 병렬 진행**
-- 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키·NICE 본인확인 신청 완료(심사 2~4주 대기)**
-- ✅ **결제 루프 E2E 검증 완료** (docs 테스트 키): 주문→결제→confirm→`paid` 전 흐름 동작 확인. 코드는 `PAYMENT_COMING_SOON=true`로 다시 차단(실키+출시 때 켬)
+- 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키 신청 완료(심사 2~4주 대기)**. NICE는 Holding(본인확인 불필요 방향)
+- ✅ **결제 도메인 실질 완성**: 결제 E2E(주문→결제→`paid`) + **주문 취소·전액 환불(P1-5)** 모두 테스트 키로 동작 확인. 코드는 `PAYMENT_COMING_SOON=true`로 차단(실키+출시 때 켬)
 - **계정/인증**: 이메일 비밀번호 재설정 완료 / 휴대폰 SMS 인증은 출시 후 이연
-- **다음 개발 후보**: P1-5 환불/취소·구매확정(결제 이어서) / 미완료결제 정리 cron / P0-3 잔여(PostHog·WebView 브리지)
+- **다음 개발 후보**: `.server.ts`/시크릿 노출 감사 / 미완료결제 정리 cron / kend-seller Phase 2 / P0-3 잔여
 
 ---
 
 ## ✅ 최근 완료
 
+- 2026-07-10: **주문 취소 + 전액 환불 (P1-5)** — Toss Cancel API + 멱등키, 상태 전환까지 동작 확인 ✅
 - 2026-07-09: **결제 루프 E2E 검증 완료** (테스트 키로 주문→결제→paid 전 흐름) + 로컬 소셜로그인 리다이렉트 수정 ✅
 - 2026-06-24: **디버그 console.log 정리** (P0-3, 8건 제거)
 - 2026-06-24: **오프라인 감지** (useNetworkStatus 훅 + 오프라인 배너, root 연동) — 실기기 비행기모드로 동작 확인 ✅
-- 2026-06-24: 문서 체계 정비 — overview 대시보드 복구 + structure-guide §8 + /changelog 명령어 개편
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
@@ -48,14 +48,15 @@
 
 | 항목 | 우선순위 | 비고 |
 |------|---------|------|
-| 환불/취소·구매확정 (P1-5) | **다음** | 결제 이어서. Toss cancel API + 상태 전환 |
+| **`.server.ts` / 시크릿 노출 감사** | **다음** | service_role·서버 키가 클라이언트 번들에 섞였는지 점검 (`my-page.tsx` 등) |
 | 미완료결제 정리 cron (`payment_in_progress`→`failed`) | 출시 전 | 가벼움 |
+| 구매확정 + 부분취소 | Phase 2 이후 | 배송(delivery_items) 도입 후 |
 | P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 대기 | |
 | kend-seller Phase 2 (판매자 기반 → 주문관리) | 다음 큰 블록 | 시드 주문으로 결제 없이도 진행 가능 |
 | 전체 테이블 RLS 적용 (~33개) | 출시 전 하드닝 | 실데이터 없어 긴급도 낮음. 정책은 개발단계 선행 |
 | PostHog / WebView 에러 브리지 | 출시 전(QA) | |
 
-> 외부 의존성: **Toss 실키·NICE 심사 대기(2~4주)** / **EXT-4 스마트택배 API** 신청 필요(Phase 2 배송용)
+> 외부 의존성: **Toss 실키 심사 대기(2~4주)** / **EXT-4 스마트택배 API** 신청 필요(Phase 2 배송용). NICE는 Holding
 
 ---
 
@@ -89,8 +90,8 @@
 ## 🚧 출시 전 반드시 필요한 작업 (체크리스트)
 
 - [ ] iOS 심사 통과
-- [x] 결제 E2E 검증 (테스트 키) → [ ] 실키 전환(라이브키) + NICE 본인확인 (심사 대기)
-- [ ] 환불/취소/구매확정 구현 (P1-5)
+- [x] 결제 E2E 검증 (테스트 키) → [ ] 실키 전환(라이브키) — 심사 대기 *(NICE는 Holding)*
+- [x] 주문 취소·전액 환불 (P1-5) → [ ] 구매확정 (Phase 2 이후)
 - [ ] Supabase dev/prod 환경 분리
 - [ ] 전체 테이블 RLS 적용·검증 (~33개, kend/seller 공유 DB)
 - [ ] 에러 핸들링 잔여 (오프라인 감지, PostHog, WebView 에러 브리지, QA)
