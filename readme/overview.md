@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-07-10
+> 최종 업데이트: 2026-07-22
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -12,13 +12,15 @@
 
 ---
 
-## 🚦 지금 상황 (2026-07-10)
+## 🚦 지금 상황 (2026-07-22)
 
 - 🚨 **iOS App Store 심사 3달+ 정체** — 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate → 빌드 리셋 재제출 트랙. **개발은 병렬 진행**
 - 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키 신청 완료(심사 2~4주 대기)**. NICE는 Holding(본인확인 불필요 방향)
 - ✅ **결제 도메인 실질 완성**: 결제 E2E(주문→결제→`paid`) + **주문 취소·전액 환불(P1-5)** 모두 테스트 키로 동작 확인. 코드는 `PAYMENT_COMING_SOON=true`로 차단(실키+출시 때 켬)
+- ⚠️ **마일스톤 보드 Phase 2 상태 미검증**: P2-1~P2-6이 2026-04 계획 시점 그대로라 kend-seller 실측 코드와 어긋날 수 있음 — 착수 전 정정 필요
+- 🔧 **스토어 목록 버그 수정(테스트 대기)**: 상품 미등록 판매자가 목록에 No-Image로 노출되던 문제, 쿼리 필터 추가로 수정 — 브라우저 확인 아직
 - **계정/인증**: 이메일 비밀번호 재설정 완료 / 휴대폰 SMS 인증은 출시 후 이연
-- **다음 개발 후보**: `.server.ts`/시크릿 노출 감사 / 미완료결제 정리 cron / kend-seller Phase 2 / P0-3 잔여
+- **다음 개발 후보**: 스토어 목록 fix 브라우저 검증 / `.server.ts`/시크릿 노출 감사 / 미완료결제 정리 cron / kend-seller Phase 2 / P0-3 잔여
 
 ---
 
@@ -48,7 +50,8 @@
 
 | 항목 | 우선순위 | 비고 |
 |------|---------|------|
-| **`.server.ts` / 시크릿 노출 감사** | **다음** | service_role·서버 키가 클라이언트 번들에 섞였는지 점검 (`my-page.tsx` 등) |
+| 스토어 목록 무상품 판매자 제외 — 브라우저 검증 | **다음** | 쿼리 필터는 반영됨, 실제 화면 확인만 남음 |
+| **`.server.ts` / 시크릿 노출 감사** | 다음 | service_role·서버 키가 클라이언트 번들에 섞였는지 점검 (`my-page.tsx` 등) |
 | 미완료결제 정리 cron (`payment_in_progress`→`failed`) | 출시 전 | 가벼움 |
 | 구매확정 + 부분취소 | Phase 2 이후 | 배송(delivery_items) 도입 후 |
 | P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 대기 | |
