@@ -91,46 +91,49 @@ export const getStoresWithProducts = async (client: Client) => {
   if (error) throw error;
 
   // 데이터 가공: 각 스토어별로 대표 이미지만 추출
-  return data.map((store) => {
-    // 로고 URL: Storage sellers 버킷의 {seller_code}/logo 경로
-    const {
-      data: { publicUrl: logoUrl },
-    } = client.storage
-      .from("sellers")
-      .getPublicUrl(`${store.seller_code}/logo`);
+  return data
+    .map((store) => {
+      // 로고 URL: Storage sellers 버킷의 {seller_code}/logo 경로
+      const {
+        data: { publicUrl: logoUrl },
+      } = client.storage
+        .from("sellers")
+        .getPublicUrl(`${store.seller_code}/logo`);
 
-    // 해시태그: "#태그1 #태그2" 형식 (\u2060으로 #과 태그명 사이 줄바꿈 방지)
-    const hashtags = store.seller_hashtags
-      .map((sh) => `#\u2060${sh.hashtags.name}`)
-      .join(" ");
+      // 해시태그: "#태그1 #태그2" 형식 (\u2060으로 #과 태그명 사이 줄바꿈 방지)
+      const hashtags = store.seller_hashtags
+        .map((sh) => `#\u2060${sh.hashtags.name}`)
+        .join(" ");
 
-    return {
-      id: store.id,
-      sellerCode: store.seller_code,
-      name: store.name,
-      domainId: store.domain_id,
-      profileImage: logoUrl,
-      hashtags: hashtags || null,
-      followerCount: 0, // TODO: followers 테이블 구현 후 교체
-      // 판매 가능한 상품의 대표이미지만 추출 (최대 6개)
-      productImages: store.products
-        .filter((p) => {
-          // 상품이 REGISTERED 상태면 제외
-          if (p.status === "REGISTERED") return false;
-          // SKU 중 REGISTERED가 아닌 것이 하나라도 있어야 함
-          const hasAvailableSku = p.product_stock_keepings.some(
-            (sku) => sku.status !== "REGISTERED"
-          );
-          return hasAvailableSku;
-        })
-        .flatMap((p) =>
-          p.product_images
-            .filter((img) => img.type === "MAIN")
-            .map((img) => img.url)
-        )
-        .slice(0, 6),
-    };
-  });
+      return {
+        id: store.id,
+        sellerCode: store.seller_code,
+        name: store.name,
+        domainId: store.domain_id,
+        profileImage: logoUrl,
+        hashtags: hashtags || null,
+        followerCount: 0, // TODO: followers 테이블 구현 후 교체
+        // 판매 가능한 상품의 대표이미지만 추출 (최대 6개)
+        productImages: store.products
+          .filter((p) => {
+            // 상품이 REGISTERED 상태면 제외
+            if (p.status === "REGISTERED") return false;
+            // SKU 중 REGISTERED가 아닌 것이 하나라도 있어야 함
+            const hasAvailableSku = p.product_stock_keepings.some(
+              (sku) => sku.status !== "REGISTERED"
+            );
+            return hasAvailableSku;
+          })
+          .flatMap((p) =>
+            p.product_images
+              .filter((img) => img.type === "MAIN")
+              .map((img) => img.url)
+          )
+          .slice(0, 6),
+      };
+    })
+    // 노출 가능한 상품이 하나도 없는 판매자는 목록에서 제외
+    .filter((store) => store.productImages.length > 0);
 };
 
 export type StoreWithProducts = Awaited<
