@@ -3,7 +3,7 @@ import InputInnerLabel from "~/common/components/input-inner-label";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import SocialButtons from "../components/social-buttons";
-import { Form, Link, redirect, useActionData } from "react-router";
+import { Form, Link, redirect, useActionData, useSearchParams } from "react-router";
 import { makeSSRClient } from "~/supa-client";
 import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/login-page";
@@ -43,8 +43,19 @@ export async function action({ request }: Route.ActionArgs) {
   });
 }
 
+const errorMessages: Record<string, string> = {
+  invalid_credentials: "이메일 또는 비밀번호가 올바르지 않아요.",
+  naver_token_failed: "네이버 로그인에 실패했어요. 다시 시도해주세요.",
+  naver_profile_failed: "네이버 로그인에 실패했어요. 다시 시도해주세요.",
+  naver_create_failed: "네이버 로그인에 실패했어요. 다시 시도해주세요.",
+};
+
 export default function LoginPage() {
   const actionData = useActionData<typeof action>();
+  const [searchParams] = useSearchParams();
+  const urlError = searchParams.get("error");
+  const errorMessage =
+    actionData?.error ?? (urlError ? errorMessages[urlError] : undefined);
   return (
     <div
       className="flex flex-col min-h-screen bg-primary/50"
@@ -106,11 +117,9 @@ export default function LoginPage() {
                 />
               </div>
 
-              {actionData?.error && (
+              {errorMessage && (
                 <div className="flex w-full px-4 py-3 rounded-lg bg-red-100 border border-red-400">
-                  <span className="text-sm text-red-700">
-                    {actionData.error}
-                  </span>
+                  <span className="text-sm text-red-700">{errorMessage}</span>
                 </div>
               )}
 

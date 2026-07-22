@@ -68,6 +68,17 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     data: { user },
   } = await client.auth.getUser();
   if (user) {
+    const { data: profile } = await client
+      .from("profiles")
+      .select("role")
+      .eq("profile_id", user.id)
+      .single();
+
+    if (profile?.role === "seller") {
+      await client.auth.signOut();
+      return redirect("/auth/login?error=invalid_credentials", { headers });
+    }
+
     const cartCount = await getCartCount(client, user.id);
     return { user, cartCount };
   } else {

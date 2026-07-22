@@ -119,6 +119,10 @@ export default function OrderGroupCard({ orderGroup }: OrderGroupCardProps) {
           });
         },
       },
+      secondaryButton: {
+        label: "취소",
+        onClick: () => {},
+      },
     });
   };
 
