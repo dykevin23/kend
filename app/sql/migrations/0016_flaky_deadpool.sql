@@ -1,0 +1,1 @@
+ALTER TABLE "deliveries" ADD COLUMN "tracking_synced_at" timestamp with time zone;

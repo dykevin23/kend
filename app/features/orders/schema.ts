@@ -365,6 +365,7 @@ export const orderItems = pgTable("order_items", {
  * shipping_fee     배송비
  * shipped_at       발송 일시
  * delivered_at     배송 완료 일시
+ * tracking_synced_at 스마트택배 API 마지막 조회 시각(캐시 갱신 시각, kend-seller 폴링)
  * created_at       생성일시
  * updated_at       수정일시
  */
@@ -386,6 +387,7 @@ export const deliveries = pgTable("deliveries", {
   // 배송 일시
   shipped_at: timestamp({ withTimezone: true }),
   delivered_at: timestamp({ withTimezone: true }),
+  tracking_synced_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
