@@ -129,6 +129,16 @@ export const createOrder = async (
 
     if (itemsError) throw itemsError;
 
+    // 재고 차감 (B안: 주문 생성 시점 즉시 차감, 실패/취소 시 트리거가 복원)
+    for (const item of group.items) {
+      const { error: stockError } = await client.rpc("decrement_stock", {
+        p_sku_id: item.skuId,
+        p_quantity: item.quantity,
+      });
+
+      if (stockError) throw stockError;
+    }
+
     // delivery 생성 (초기 상태)
     const { data: delivery, error: deliveryError } = await client
       .from("deliveries")

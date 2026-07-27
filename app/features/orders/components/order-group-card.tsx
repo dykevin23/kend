@@ -6,8 +6,8 @@ import OrderItemCard from "./order-item-card";
 import { Button } from "~/common/components/ui/button";
 import { useAlert } from "~/hooks/useAlert";
 
-/** 배송이 시작된 이후 상태 — 구매자가 직접 취소할 수 없다 */
-const SHIPPED_ORDER_STATUSES = ["shipped", "delivered"];
+/** 이미 결론이 난 상태 — 구매자가 (재)취소할 수 없다 (배송 시작됐거나, 이미 취소됨) */
+const RESOLVED_ORDER_STATUSES = ["shipped", "delivered", "cancelled"];
 
 interface OrderGroupCardProps {
   orderGroup: UserOrderGroup;
@@ -85,11 +85,11 @@ export default function OrderGroupCard({ orderGroup }: OrderGroupCardProps) {
 
   const isCancelling = fetcher.state !== "idle";
 
-  // 결제 완료 + 배송 시작 전인 주문만 취소 가능 (서버에서도 동일하게 재검증한다)
+  // 결제 완료 + 배송 시작 전 + 아직 취소되지 않은 주문만 취소 가능 (서버에서도 동일하게 재검증한다)
   const canCancel =
     orderGroup.status === "paid" &&
     !orderGroup.orders.some((order) =>
-      SHIPPED_ORDER_STATUSES.includes(order.status)
+      RESOLVED_ORDER_STATUSES.includes(order.status)
     );
 
   // 취소 실패 시 사유 안내
