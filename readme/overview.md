@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-07-22
+> 최종 업데이트: 2026-08-04
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -12,25 +12,24 @@
 
 ---
 
-## 🚦 지금 상황 (2026-07-22)
+## 🚦 지금 상황 (2026-08-04)
 
 - 🚨 **iOS App Store 심사 3달+ 정체** — 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate → 빌드 리셋 재제출 트랙. **개발은 병렬 진행**
-- 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키 신청 완료(심사 2~4주 대기)**. NICE는 Holding(본인확인 불필요 방향)
-- ✅ **결제 도메인 실질 완성**: 결제 E2E(주문→결제→`paid`) + **주문 취소·전액 환불(P1-5)** 모두 테스트 키로 동작 확인. 코드는 `PAYMENT_COMING_SOON=true`로 차단(실키+출시 때 켬)
-- ⚠️ **마일스톤 보드 Phase 2 상태 미검증**: P2-1~P2-6이 2026-04 계획 시점 그대로라 kend-seller 실측 코드와 어긋날 수 있음 — 착수 전 정정 필요
-- 🔧 **스토어 목록 버그 수정(테스트 대기)**: 상품 미등록 판매자가 목록에 No-Image로 노출되던 문제, 쿼리 필터 추가로 수정 — 브라우저 확인 아직
-- 🔒 **판매자 계정 kend 로그인 차단(테스트 대기)**: `profiles.role`이 정의만 되고 어디서도 체크 안 되던 걸 발견 — root loader에서 차단하도록 수정. 주문취소 팝업에 되돌리기(취소) 버튼도 추가
-- **계정/인증**: 이메일 비밀번호 재설정 완료 / 휴대폰 SMS 인증은 출시 후 이연
-- **다음 개발 후보**: 위 두 수정 브라우저 검증 / `.server.ts`/시크릿 노출 감사 / 미완료결제 정리 cron / kend-seller Phase 2 / P0-3 잔여
+- 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키 신청 완료(심사 대기)**. NICE는 Holding(본인확인 불필요 방향)
+- ✅ **결제 도메인 실질 완성**: 결제 E2E + 주문 취소·전액 환불(P1-5) 모두 테스트 키로 동작 확인. `PAYMENT_COMING_SOON=true`로 차단 중
+- ✅ **재고 차감/복원 연동 완료 (P2-4)**: 주문 생성 시 SKU 재고 원자적 차감(`decrement_stock`), 취소 시 자동 복원 트리거(`handle_order_cancelled`), 결제이탈 정리 cron(`expire_pending_orders`, hold 15분). 실사용 테스트 중 "판매자 취소 시 재고 미복원/취소버튼 잔존/취소환불탭 미노출" 버그 3건 발견·수정
+- 🔄 **주문 라이프사이클 전체(취소/반품/교환/AS문의/SLA/배송비정책) 설계 진행 중**: P2-4 버그 대응 과정에서 촉발, 업계표준 대비 갭 분석 완료. **로드맵 재구성 제안 중** — Phase 2 종료 + 신설 Phase 2.5(라이프사이클 완결)로 P2-9(반품환불, 선택→필수 승격)·P3-1(구매확정, Phase3에서 앞당김) 등 통합. 아직 `kend-milestones.md` 미반영, 코드 착수 전 정책 정의 단계
+- ⚠️ **마일스톤 보드 Phase 2 상태 미검증**: 위 재구성 논의로 조만간 정리 예정
+- **다음 개발 후보**: 로드맵 재구성 확정 → Phase 2.5 착수 (SLA cron, 구매확정, 반품/환불/문의 시스템) / `.server.ts` 시크릿 노출 감사 / P0-3 잔여
 
 ---
 
 ## ✅ 최근 완료
 
-- 2026-07-10: **주문 취소 + 전액 환불 (P1-5)** — Toss Cancel API + 멱등키, 상태 전환까지 동작 확인 ✅
-- 2026-07-09: **결제 루프 E2E 검증 완료** (테스트 키로 주문→결제→paid 전 흐름) + 로컬 소셜로그인 리다이렉트 수정 ✅
-- 2026-06-24: **디버그 console.log 정리** (P0-3, 8건 제거)
-- 2026-06-24: **오프라인 감지** (useNetworkStatus 훅 + 오프라인 배너, root 연동) — 실기기 비행기모드로 동작 확인 ✅
+- 2026-08-04: **재고 hold 유지시간 30분→15분 단축**
+- 2026-07-27: **재고 차감/복원 연동 (P2-4)** — 차감/복원 트리거 + 결제이탈 정리 cron, 실사용 버그 3건 수정 ✅
+- 2026-07-24: **판매자 계정 kend 로그인 차단 + 주문취소 팝업 개선**, **스토어 목록 무상품 판매자 제외** — 둘 다 브라우저 검증 완료 ✅
+- 2026-07-10: **주문 취소 + 전액 환불 (P1-5)** — Toss Cancel API + 멱등키 ✅
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
@@ -40,10 +39,11 @@
 
 | 항목 | 상태 |
 |------|------|
-| [ios-review-rejection-apr14](./active/ios-review-rejection-apr14.md) | 🚨 심사 2달+ 정체 → escalate 필요 |
+| [ios-review-rejection-apr14](./active/ios-review-rejection-apr14.md) | 🚨 심사 정체 → escalate 필요 |
 | [internal-test-1st](./active/internal-test-1st.md) | 15/18 완료, 잔여는 휴대폰 인증 연계(이연) |
 | [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 네이티브 적용 대기 |
 | [environment-separation-plan](./active/environment-separation-plan.md) | 출시 전 필수, 미착수 |
+| [order-lifecycle-master-plan](./todo/order-lifecycle-master-plan.md) | 로드맵 재구성 제안 — milestones.md 반영 대기 |
 
 ---
 
@@ -51,17 +51,16 @@
 
 | 항목 | 우선순위 | 비고 |
 |------|---------|------|
-| 스토어 목록 무상품 판매자 제외 — 브라우저 검증 | **다음** | 쿼리 필터는 반영됨, 실제 화면 확인만 남음 |
-| 판매자 로그인 차단 + 주문취소 팝업 — 브라우저 검증 | **다음** | 판매자 계정으로 로그인 시도 + 주문취소 팝업에서 되돌리기 동작 확인 |
-| **`.server.ts` / 시크릿 노출 감사** | 다음 | service_role·서버 키가 클라이언트 번들에 섞였는지 점검 (`my-page.tsx` 등) |
-| 미완료결제 정리 cron (`payment_in_progress`→`failed`) | 출시 전 | 가벼움 |
-| 구매확정 + 부분취소 | Phase 2 이후 | 배송(delivery_items) 도입 후 |
+| Phase 2.5 로드맵 반영 (`kend-milestones.md`) | **다음** | 구조는 확정, 문서 반영만 남음 |
+| 판매자 확인/발송 SLA cron + 구매확정 로직 | Phase 2.5 착수 시 | 기존 `expire_pending_orders` 패턴 재사용 |
+| 반품/교환/AS문의 시스템 (스키마 확장 포함) | Phase 2.5 | kend가 스키마 선행, kend-seller가 승인화면 |
+| Toss 부분환불 연동 | Phase 2.5 | 판매자 취소 시 환불 자동화 안 되는 기존 버그도 같이 해결됨 |
+| **`.server.ts` / 시크릿 노출 감사** | 다음 | service_role·서버 키 클라이언트 번들 노출 점검 |
 | P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 대기 | |
-| kend-seller Phase 2 (판매자 기반 → 주문관리) | 다음 큰 블록 | 시드 주문으로 결제 없이도 진행 가능 |
-| 전체 테이블 RLS 적용 (~33개) | 출시 전 하드닝 | 실데이터 없어 긴급도 낮음. 정책은 개발단계 선행 |
+| 전체 테이블 RLS 적용 (~33개) | 출시 전 하드닝 | 실데이터 없어 긴급도 낮음. 정책은 개발단계 선행 (Phase 4 P4-3) |
 | PostHog / WebView 에러 브리지 | 출시 전(QA) | |
 
-> 외부 의존성: **Toss 실키 심사 대기(2~4주)** / **EXT-4 스마트택배 API** 신청 필요(Phase 2 배송용). NICE는 Holding
+> 외부 의존성: **Toss 실키 심사 대기** / NICE는 Holding
 
 ---
 
@@ -96,11 +95,11 @@
 
 - [ ] iOS 심사 통과
 - [x] 결제 E2E 검증 (테스트 키) → [ ] 실키 전환(라이브키) — 심사 대기 *(NICE는 Holding)*
-- [x] 주문 취소·전액 환불 (P1-5) → [ ] 구매확정 (Phase 2 이후)
+- [x] 주문 취소·전액 환불 (P1-5) / [x] 재고 차감·복원 연동 (P2-4) → [ ] 구매확정·반품/교환/AS (Phase 2.5, 로드맵 반영 중)
 - [ ] Supabase dev/prod 환경 분리
 - [ ] 전체 테이블 RLS 적용·검증 (~33개, kend/seller 공유 DB)
-- [ ] 에러 핸들링 잔여 (오프라인 감지, PostHog, WebView 에러 브리지, QA)
-- [ ] kend-seller Phase 2 (판매자 기반, 주문/배송 관리)
+- [ ] 에러 핸들링 잔여 (PostHog, WebView 에러 브리지, QA)
+- [x] kend-seller Phase 2 핵심(판매자 기반·주문관리·배송처리·재고차감) 완료 → [ ] Phase 2.5(반품/환불/구매확정)
 
 ---
 
