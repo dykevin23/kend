@@ -8,6 +8,15 @@
 -- order_group을 failed 처리할 때 하위 orders.status를 cancelled로 함께 맞춰야
 -- 트리거가 걸려 재고가 복원된다 (order_groups만 바꾸면 재고가 안 돌아옴).
 --
+-- ⚠️ 2026-07-28 수정: hold 유지시간을 30분 → 15분으로 단축 (업계 표준 10~15분
+-- 참고, order-cancel-refund-exchange-flow.md §9.2 논의 결과). cron 주기도
+-- 10분 → 5분으로 맞춤 (임계치 대비 1/3 비율 유지).
+--
+-- 📌 향후 가상계좌(virtual_account) 결제 도입 시: 가상계좌는 `payment_pending`
+-- 상태(이미 enum에 존재, payment_in_progress와 별개)로 입금 대기하므로, 이 함수와
+-- 별개로 훨씬 긴 임계치(예: 24시간)로 payment_pending → failed 처리를 추가해야
+-- 한다 (지금은 가상계좌 미출시라 미구현, 정책만 기록해둠).
+--
 -- 외부 API 호출이 없는 순수 DB 작업이라 Edge Function 없이 pg_cron에서
 -- 함수를 직접 호출한다 (kend-seller의 sync-tracking처럼 pg_net이 필요 없음).
 --
@@ -27,7 +36,7 @@ BEGIN
   SELECT array_agg(id) INTO v_group_ids
     FROM order_groups
    WHERE status = 'payment_in_progress'
-     AND created_at < now() - interval '30 minutes';
+     AND created_at < now() - interval '15 minutes';
 
   IF v_group_ids IS NULL THEN
     RETURN 0;
@@ -52,8 +61,11 @@ $$;
 
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
 
+SELECT cron.unschedule('expire-pending-orders')
+ WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'expire-pending-orders');
+
 SELECT cron.schedule(
   'expire-pending-orders',
-  '*/10 * * * *', -- 10분마다 실행 (30분 임계치보다 충분히 촘촘하게)
+  '*/5 * * * *', -- 5분마다 실행 (15분 임계치보다 충분히 촘촘하게)
   $$ SELECT expire_pending_orders(); $$
 );
