@@ -109,7 +109,23 @@ Phase 2.5가 끝나면 주문→결제→배송→구매확정의 정상흐름, 
 
 ---
 
-## 5. 참고
+## 5. 착수 로그 (2026-08-06~) — 검토했다가 기각한 것들
+
+Phase 2.5 실제 착수하면서 나온 설계 판단 중, **왜 안 하기로 했는지**를 기록해둔다 (나중에 같은 논의를 반복하지 않기 위함).
+
+### 5.1 `confirmed_at` 자동 세팅 — DB 트리거 대신 앱 코드에서 직접 세팅
+- **검토했던 안**: 재고 복원 트리거(`handle_order_cancelled`)와 같은 방식으로, `orders.status`가 `confirmed`로 바뀌면 DB 트리거가 자동으로 `confirmed_at`을 채우게 하려 했음
+- **기각 이유**: 재고 트리거는 상태를 바꾸는 경로가 실제로 3곳(kend 구매자취소·kend-seller 판매자취소·kend cron)이라 트리거가 필요했지만, `confirmed`로 바꾸는 경로는 **kend-seller의 `updateOrderStatus` 한 곳뿐**이었음. 여러 경로를 걱정할 이유가 없는데 트리거를 쓰는 건 불필요한 복잡도
+- **결정**: kend-seller의 `updateOrderStatus`에서 `status`가 `confirmed`로 바뀔 때만 `confirmed_at`도 같이 세팅하도록 직접 구현 (완료, 커밋 `cc382b9`). 이후 발송 SLA cron(`expire_unshipped_orders`)이 이 값을 사용
+
+### 5.2 `product_returns.return_window_days` 필드 — 만들지 않기로 함
+- **검토했던 안**: 반품기간(단순변심 7일/하자 30일)을 상품별·판매자별로 설정 가능하게, kend-seller `product_returns` 테이블에 필드 추가 + kend `order_items`에 스냅샷 컬럼 추가
+- **기각 이유**: 지금 판매자가 반품기간을 상품별로 다르게(법정 최소보다 길게) 설정하고 싶어할 실제 니즈가 없음. 없는 요구를 위해 스키마+검증+스냅샷까지 미리 만드는 건 과설계
+- **결정**: 법정기간을 kend 코드 안에 **상수로 하드코딩** (`CHANGE_OF_MIND`: 7일, 그 외 사유: 30일). `deliveries.delivered_at` + 이 상수로 판정. 나중에 실제로 판매자가 기간 연장을 원하는 사례가 생기면 그때 필드 추가 재논의
+
+---
+
+## 6. 참고
 - 세부 정책/논의 근거: [order-cancel-refund-exchange-flow.md](order-cancel-refund-exchange-flow.md)
 - 로드맵: [kend-milestones.md](../kend-milestones.md) — 위 구조 2026-08-04 반영 완료
 - kend-seller에서 자체 발견한 항목(Phase 3 관리보완에 반영됨): 재고 수동조정 화면("Stocks Keeping" 죽은 링크였음), 상품 수정 기능 자체 부재
