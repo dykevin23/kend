@@ -90,6 +90,7 @@ export const orderStatus = pgEnum("order_status", [
  * - shipped: 발송됨
  * - in_transit: 배송중
  * - delivered: 배송 완료
+ * - returning: 반송중/반송확인됨 (장기미수령·수취거절 등, Phase 2.5 배송예외 처리용)
  */
 export const deliveryStatus = pgEnum("delivery_status", [
   "pending",
@@ -97,6 +98,7 @@ export const deliveryStatus = pgEnum("delivery_status", [
   "shipped",
   "in_transit",
   "delivered",
+  "returning",
 ]);
 
 /**
@@ -118,6 +120,22 @@ export const deliveryItemStatus = pgEnum("delivery_item_status", [
 ]);
 
 /**
+ * 반품/교환 사유 (Phase 2.5)
+ * - CHANGE_OF_MIND: 단순변심 (반품배송비 구매자 부담)
+ * - DEFECT: 상품하자 (반품배송비 판매자 부담)
+ * - WRONG_ITEM: 오배송 (판매자 부담)
+ * - DAMAGED: 배송중 파손 (판매자 부담)
+ * - LOST: 배송중 분실 (판매자 부담)
+ */
+export const returnReasonType = pgEnum("return_reason_type", [
+  "CHANGE_OF_MIND",
+  "DEFECT",
+  "WRONG_ITEM",
+  "DAMAGED",
+  "LOST",
+]);
+
+/**
  * 배송비 타입
  * - FREE: 무료배송
  * - PAID: 유료 (선결제)
@@ -129,6 +147,16 @@ export const shippingFeeType = pgEnum("shipping_fee_type", [
   "PAID",
   "COD",
   "CONDITIONAL",
+]);
+
+/**
+ * 배송비 부담 주체 (Phase 2.5, 플랫폼 조건부 무료배송)
+ * - SELLER: 판매자 자신의 조건부무료 정책으로 무료가 된 경우
+ * - PLATFORM: 판매자 조건은 미충족이나 플랫폼 프로모션으로 무료가 된 경우 (정산 시 플랫폼이 흡수)
+ */
+export const shippingFeeBearer = pgEnum("shipping_fee_bearer", [
+  "SELLER",
+  "PLATFORM",
 ]);
 
 // ============================================================
@@ -315,6 +343,7 @@ export const orders = pgTable("orders", {
  * shipping_fee_type             배송비 타입 (스냅샷)
  * base_shipping_fee             기본 배송비 (스냅샷)
  * free_shipping_condition_value 무료배송 조건 금액 (스냅샷)
+ * shipping_fee_bearer           배송비 무료 처리 시 부담 주체 (SELLER/PLATFORM, Phase 2.5 정산 입력값)
  * ship_from_region              출고 지역 (스냅샷)
  * created_at                    생성일시
  */
@@ -347,6 +376,7 @@ export const orderItems = pgTable("order_items", {
   shipping_fee_type: shippingFeeType().notNull(),
   base_shipping_fee: integer().notNull().default(0),
   free_shipping_condition_value: integer(),
+  shipping_fee_bearer: shippingFeeBearer().notNull().default("SELLER"),
   ship_from_region: text(),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -404,6 +434,7 @@ export const deliveries = pgTable("deliveries", {
  * order_item_id   주문 상품 ID (FK → order_items)
  * quantity        수량 (order_item의 일부만 배송될 수 있음)
  * status          상태 (부분취소/교환 처리용)
+ * reason          반품/교환 사유 (return_requested/exchange_requested 전이 시 세팅)
  * created_at      생성일시
  * updated_at      수정일시
  */
@@ -418,6 +449,7 @@ export const deliveryItems = pgTable("delivery_items", {
 
   quantity: integer().notNull(),
   status: deliveryItemStatus().notNull().default("normal"),
+  reason: returnReasonType(),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
