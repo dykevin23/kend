@@ -294,6 +294,7 @@ export const payments = pgTable("payments", {
  * total_amount      합계
  * seller_name       판매자명 (스냅샷)
  * seller_code       판매자 코드 (스냅샷)
+ * confirmed_at      판매자 주문확인(pending→confirmed) 시각 — 발송 SLA 기산점 + 주문상세 타임라인용
  * created_at        생성일시
  * updated_at        수정일시
  */
@@ -317,6 +318,8 @@ export const orders = pgTable("orders", {
   // 판매자 스냅샷
   seller_name: text().notNull(),
   seller_code: text().notNull(),
+
+  confirmed_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),

@@ -752,6 +752,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          confirmed_at: string | null
           created_at: string
           id: string
           order_group_id: string
@@ -766,6 +767,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          confirmed_at?: string | null
           created_at?: string
           id?: string
           order_group_id: string
@@ -780,6 +782,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          confirmed_at?: string | null
           created_at?: string
           id?: string
           order_group_id?: string
@@ -1622,6 +1625,7 @@ export type Database = {
         Returns: undefined
       }
       expire_pending_orders: { Args: never; Returns: number }
+      expire_unconfirmed_orders: { Args: never; Returns: number }
       get_growth_percentile_history: {
         Args: { p_child_id: string; p_type: string }
         Returns: {
