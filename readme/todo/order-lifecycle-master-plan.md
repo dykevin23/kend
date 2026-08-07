@@ -125,7 +125,19 @@ Phase 2.5 실제 착수하면서 나온 설계 판단 중, **왜 안 하기로 �
 
 ---
 
-## 6. 참고
+## 6. 백로그 (어느 Phase에도 안 넣음 — 할지 말지도 미정)
+
+Phase 2/2.5/3/3.5/4/5 어디에도 배정하지 않은 번외 항목. 착수 시점이 정해지면 그때 적절한 Phase로 옮긴다.
+
+### 6.1 배송조회 상세 이력 화면 (kind: 소비자 UX 개선)
+- **현재 상태**: 주문상세 화면(P2.5-2)의 "배송 조회"는 발송/배송완료 시각 + 송장번호만 보여주는 요약형. CJ대한통운 등 택배사 자체 조회 페이지처럼 "상품인수→이동중→배송지도착→배달완료" 단계별 이력(시각·담당점소)은 안 보여줌
+- **가능 여부 확인됨**: 스마트택배(SweetTracker) API의 `trackingInfo` 응답에 `trackingDetails` 배열(단계별 `kind`/`time`/`where`/`manName` 등)이 이미 존재 — 기술적으로 가능
+- **왜 지금 안 하는가**: kend-seller의 `sync-tracking` Edge Function이 지금 `level`/`complete`만 읽고 `trackingDetails`는 버리고 있음. 이미 실서비스로 도는 함수를 확장해야 해서, 별도로 신중하게 진행하는 게 맞다고 판단해 보류
+- **착수 시 방향**: kend-seller가 `sync-tracking`에 `trackingDetails` 저장을 추가(효율성 고려, kend으로 이관하지 않음 — 이유는 §5 유사 사례 참고), kend은 그 데이터를 step-리스트/표로 렌더링
+
+---
+
+## 7. 참고
 - 세부 정책/논의 근거: [order-cancel-refund-exchange-flow.md](order-cancel-refund-exchange-flow.md)
 - 로드맵: [kend-milestones.md](../kend-milestones.md) — 위 구조 2026-08-04 반영 완료
 - kend-seller에서 자체 발견한 항목(Phase 3 관리보완에 반영됨): 재고 수동조정 화면("Stocks Keeping" 죽은 링크였음), 상품 수정 기능 자체 부재
