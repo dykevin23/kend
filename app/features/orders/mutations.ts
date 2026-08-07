@@ -37,13 +37,26 @@ export const createOrder = async (
 ) => {
   const groupOrderNumber = generateOrderNumber();
 
-  // 전체 금액 계산
+  // 전체 상품금액 (플랫폼 조건부 무료배송 판정 기준, Phase 2.5-5)
   const totalProductAmount = sellerGroups.reduce(
     (sum, g) => sum + g.subtotal,
     0
   );
+
+  // 플랫폼 조건부 무료배송: 판매자별 조건과 별개로, 장바구니 총액이 플랫폼
+  // 임계값 이상이면 배송비를 플랫폼이 부담(면제)한다. row가 없거나 임계값이
+  // 0이면 기능 off로 취급.
+  const { data: platformSettings } = await client
+    .from("platform_settings")
+    .select("free_shipping_threshold")
+    .limit(1)
+    .maybeSingle();
+  const platformThreshold = platformSettings?.free_shipping_threshold ?? 0;
+  const platformFreeShipping =
+    platformThreshold > 0 && totalProductAmount >= platformThreshold;
+
   const totalShippingFee = sellerGroups.reduce(
-    (sum, g) => sum + g.shippingFee,
+    (sum, g) => sum + (platformFreeShipping ? 0 : g.shippingFee),
     0
   );
   const totalAmount = totalProductAmount + totalShippingFee;
@@ -81,7 +94,13 @@ export const createOrder = async (
     const group = sellerGroups[i];
     const orderNumber = `${groupOrderNumber}-${String(i + 1).padStart(2, "0")}`;
 
-    const orderTotalAmount = group.subtotal + group.shippingFee;
+    // 이 판매자 몫에 플랫폼 무료배송이 실제로 적용됐는지(=판매자 자체 조건은
+    // 미충족이라 원래는 유료였는데 플랫폼이 대신 면제한 경우)
+    const feeWaivedByPlatform = platformFreeShipping && group.shippingFee > 0;
+    const effectiveShippingFee = platformFreeShipping ? 0 : group.shippingFee;
+    const shippingFeeBearer = feeWaivedByPlatform ? ("PLATFORM" as const) : ("SELLER" as const);
+
+    const orderTotalAmount = group.subtotal + effectiveShippingFee;
 
     // order 생성
     const { data: order, error: orderError } = await client
@@ -92,7 +111,7 @@ export const createOrder = async (
         order_number: orderNumber,
         status: "pending",
         product_amount: group.subtotal,
-        shipping_fee: group.shippingFee,
+        shipping_fee: effectiveShippingFee,
         total_amount: orderTotalAmount,
         seller_name: group.seller?.name ?? "",
         seller_code: group.seller?.sellerCode ?? "",
@@ -119,6 +138,7 @@ export const createOrder = async (
       shipping_fee_type: item.delivery?.shippingFeeType ?? ("FREE" as const),
       base_shipping_fee: item.delivery?.shippingFee ?? 0,
       free_shipping_condition_value: item.delivery?.freeShippingCondition ?? null,
+      shipping_fee_bearer: shippingFeeBearer,
       ship_from_region: null,
     }));
 
@@ -145,7 +165,7 @@ export const createOrder = async (
       .insert({
         order_id: order.id,
         status: "pending",
-        shipping_fee: group.shippingFee,
+        shipping_fee: effectiveShippingFee,
       })
       .select("id")
       .single();

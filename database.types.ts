@@ -906,6 +906,24 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          free_shipping_threshold: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          free_shipping_threshold?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          free_shipping_threshold?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_deliveries: {
         Row: {
           address_id: string
