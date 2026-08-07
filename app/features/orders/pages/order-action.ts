@@ -1,5 +1,5 @@
 import { makeSSRClient } from "~/supa-client";
-import { createOrder } from "~/features/orders/mutations";
+import { createOrder, confirmPurchase } from "~/features/orders/mutations";
 import { cancelOrderGroup } from "~/features/orders/mutations.server";
 import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/order-action";
@@ -73,6 +73,22 @@ export const action = async ({ request }: Route.ActionArgs) => {
         orderGroupId: result.orderGroupId,
         orderNumber: result.orderNumber,
       };
+    } catch (error) {
+      return actionErrorResponse(error);
+    }
+  }
+
+  if (intent === "confirmPurchase") {
+    try {
+      const orderId = formData.get("orderId") as string;
+
+      if (!orderId) {
+        return { success: false, error: "주문 정보가 없습니다." };
+      }
+
+      const result = await confirmPurchase(client, { userId: user.id, orderId });
+
+      return { success: true, orderId: result.orderId };
     } catch (error) {
       return actionErrorResponse(error);
     }

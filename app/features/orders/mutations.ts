@@ -169,3 +169,41 @@ export const createOrder = async (
 
   return { orderGroupId: orderGroup.id, orderNumber: groupOrderNumber };
 };
+
+/**
+ * 구매확정 (수동)
+ *
+ * 배송완료(delivered)된 주문(판매자 단위)만 확정 가능. 확정 이후에는
+ * 반품/교환 신청 채널이 닫히고 "문의하기"(AS)로만 접수된다 (Phase 2.5).
+ * 확정 시각은 Phase 3.5 정산 대상 판정 기준이 된다.
+ */
+export const confirmPurchase = async (
+  client: Client,
+  { userId, orderId }: { userId: string; orderId: string }
+) => {
+  const { data: order, error } = await client
+    .from("orders")
+    .select("id, status, purchase_confirmed_at, order_groups!inner(user_id)")
+    .eq("id", orderId)
+    .eq("order_groups.user_id", userId)
+    .single();
+
+  if (error || !order) {
+    throw new Error("주문을 찾을 수 없습니다.");
+  }
+  if (order.status !== "delivered") {
+    throw new Error("배송 완료된 주문만 구매확정할 수 있습니다.");
+  }
+  if (order.purchase_confirmed_at) {
+    throw new Error("이미 구매확정된 주문입니다.");
+  }
+
+  const { error: updateError } = await client
+    .from("orders")
+    .update({ purchase_confirmed_at: new Date().toISOString() })
+    .eq("id", orderId);
+
+  if (updateError) throw updateError;
+
+  return { orderId };
+};

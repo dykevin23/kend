@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useFetcher } from "react-router";
+import { Link, useFetcher } from "react-router";
 import { DateTime } from "luxon";
 import type { UserOrderGroup, UserOrder } from "../queries";
 import OrderItemCard from "./order-item-card";
@@ -39,7 +39,7 @@ function getOrderStatusLabel(status: string): { label: string; color: string } {
  * 개별 주문 블록 (판매자별)
  * - 상태 + 아이템들 + 액션 버튼
  */
-function OrderBlock({ order }: { order: UserOrder }) {
+function OrderBlock({ order, orderGroupId }: { order: UserOrder; orderGroupId: string }) {
   const status = getOrderStatusLabel(order.status);
 
   return (
@@ -58,13 +58,13 @@ function OrderBlock({ order }: { order: UserOrder }) {
         ))}
       </div>
 
-      {/* 액션 버튼 */}
+      {/* 액션 버튼 — 주문상세(타임라인+구매확정) 화면으로 이동 */}
       <div className="flex items-center gap-2 px-4 py-3">
-        <Button variant="outline" size="sm" className="flex-1 text-xs">
-          배송·주문 관리
+        <Button variant="outline" size="sm" className="flex-1 text-xs" asChild>
+          <Link to={`/orders/${orderGroupId}`}>배송·주문 관리</Link>
         </Button>
-        <Button variant="outline" size="sm" className="flex-1 text-xs">
-          배송 조회
+        <Button variant="outline" size="sm" className="flex-1 text-xs" asChild>
+          <Link to={`/orders/${orderGroupId}`}>배송 조회</Link>
         </Button>
       </div>
     </div>
@@ -135,7 +135,7 @@ export default function OrderGroupCard({ orderGroup }: OrderGroupCardProps) {
 
       {/* 주문별 블록 (판매자별) - 붙여서 표시 */}
       {orderGroup.orders.map((order) => (
-        <OrderBlock key={order.id} order={order} />
+        <OrderBlock key={order.id} order={order} orderGroupId={orderGroup.id} />
       ))}
 
       {/* 주문 취소 — 결제 단위(order_group) 전체 취소 */}

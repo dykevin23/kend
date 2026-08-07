@@ -44,6 +44,7 @@ export default [
   ...prefix("orders", [
     index("features/orders/pages/orders-page.tsx"),
     route("/action", "features/orders/pages/order-action.ts"),
+    route("/:orderGroupId", "features/orders/pages/order-detail-page.tsx"),
   ]),
   ...prefix("payments", [
     route("/success", "features/payments/pages/payment-success-page.tsx"),

@@ -156,6 +156,8 @@ export const getOrderGroupDetail = async (
         product_amount,
         shipping_fee,
         total_amount,
+        confirmed_at,
+        purchase_confirmed_at,
         order_items (
           id,
           product_id,
@@ -170,6 +172,14 @@ export const getOrderGroupDetail = async (
           subtotal,
           shipping_fee_type,
           base_shipping_fee
+        ),
+        deliveries (
+          id,
+          status,
+          courier,
+          tracking_number,
+          shipped_at,
+          delivered_at
         )
       )
     `
@@ -205,6 +215,17 @@ export const getOrderGroupDetail = async (
       productAmount: order.product_amount,
       shippingFee: order.shipping_fee,
       totalAmount: order.total_amount,
+      confirmedAt: order.confirmed_at,
+      purchaseConfirmedAt: order.purchase_confirmed_at,
+      delivery: order.deliveries[0]
+        ? {
+            status: order.deliveries[0].status,
+            courier: order.deliveries[0].courier,
+            trackingNumber: order.deliveries[0].tracking_number,
+            shippedAt: order.deliveries[0].shipped_at,
+            deliveredAt: order.deliveries[0].delivered_at,
+          }
+        : null,
       items: order.order_items.map((item) => ({
         id: item.id,
         productId: item.product_id,

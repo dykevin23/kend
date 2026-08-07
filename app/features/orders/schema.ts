@@ -295,6 +295,7 @@ export const payments = pgTable("payments", {
  * seller_name       판매자명 (스냅샷)
  * seller_code       판매자 코드 (스냅샷)
  * confirmed_at      판매자 주문확인(pending→confirmed) 시각 — 발송 SLA 기산점 + 주문상세 타임라인용
+ * purchase_confirmed_at 구매확정 시각 (수동 또는 배송완료 후 자동, P2.5-2) — 정산(Phase 3.5) 대상 판정 기준
  * created_at        생성일시
  * updated_at        수정일시
  */
@@ -320,6 +321,7 @@ export const orders = pgTable("orders", {
   seller_code: text().notNull(),
 
   confirmed_at: timestamp({ withTimezone: true }),
+  purchase_confirmed_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
