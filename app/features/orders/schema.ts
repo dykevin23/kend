@@ -438,12 +438,21 @@ export const deliveries = pgTable("deliveries", {
  * delivery_id     배송 ID (FK → deliveries)
  * order_item_id   주문 상품 ID (FK → order_items)
  * quantity        수량 (order_item의 일부만 배송될 수 있음)
- * status          상태 (부분취소/교환 처리용)
- * reason          반품/교환 사유 (return_requested/exchange_requested 전이 시 세팅)
- * refunded_at     Toss 부분환불 처리 완료 시각 (P2.5-3) — status='returned'인데 이 값이
- *                 NULL이면 판매자 승인은 됐지만 환불 크론이 아직 처리 전이라는 뜻
- * created_at      생성일시
- * updated_at      수정일시
+ * status              상태 (부분취소/교환 처리용) — status가 'returned'로 바뀌는 순간이
+ *                     실제 최종 반품 확정(검수 완료) 시점이며, 환불 크론(processApprovedReturns)이
+ *                     이 상태만 감시한다. 그 전 단계(1차승인/회수/거절)는 아래 컬럼으로만 표현하고
+ *                     status는 계속 'return_requested'에 머문다 (P2.5-3, 판매자 검수 플로우 반영)
+ * reason              반품/교환 사유 (return_requested/exchange_requested 전이 시 세팅)
+ * return_approved_at  판매자 1차 승인 시각 — 반품 신청 자체를 받아들이고 반송(회수) 택배
+ *                     진행에 동의했다는 뜻. 아직 실물 회수 전이라 환불/재고복원은 하지 않는다
+ * return_received_at  반송된 실물을 판매자가 회수 확인한 시각 — 검수를 시작할 수 있는 시점
+ * reject_reason       판매자가 (1차 검토 또는 검수) 거절 시 남기는 사유. 상태를 되돌리지 않고
+ *                     이 필드만 채운다 — 판매자가 재고려해서 승인 쪽으로 진행하면 다시 NULL로
+ *                     비운다. 별도 이력 테이블 없이 "현재 거절 상태인지"만 표현
+ * refunded_at         Toss 부분환불 처리 완료 시각 (P2.5-3) — status='returned'인데 이 값이
+ *                     NULL이면 판매자가 최종 승인은 했지만 환불 크론이 아직 처리 전이라는 뜻
+ * created_at          생성일시
+ * updated_at          수정일시
  */
 export const deliveryItems = pgTable("delivery_items", {
   id: uuid().primaryKey().defaultRandom(),
@@ -457,6 +466,9 @@ export const deliveryItems = pgTable("delivery_items", {
   quantity: integer().notNull(),
   status: deliveryItemStatus().notNull().default("normal"),
   reason: returnReasonType(),
+  return_approved_at: timestamp({ withTimezone: true }),
+  return_received_at: timestamp({ withTimezone: true }),
+  reject_reason: text(),
   refunded_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),

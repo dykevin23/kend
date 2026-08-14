@@ -383,6 +383,9 @@ export type Database = {
           quantity: number
           reason: Database["public"]["Enums"]["return_reason_type"] | null
           refunded_at: string | null
+          reject_reason: string | null
+          return_approved_at: string | null
+          return_received_at: string | null
           status: Database["public"]["Enums"]["delivery_item_status"]
           updated_at: string
         }
@@ -394,6 +397,9 @@ export type Database = {
           quantity: number
           reason?: Database["public"]["Enums"]["return_reason_type"] | null
           refunded_at?: string | null
+          reject_reason?: string | null
+          return_approved_at?: string | null
+          return_received_at?: string | null
           status?: Database["public"]["Enums"]["delivery_item_status"]
           updated_at?: string
         }
@@ -405,6 +411,9 @@ export type Database = {
           quantity?: number
           reason?: Database["public"]["Enums"]["return_reason_type"] | null
           refunded_at?: string | null
+          reject_reason?: string | null
+          return_approved_at?: string | null
+          return_received_at?: string | null
           status?: Database["public"]["Enums"]["delivery_item_status"]
           updated_at?: string
         }

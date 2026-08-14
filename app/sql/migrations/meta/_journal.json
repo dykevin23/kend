@@ -148,6 +148,13 @@
       "when": 1786345498089,
       "tag": "0020_lame_molly_hayes",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1786688739548,
+      "tag": "0021_silent_lethal_legion",
+      "breakpoints": true
     }
   ]
 }

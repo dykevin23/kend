@@ -184,7 +184,10 @@ export const getOrderGroupDetail = async (
             id,
             order_item_id,
             status,
-            reason
+            reason,
+            return_approved_at,
+            reject_reason,
+            refunded_at
           )
         )
       )
@@ -253,6 +256,9 @@ export const getOrderGroupDetail = async (
           deliveryItemId: deliveryItem?.id ?? null,
           deliveryItemStatus: deliveryItem?.status ?? null,
           returnReason: deliveryItem?.reason ?? null,
+          returnApprovedAt: deliveryItem?.return_approved_at ?? null,
+          returnRejectReason: deliveryItem?.reject_reason ?? null,
+          returnRefundedAt: deliveryItem?.refunded_at ?? null,
         };
       }),
     })),
