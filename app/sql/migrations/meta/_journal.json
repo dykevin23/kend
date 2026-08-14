@@ -155,6 +155,13 @@
       "when": 1786688739548,
       "tag": "0021_silent_lethal_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1786693834264,
+      "tag": "0022_vengeful_brother_voodoo",
+      "breakpoints": true
     }
   ]
 }

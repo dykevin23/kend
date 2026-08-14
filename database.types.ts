@@ -461,6 +461,33 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_status_history: {
+        Row: {
+          entity_id: string
+          entity_type: string
+          id: string
+          occurred_at: string
+          snapshot: Json | null
+          status: string
+        }
+        Insert: {
+          entity_id: string
+          entity_type: string
+          id?: string
+          occurred_at?: string
+          snapshot?: Json | null
+          status: string
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          occurred_at?: string
+          snapshot?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
