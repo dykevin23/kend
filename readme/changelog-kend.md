@@ -7,6 +7,22 @@ KEND 웹앱(React Router SSR + WebView)의 주요 변경사항을 날짜별로 �
 
 ---
 
+## 2026-08-14
+
+### [KEND] 반품 신청 + 환불 처리 도입 (P2.5-3, kend 부분) — 구현됨, 테스트 대기
+
+- **반품 신청**: 배송완료~구매확정 전, `delivery_item` 단위로 반품 신청 가능(`requestReturn`). 사유별 신청기한(단순변심 7일/그 외 30일) 검증, 신청 시 `delivery_items.status: normal → return_requested` + `reason` 세팅. 주문상세 화면에 반품 신청 다이얼로그(`return-request-dialog.tsx`) 추가
+- **반품 승인 플로우 재설계**: 최초엔 "승인=즉시 최종확정"으로 단순화했으나, 실제로는 1차승인(반송 택배 진행 동의) → 회수확인 → 검수 후 최종승인/거절의 다단계 프로세스가 필요함을 kend-seller 작업 중 확인. `delivery_items.status` enum은 그대로 두고 `return_approved_at`/`return_received_at`/`reject_reason` 컬럼을 추가해 중간 단계를 표현 — `status`가 `'returned'`로 바뀌는 시점(검수 후 최종승인)에만 환불이 트리거되도록 설계. 거절은 상태를 되돌리지 않고 `reject_reason`만 채워 판매자가 재고려 가능하게 함
+- **환불 처리 크론**: `processApprovedReturns`(`orders/mutations.server.ts`) — `status='returned' AND refunded_at IS NULL`인 건을 찾아 Toss 부분환불 + 재고복원(`increment_stock` RPC 신설) + `order_groups` 상태 집계(`partially_refunded`/`refunded`)까지 처리. `/api/cron/process-returns` 라우트로 노출(`CRON_SECRET` 헤더 인증). kend-seller는 TOSS_SECRET_KEY가 없어 상태 컬럼만 갱신하고, 실제 환불은 이 크론이 폴링 방식으로 처리 — 판매자 취소가 결제취소를 안 부르던 기존 버그(2026-07-27 항목 참고)와 같은 유형의 실수를 피하기 위한 설계
+- **pg_cron 등록 SQL은 준비만 해둠**: `schedule_process_returns.sql`은 프로덕션 도메인이 아직 없어 플레이스홀더 상태로 미적용 — 도메인 확정 후 실행 필요
+- **상태 이력 테이블 신설**: `entity_status_history`(entity_type 기반 범용 구조 — orders/order_groups/deliveries/payments로도 같은 틀로 확장 가능하게 설계, 이번엔 delivery_items에만 연결) + `delivery_items` 대상 DB 트리거(`on_delivery_item_status_changed.sql`) — status/reason/승인/거절/환불 관련 컬럼이 바뀔 때마다 자동으로 스냅샷 기록. 앱 코드가 로깅을 기억할 필요 없이 트리거가 캡처
+- **kend-seller에 반품 승인 스펙 전달**: 1차승인/1차거절/회수확인/최종승인·거절 4단계가 어떤 컬럼을 어떻게 바꾸는지, `status='returned'`가 정확히 언제 되는지 문서화해 전달
+- **테스트용 주문 데이터 정리**: `order_groups`(+cascade) 11건, `carts` 2건 삭제 (전부 테스트 데이터, 재고 수치는 손대지 않음 — 어차피 더미)
+- **P2.5-4(문의하기) 착수했다가 홀딩**: `inquiries` 스키마 초안까지 갔다가, 반품 승인 설계 이슈 확인 우선순위로 밀려 롤백. 재개 예정
+- ⚠️ **테스트 대기**: 코드/트리거/스키마는 적용됐으나 실제 반품 신청→승인→환불 E2E는 아직 미검증 (kend-seller 승인화면이 별도 저장소에서 진행 중이라 여기서 단독 테스트 불가)
+
+---
+
 ## 2026-08-07
 
 ### [KEND] Phase 2.5 진행 — 구매확정 + 주문상세 타임라인 + 플랫폼 조건부 무료배송

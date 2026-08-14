@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-08-07
+> 최종 업데이트: 2026-08-14
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -12,15 +12,15 @@
 
 ---
 
-## 🚦 지금 상황 (2026-08-07)
+## 🚦 지금 상황 (2026-08-14)
 
 - 🚨 **iOS App Store 심사 3달+ 정체** — 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate → 빌드 리셋 재제출 트랙. **개발은 병렬 진행**
 - 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키 신청 완료(심사 대기)**. NICE는 Holding(본인확인 불필요 방향)
 - ✅ **결제 도메인 실질 완성**: 결제 E2E + 주문 취소·전액 환불(P1-5) 모두 테스트 키로 동작 확인. `PAYMENT_COMING_SOON=true`로 차단 중
-- ✅ **Phase 2.5 진행 중 — P2.5-1(SLA)·P2.5-2(구매확정)·P2.5-5(플랫폼 조건부 무료배송) 완료**: 주문상세 타임라인 화면(죽어있던 `getOrderGroupDetail` 재활용) + 수동/자동(7일) 구매확정, kend-seller의 `platform_settings`와 연동해 장바구니 총액 기준 배송비 면제(`shipping_fee_bearer`) 반영까지 끝남
-- 🔄 **다음 — P2.5-3(반품/교환/AS 처리 시스템)**: 반품/교환은 신규 테이블 없이 기존 `delivery_items.status` 재사용(주문 상태 액션), Toss 부분환불 연동 포함 — kend가 스키마+환불로직, kend-seller가 승인/검수 화면
+- ✅ **Phase 2.5 — P2.5-1(SLA)·P2.5-2(구매확정)·P2.5-5(플랫폼 조건부 무료배송) 완료**
+- 🔄 **P2.5-3(반품) — kend 쪽 구현됨, 테스트 대기**: 반품 신청(`delivery_item` 단위) + 승인 4단계(1차승인/거절→회수확인→검수 후 최종승인/거절, 최종승인 시점에만 `status='returned'`로 전이) + Toss 부분환불·재고복원 크론(`processApprovedReturns`) + 상태 이력 테이블(`entity_status_history`, 범용 설계) 완료. kend-seller가 승인화면 구현 중(별도 저장소) — **그쪽 완료 + 실제 E2E 테스트 전까지 미완료 취급**. 교환(exchange)은 정책 미정 항목 많아 별도 스텝으로 미룸
 - 📌 **배송조회 상세 이력(택배사 단계별 이력) 화면은 백로그로 보류**: 스마트택배 API에 데이터는 있으나 kend-seller `sync-tracking`이 현재 안 읽고 있음, Phase 미배정 상태로 기록만 해둠
-- **다음 개발 후보**: P2.5-3(반품/교환/AS) → P2.5-4(문의하기) / `.server.ts` 시크릿 노출 감사 / P0-3 잔여
+- **다음 개발 후보**: P2.5-4(문의하기, 착수했다가 홀딩 — 재개 예정) → P2.5-3 교환 → `.server.ts` 시크릿 노출 감사 / P0-3 잔여
 
 ---
 
@@ -29,7 +29,8 @@
 - 2026-08-07: **P2.5-2(구매확정+주문상세) / P2.5-5(플랫폼 조건부 무료배송) 완료** — 타임라인 화면, 수동/자동(7일) 구매확정, kend-seller `platform_settings` 연동. 시뮬레이션 테스트 통과 ✅
 - 2026-08-06: **Phase 2.5 착수 — SLA 자동취소 cron + 스키마 확장 (P2.5-1)** — 판매자확인/발송 SLA cron, 반품사유·배송비부담주체·RTS상태·confirmed_at 스키마 확장 ✅
 - 2026-08-04: **로드맵 재구성** — Phase 2 종료 + Phase 2.5/3/3.5 신설 ✅ / **재고 hold 유지시간 30분→15분 단축**
-- 2026-07-27: **재고 차감/복원 연동 (P2-4)** — 차감/복원 트리거 + 결제이탈 정리 cron, 실사용 버그 3건 수정 ✅
+
+> 반품(P2.5-3) 관련 작업은 kend 쪽 구현은 끝났지만 E2E 미검증이라 아직 여기 안 올림 — 아래 "진행 중 / 대기" 참고
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
@@ -43,7 +44,7 @@
 | [internal-test-1st](./active/internal-test-1st.md) | 15/18 완료, 잔여는 휴대폰 인증 연계(이연) |
 | [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 네이티브 적용 대기 |
 | [environment-separation-plan](./active/environment-separation-plan.md) | 출시 전 필수, 미착수 |
-| [order-lifecycle-master-plan](./todo/order-lifecycle-master-plan.md) | Phase 2.5 진행 중 — P2.5-1/2/5 완료, P2.5-3(반품/교환/AS) 착수 예정 |
+| [order-lifecycle-master-plan](./todo/order-lifecycle-master-plan.md) | Phase 2.5 진행 중 — P2.5-1/2/5 완료, P2.5-3(반품) kend 구현됨/테스트 대기(kend-seller 승인화면 별도 저장소 진행 중), 교환은 별도 스텝 |
 
 ---
 
@@ -51,9 +52,10 @@
 
 | 항목 | 우선순위 | 비고 |
 |------|---------|------|
-| **반품/교환/AS 처리 시스템 (P2.5-3)** | **다음** | 신규 테이블 없이 `delivery_items.status` 재사용, kend-seller가 승인화면 |
-| Toss 부분환불 연동 | Phase 2.5 | 판매자 취소 시 환불 자동화 안 되는 기존 버그도 같이 해결됨 |
-| 문의하기 Q&A 코어 (P2.5-4) | Phase 2.5 | |
+| **문의하기 Q&A 코어 (P2.5-4)** | **다음** | 착수했다가 반품 설계 이슈로 홀딩, 재개 예정. 전체 비공개로 결정 |
+| P2.5-3 반품 — kend-seller 승인화면 + E2E 테스트 | 대기 중 | kend 쪽(신청/환불크론/상태이력)은 구현 완료, kend-seller 완료되면 실제 반품→승인→환불 흐름 검증 필요 |
+| P2.5-3 교환(exchange) | Phase 2.5 | 정책 미정 항목 다수(옵션재고 없을때 처리, 배송비 부담주체, 횟수제한 등) — 착수 전 정책 결정 필요 |
+| pg_cron 반품환불 자동 트리거 등록 | 프로덕션 도메인 확정 후 | `schedule_process_returns.sql` 준비됨, 도메인 플레이스홀더만 남음 |
 | **`.server.ts` / 시크릿 노출 감사** | 다음 | service_role·서버 키 클라이언트 번들 노출 점검 |
 | P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 대기 | |
 | 전체 테이블 RLS 적용 (~33개) | 출시 전 하드닝 | 실데이터 없어 긴급도 낮음. 정책은 개발단계 선행 (Phase 4 P4-3) |
