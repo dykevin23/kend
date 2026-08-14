@@ -8,6 +8,37 @@ KEND-SELLER 판매자 관리자 웹의 주요 변경사항을 날짜별로 기�
 
 ---
 
+## 2026-08-14
+
+### [KEND-SELLER] 반품 신청 처리 화면 (P2.5-3) — 구현 완료, 실사용 테스트 대기
+
+- kend가 반품 신청/환불 로직(구매자 반품 신청, 사유별 신청기한 검증, Toss 부분환불+재고복원 크론)을 완료해 인계, kend-seller는 그 위에서 판매자가 신청을 처리하는 화면만 구현
+- **설계 재협의**: 처음엔 "승인/거절 2액션" 단순 모델로 시작했으나, 검토 중 "거절 후 재승인하면 이전 거절 사유가 사라진다"는 문제를 발견해 홀딩 후 kend와 재협의. 그 결과 kend가 `entity_status_history` 트리거 기반 이력 테이블과 `delivery_items.return_approved_at`/`return_received_at`/`reject_reason` 3개 컬럼을 추가해, 상태를 잃지 않고 승인/거절을 오갈 수 있는 4단계 플로우로 확정
+- **4단계 승인 플로우** (`delivery_items.status`는 `return_requested` 그대로 유지, enum 변경 없음):
+  1. 1차 승인 — `return_approved_at` 기록
+  2. 거절 — `reject_reason`만 채움(status 안 건드림, 단계 무관하게 재사용 가능한 단일 액션)
+  3. 회수 확인 — `return_received_at` 기록
+  4. 최종 승인 — 이 순간에만 `status`를 `'returned'`로 변경, kend의 환불 크론(`status='returned' AND refunded_at IS NULL` 감지)이 여기서 트리거됨
+  - 재승인(액션 1·4 재실행)은 그 시점에 `reject_reason`을 함께 NULL로 비워 "거절 취소하고 재진행"을 겸함
+  - 회수확인→최종승인 순서는 DB 레벨 제약이 없어(CHECK 없음) 앱 코드(`finalizeReturnApproval`)에서 `return_received_at` 존재 여부를 직접 가드
+- **구현**: `getSellerReturnRequests`(목록 조회, `order_items!inner(orders!inner(...))` dot-path 필터로 판매자 소유 반품 신청만 필터), `approveReturnStage1`/`rejectReturn`/`confirmReturnReceived`/`finalizeReturnApproval`(액션별 mutation, 공통 소유권 가드 재사용), `/orders/returns` 화면(컬럼 조합으로 진행 단계 배지 계산, 거절은 기존 판매자승인 반려화면의 `RejectDialog`(Dialog+Textarea) 패턴 재사용)
+- kend 소유 영역(Toss 호출, 환불 계산, 재고복원, `refunded_at`)은 손대지 않음. 반품기간 재검증도 kend가 신청 시점에 이미 처리해 불필요
+- `database.types.ts`를 최신 스키마로 재생성해 함께 반영(로컬이 8/7 시점에 정체돼 있던 걸 이번에 발견)
+- **실사용 테스트는 아직 진행 안 함** — typecheck 통과, dev 서버에서 라우팅 정상 동작(인증 리다이렉트 확인)까지만 확인. 실제 판매자 계정으로 4단계 전체 플로우(1차승인→회수확인→최종승인, 거절→재진행 포함) 클릭 테스트가 **다음 작업 최우선 순위**
+
+---
+
+## 2026-08-07
+
+### [KEND-SELLER] 플랫폼 조건부 무료배송 admin 설정 화면 (Phase 2.5-5)
+
+- **`platform_settings` 테이블 추가** (싱글턴): `free_shipping_threshold`(기본값 0=off) — 장바구니 총액이 이 값 이상이면 판매자 배송비 정책과 무관하게 플랫폼이 배송비 부담
+- **admin 설정 화면** (`/system/settings`, `administrator` 전용): 임계값 조회/수정 폼, 네비게이션 "System" 메뉴에 "Platform Settings" 추가
+- kend이 이어서 `createOrder`에 실제 판정 로직 연동 완료: 상품금액 합계가 임계값 이상이면 판매자 자체조건 충족 여부와 무관하게 배송비 면제하되, **판매자 자체조건은 미달인데 플랫폼이 대신 면제한 경우만** `order_items.shipping_fee_bearer = 'PLATFORM'`으로 기록(Phase 3.5 정산 계산 입력값). 판매자 자체조건으로 원래 무료였던 건은 `SELLER` 유지. kend 측 DB 시뮬레이션 3케이스로 검증 완료
+- 실사용 흐름 종단 테스트(admin이 실제 값 설정 → 실주문 생성 → PLATFORM 기록 확인)는 아직 진행 안 함 — 현재 `platform_settings`에 row가 없어 사실상 off 상태
+
+---
+
 ## 2026-08-06
 
 ### [KEND-SELLER] Phase 2.5 착수 준비 — confirmed_at 기록 + return_window_days 스킵
