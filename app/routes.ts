@@ -50,6 +50,9 @@ export default [
     route("/success", "features/payments/pages/payment-success-page.tsx"),
     route("/fail", "features/payments/pages/payment-fail-page.tsx"),
   ]),
+  ...prefix("api/cron", [
+    route("/process-returns", "features/orders/pages/process-returns-cron.ts"),
+  ]),
   route("/terms", "common/pages/terms-page.tsx"),
   route("/privacy", "common/pages/privacy-page.tsx"),
   ...prefix("auth", [

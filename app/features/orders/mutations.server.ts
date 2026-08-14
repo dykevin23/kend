@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "~/supa-client";
 import type { Json } from "database.types";
 import { cancelPayment } from "~/features/payments/mutations.server";
@@ -136,4 +136,109 @@ export const cancelOrderGroup = async (
     orderGroupId: orderGroup.id,
     orderNumber: orderGroup.order_number,
   };
+};
+
+/**
+ * 승인된 반품 건 환불 처리 (P2.5-3)
+ *
+ * kend-seller는 TOSS_SECRET_KEY가 없어 반품 회수를 확인하면 `delivery_items.status`를
+ * 'returned'로 바꾸는 것까지만 한다. 이 함수가 인증된 크론 라우트에서 주기 호출되어
+ * status='returned' AND refunded_at IS NULL인 건을 찾아 Toss 부분환불 + 재고복원 +
+ * order_group 상태 집계까지 마무리한다. (승인 액션이 kend를 직접 호출하지 않는 이유는
+ * order-lifecycle 설계 논의 참고 — kend-seller 장애와 무관하게 재시도 가능하도록
+ * 폴링 방식을 택함)
+ *
+ * 개별 건이 실패해도 나머지 건 처리를 막지 않고, 실패 건은 다음 주기에 재시도된다
+ * (idempotencyKey로 이중환불 방지).
+ */
+export const processApprovedReturns = async () => {
+  const adminClient = createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: pendingItems, error } = await adminClient
+    .from("delivery_items")
+    .select(
+      `
+      id,
+      quantity,
+      order_items!inner (
+        sale_price,
+        sku_id,
+        orders!inner (
+          order_group_id,
+          order_groups!inner ( id, status, payment_key )
+        )
+      )
+    `
+    )
+    .eq("status", "returned")
+    .is("refunded_at", null);
+
+  if (error) throw error;
+
+  let processed = 0;
+  let failed = 0;
+
+  for (const item of pendingItems ?? []) {
+    const orderItem = item.order_items;
+    const orderGroup = orderItem.orders.order_groups;
+
+    if (!orderGroup.payment_key) {
+      console.error(`반품 환불 실패 — payment_key 없음 (delivery_item ${item.id})`);
+      failed++;
+      continue;
+    }
+
+    const cancelAmount = orderItem.sale_price * item.quantity;
+
+    const result = await cancelPayment({
+      paymentKey: orderGroup.payment_key,
+      cancelReason: "반품 승인에 따른 부분환불",
+      cancelAmount,
+      idempotencyKey: `return-${item.id}`,
+    });
+
+    if (!result.success) {
+      console.error(`반품 환불 실패 (delivery_item ${item.id}): ${result.error}`);
+      failed++;
+      continue;
+    }
+
+    await adminClient
+      .from("delivery_items")
+      .update({ refunded_at: new Date().toISOString() })
+      .eq("id", item.id);
+
+    if (orderItem.sku_id) {
+      await adminClient.rpc("increment_stock", {
+        p_sku_id: orderItem.sku_id,
+        p_quantity: item.quantity,
+      });
+    }
+
+    // order_group 상태 집계 — 이미 종결(cancelled/refunded)된 그룹은 건드리지 않는다
+    if (orderGroup.status === "paid" || orderGroup.status === "partially_refunded") {
+      const { count: remainingNormal } = await adminClient
+        .from("delivery_items")
+        .select("id, order_items!inner(orders!inner(order_group_id))", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "normal")
+        .eq("order_items.orders.order_group_id", orderItem.orders.order_group_id);
+
+      await adminClient
+        .from("order_groups")
+        .update({
+          status: remainingNormal === 0 ? "refunded" : "partially_refunded",
+        })
+        .eq("id", orderGroup.id);
+    }
+
+    processed++;
+  }
+
+  return { processed, failed };
 };

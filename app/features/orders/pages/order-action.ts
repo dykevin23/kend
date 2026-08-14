@@ -1,5 +1,6 @@
 import { makeSSRClient } from "~/supa-client";
-import { createOrder, confirmPurchase } from "~/features/orders/mutations";
+import { createOrder, confirmPurchase, requestReturn } from "~/features/orders/mutations";
+import type { ReturnReasonType } from "~/features/orders/types";
 import { cancelOrderGroup } from "~/features/orders/mutations.server";
 import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/order-action";
@@ -89,6 +90,27 @@ export const action = async ({ request }: Route.ActionArgs) => {
       const result = await confirmPurchase(client, { userId: user.id, orderId });
 
       return { success: true, orderId: result.orderId };
+    } catch (error) {
+      return actionErrorResponse(error);
+    }
+  }
+
+  if (intent === "requestReturn") {
+    try {
+      const deliveryItemId = formData.get("deliveryItemId") as string;
+      const reason = formData.get("reason") as ReturnReasonType;
+
+      if (!deliveryItemId || !reason) {
+        return { success: false, error: "반품 신청 정보가 부족합니다." };
+      }
+
+      const result = await requestReturn(client, {
+        userId: user.id,
+        deliveryItemId,
+        reason,
+      });
+
+      return { success: true, deliveryItemId: result.deliveryItemId };
     } catch (error) {
       return actionErrorResponse(error);
     }

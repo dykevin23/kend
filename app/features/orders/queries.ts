@@ -179,7 +179,13 @@ export const getOrderGroupDetail = async (
           courier,
           tracking_number,
           shipped_at,
-          delivered_at
+          delivered_at,
+          delivery_items (
+            id,
+            order_item_id,
+            status,
+            reason
+          )
         )
       )
     `
@@ -226,21 +232,29 @@ export const getOrderGroupDetail = async (
             deliveredAt: order.deliveries[0].delivered_at,
           }
         : null,
-      items: order.order_items.map((item) => ({
-        id: item.id,
-        productId: item.product_id,
-        productName: item.product_name,
-        productCode: item.product_code,
-        skuCode: item.sku_code,
-        options: item.options as Record<string, string> | null,
-        mainImage: item.main_image,
-        regularPrice: item.regular_price,
-        salePrice: item.sale_price,
-        quantity: item.quantity,
-        subtotal: item.subtotal,
-        shippingFeeType: item.shipping_fee_type,
-        baseShippingFee: item.base_shipping_fee,
-      })),
+      items: order.order_items.map((item) => {
+        const deliveryItem = order.deliveries[0]?.delivery_items.find(
+          (di) => di.order_item_id === item.id
+        );
+        return {
+          id: item.id,
+          productId: item.product_id,
+          productName: item.product_name,
+          productCode: item.product_code,
+          skuCode: item.sku_code,
+          options: item.options as Record<string, string> | null,
+          mainImage: item.main_image,
+          regularPrice: item.regular_price,
+          salePrice: item.sale_price,
+          quantity: item.quantity,
+          subtotal: item.subtotal,
+          shippingFeeType: item.shipping_fee_type,
+          baseShippingFee: item.base_shipping_fee,
+          deliveryItemId: deliveryItem?.id ?? null,
+          deliveryItemStatus: deliveryItem?.status ?? null,
+          returnReason: deliveryItem?.reason ?? null,
+        };
+      }),
     })),
   };
 };

@@ -1,7 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "~/supa-client";
-import type { OrderItem, SellerOrderGroup } from "./types";
+import type { OrderItem, ReturnReasonType, SellerOrderGroup } from "./types";
 import type { UserAddress } from "~/features/users/queries";
+
+/** 반품 사유별 신청 기한(일). 기산점은 배송완료일. 법정 최소 기간을 코드 상수로 고정한다. */
+const RETURN_WINDOW_DAYS: Record<ReturnReasonType, number> = {
+  CHANGE_OF_MIND: 7,
+  DEFECT: 30,
+  WRONG_ITEM: 30,
+  DAMAGED: 30,
+  LOST: 30,
+};
 
 type Client = SupabaseClient<Database>;
 
@@ -226,4 +235,78 @@ export const confirmPurchase = async (
   if (updateError) throw updateError;
 
   return { orderId };
+};
+
+/**
+ * 반품 신청 (구매자, delivery_item 단위)
+ *
+ * 배송완료 후 ~ 구매확정 전, 반품기간(사유별 7일/30일) 이내에만 신청 가능.
+ * 신청은 상태 전이만 한다 — 실제 환불/재고복원은 판매자 승인(kend-seller,
+ * status를 returned로 변경) 이후 kend의 환불 크론(processApprovedReturns)이 처리한다.
+ */
+export const requestReturn = async (
+  client: Client,
+  {
+    userId,
+    deliveryItemId,
+    reason,
+  }: { userId: string; deliveryItemId: string; reason: ReturnReasonType }
+) => {
+  const { data: deliveryItem, error } = await client
+    .from("delivery_items")
+    .select(
+      `
+      id,
+      status,
+      order_items!inner (
+        orders!inner (
+          status,
+          purchase_confirmed_at,
+          order_groups!inner ( user_id )
+        )
+      ),
+      deliveries!inner ( delivered_at )
+    `
+    )
+    .eq("id", deliveryItemId)
+    .single();
+
+  if (error || !deliveryItem) {
+    throw new Error("반품 대상을 찾을 수 없습니다.");
+  }
+
+  const order = deliveryItem.order_items.orders;
+
+  if (order.order_groups.user_id !== userId) {
+    throw new Error("본인 주문만 반품 신청할 수 있습니다.");
+  }
+  if (deliveryItem.status !== "normal") {
+    throw new Error("이미 반품/교환 처리 중이거나 완료된 상품입니다.");
+  }
+  if (order.status !== "delivered") {
+    throw new Error("배송 완료된 상품만 반품 신청할 수 있습니다.");
+  }
+  if (order.purchase_confirmed_at) {
+    throw new Error("구매확정 후에는 반품 대신 문의하기(AS)로 접수해 주세요.");
+  }
+
+  const deliveredAt = deliveryItem.deliveries.delivered_at;
+  if (!deliveredAt) {
+    throw new Error("배송완료 정보를 확인할 수 없습니다.");
+  }
+  const windowDays = RETURN_WINDOW_DAYS[reason];
+  const deadline = new Date(deliveredAt);
+  deadline.setDate(deadline.getDate() + windowDays);
+  if (new Date() > deadline) {
+    throw new Error(`반품 신청 기한(배송완료 후 ${windowDays}일)이 지났습니다.`);
+  }
+
+  const { error: updateError } = await client
+    .from("delivery_items")
+    .update({ status: "return_requested", reason })
+    .eq("id", deliveryItemId);
+
+  if (updateError) throw updateError;
+
+  return { deliveryItemId };
 };

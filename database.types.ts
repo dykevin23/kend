@@ -382,6 +382,7 @@ export type Database = {
           order_item_id: string
           quantity: number
           reason: Database["public"]["Enums"]["return_reason_type"] | null
+          refunded_at: string | null
           status: Database["public"]["Enums"]["delivery_item_status"]
           updated_at: string
         }
@@ -392,6 +393,7 @@ export type Database = {
           order_item_id: string
           quantity: number
           reason?: Database["public"]["Enums"]["return_reason_type"] | null
+          refunded_at?: string | null
           status?: Database["public"]["Enums"]["delivery_item_status"]
           updated_at?: string
         }
@@ -402,6 +404,7 @@ export type Database = {
           order_item_id?: string
           quantity?: number
           reason?: Database["public"]["Enums"]["return_reason_type"] | null
+          refunded_at?: string | null
           status?: Database["public"]["Enums"]["delivery_item_status"]
           updated_at?: string
         }
@@ -1641,6 +1644,7 @@ export type Database = {
       }
     }
     Functions: {
+      auto_confirm_purchase: { Args: never; Returns: number }
       decrement_stock: {
         Args: { p_quantity: number; p_sku_id: string }
         Returns: undefined
@@ -1656,6 +1660,10 @@ export type Database = {
           percentile: number
           value: number
         }[]
+      }
+      increment_stock: {
+        Args: { p_quantity: number; p_sku_id: string }
+        Returns: undefined
       }
     }
     Enums: {

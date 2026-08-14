@@ -4,6 +4,16 @@
 export type ShippingFeeType = "FREE" | "PAID" | "COD" | "CONDITIONAL";
 
 /**
+ * 반품/교환 사유 (Phase 2.5-3)
+ */
+export type ReturnReasonType =
+  | "CHANGE_OF_MIND"
+  | "DEFECT"
+  | "WRONG_ITEM"
+  | "DAMAGED"
+  | "LOST";
+
+/**
  * 배송 정보
  */
 export interface DeliveryInfo {

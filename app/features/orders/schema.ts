@@ -440,6 +440,8 @@ export const deliveries = pgTable("deliveries", {
  * quantity        수량 (order_item의 일부만 배송될 수 있음)
  * status          상태 (부분취소/교환 처리용)
  * reason          반품/교환 사유 (return_requested/exchange_requested 전이 시 세팅)
+ * refunded_at     Toss 부분환불 처리 완료 시각 (P2.5-3) — status='returned'인데 이 값이
+ *                 NULL이면 판매자 승인은 됐지만 환불 크론이 아직 처리 전이라는 뜻
  * created_at      생성일시
  * updated_at      수정일시
  */
@@ -455,6 +457,7 @@ export const deliveryItems = pgTable("delivery_items", {
   quantity: integer().notNull(),
   status: deliveryItemStatus().notNull().default("normal"),
   reason: returnReasonType(),
+  refunded_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),

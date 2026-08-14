@@ -7,7 +7,15 @@ import { useAlert } from "~/hooks/useAlert";
 import { makeSSRClient } from "~/supa-client";
 import { getOrderGroupDetail } from "../queries";
 import OrderItemCard from "../components/order-item-card";
+import ReturnRequestDialog from "../components/return-request-dialog";
 import type { Route } from "./+types/order-detail-page";
+
+const RETURN_STATUS_LABELS: Record<string, string> = {
+  return_requested: "반품 신청됨 (판매자 확인 대기)",
+  returned: "반품 완료",
+  exchange_requested: "교환 신청됨",
+  exchanged: "교환 완료",
+};
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -121,9 +129,33 @@ export default function OrderDetailPage() {
               </div>
 
               <div className="px-4">
-                {order.items.map((item) => (
-                  <OrderItemCard key={item.id} item={item} sellerName={order.sellerName} />
-                ))}
+                {order.items.map((item) => {
+                  const canRequestReturn =
+                    order.status === "delivered" &&
+                    !order.purchaseConfirmedAt &&
+                    item.deliveryItemId &&
+                    item.deliveryItemStatus === "normal";
+                  const returnStatusLabel =
+                    item.deliveryItemStatus && item.deliveryItemStatus !== "normal"
+                      ? RETURN_STATUS_LABELS[item.deliveryItemStatus]
+                      : null;
+
+                  return (
+                    <div key={item.id} className="border-b border-gray-100 last:border-b-0">
+                      <OrderItemCard item={item} sellerName={order.sellerName} />
+                      {canRequestReturn && (
+                        <div className="pb-3">
+                          <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
+                        </div>
+                      )}
+                      {returnStatusLabel && (
+                        <div className="pb-3">
+                          <span className="text-xs text-gray-500">{returnStatusLabel}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="px-4 pb-3">
