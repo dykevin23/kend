@@ -5,6 +5,7 @@ import type { UserOrderGroup, UserOrder } from "../queries";
 import OrderItemCard from "./order-item-card";
 import { Button } from "~/common/components/ui/button";
 import { useAlert } from "~/hooks/useAlert";
+import { getItemStatusLabel } from "../utils";
 
 /** 이미 결론이 난 상태 — 구매자가 (재)취소할 수 없다 (배송 시작됐거나, 이미 취소됨) */
 const RESOLVED_ORDER_STATUSES = ["shipped", "delivered", "cancelled"];
@@ -14,48 +15,27 @@ interface OrderGroupCardProps {
 }
 
 /**
- * 개별 주문(판매자별) 상태 라벨
- */
-function getOrderStatusLabel(status: string): { label: string; color: string } {
-  switch (status) {
-    case "pending":
-      return { label: "주문접수", color: "text-gray-600" };
-    case "confirmed":
-      return { label: "주문확인", color: "text-blue-600" };
-    case "preparing":
-      return { label: "상품준비중", color: "text-blue-600" };
-    case "shipped":
-      return { label: "배송시작", color: "text-blue-600" };
-    case "delivered":
-      return { label: "배송완료", color: "text-green-600" };
-    case "cancelled":
-      return { label: "취소", color: "text-gray-500" };
-    default:
-      return { label: "주문접수", color: "text-gray-600" };
-  }
-}
-
-/**
  * 개별 주문 블록 (판매자별)
  * - 상태 + 아이템들 + 액션 버튼
  */
 function OrderBlock({ order, orderGroupId }: { order: UserOrder; orderGroupId: string }) {
-  const status = getOrderStatusLabel(order.status);
-
   return (
     <div>
-      {/* 주문 상태 */}
-      <div className="px-4 pt-4 pb-2">
-        <span className={`text-sm font-bold ${status.color}`}>
-          {status.label}
-        </span>
-      </div>
-
-      {/* 상품 목록 */}
+      {/* 상품 목록 — 상품마다 상태가 다를 수 있어(P2.5-3) 상품별로 배지를 보여준다 */}
       <div className="px-4">
-        {order.items.map((item) => (
-          <OrderItemCard key={item.id} item={item} sellerName={order.sellerName} />
-        ))}
+        {order.items.map((item) => {
+          const status = getItemStatusLabel(order.status, item);
+          return (
+            <div key={item.id}>
+              <div className="pt-4 pb-2">
+                <span className={`text-sm font-bold ${status.color}`}>
+                  {status.label}
+                </span>
+              </div>
+              <OrderItemCard item={item} sellerName={order.sellerName} />
+            </div>
+          );
+        })}
       </div>
 
       {/* 액션 버튼 — 주문상세(타임라인+구매확정) 화면으로 이동 */}

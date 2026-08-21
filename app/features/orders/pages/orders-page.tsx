@@ -6,12 +6,13 @@ import { Input } from "~/common/components/ui/input";
 import { makeSSRClient } from "~/supa-client";
 import { getUserOrderGroups, type OrderTabFilter } from "../queries";
 import OrderGroupCard from "../components/order-group-card";
+import OrderStatusCard from "../components/order-status-card";
 import type { Route } from "./+types/orders-page";
 import { cn } from "~/lib/utils";
 
 const ORDER_TABS: { value: OrderTabFilter; label: string }[] = [
   { value: "all", label: "전체" },
-  { value: "payment_pending", label: "결제대기" },
+  { value: "order_received", label: "주문접수" },
   { value: "in_delivery", label: "배송중" },
   { value: "delivered", label: "배송완료" },
   { value: "cancelled", label: "취소/환불" },
@@ -24,19 +25,19 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await client.auth.getUser();
 
   if (!user) {
-    return { orderGroups: [] };
+    return { result: { kind: "grouped" as const, orderGroups: [] } };
   }
 
   const url = new URL(request.url);
   const filter = (url.searchParams.get("filter") as OrderTabFilter) || "all";
 
-  const orderGroups = await getUserOrderGroups(client, user.id, filter);
+  const result = await getUserOrderGroups(client, user.id, filter);
 
-  return { orderGroups };
+  return { result };
 };
 
 export default function OrdersPage() {
-  const { orderGroups } = useLoaderData<typeof loader>();
+  const { result } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState<{
@@ -71,15 +72,25 @@ export default function OrdersPage() {
   };
 
   // 검색어로 필터링 (상품명 기준)
-  const filteredOrderGroups = searchKeyword
-    ? orderGroups.filter((group) =>
-        group.orders.some((order) =>
-          order.items.some((item) =>
-            item.productName.toLowerCase().includes(searchKeyword.toLowerCase())
+  const keyword = searchKeyword.toLowerCase();
+  const matchesKeyword = (productName: string) =>
+    !keyword || productName.toLowerCase().includes(keyword);
+
+  const filteredGroups =
+    result.kind === "grouped"
+      ? result.orderGroups.filter((group) =>
+          group.orders.some((order) =>
+            order.items.some((item) => matchesKeyword(item.productName))
           )
         )
-      )
-    : orderGroups;
+      : [];
+
+  const filteredCards =
+    result.kind === "cards"
+      ? result.cards.filter((card) =>
+          card.items.some((item) => matchesKeyword(item.productName))
+        )
+      : [];
 
   return (
     <Content headerPorps={{ title: "주문/배송", useRight: false }}>
@@ -138,14 +149,26 @@ export default function OrdersPage() {
           ))}
         </div>
 
-        {/* 주문 목록 - order_groups 간 회색 영역으로 구분 */}
+        {/* 주문 목록 - 카드 간 회색 영역으로 구분 */}
         <div className="flex flex-col">
-          {filteredOrderGroups.length > 0 ? (
-            filteredOrderGroups.map((orderGroup, index) => (
-              <div key={orderGroup.id}>
-                {/* order_groups 간 구분 영역 */}
+          {result.kind === "grouped" ? (
+            filteredGroups.length > 0 ? (
+              filteredGroups.map((orderGroup, index) => (
+                <div key={orderGroup.id}>
+                  {index > 0 && <div className="h-3 bg-gray-100" />}
+                  <OrderGroupCard orderGroup={orderGroup} />
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-gray-500 bg-white">
+                <span className="text-sm">주문 내역이 없습니다.</span>
+              </div>
+            )
+          ) : filteredCards.length > 0 ? (
+            filteredCards.map((card, index) => (
+              <div key={`${card.order.id}-${card.items[0]?.id}`}>
                 {index > 0 && <div className="h-3 bg-gray-100" />}
-                <OrderGroupCard orderGroup={orderGroup} />
+                <OrderStatusCard card={card} />
               </div>
             ))
           ) : (

@@ -8,43 +8,8 @@ import { makeSSRClient } from "~/supa-client";
 import { getOrderGroupDetail } from "../queries";
 import OrderItemCard from "../components/order-item-card";
 import ReturnRequestDialog from "../components/return-request-dialog";
+import { getReturnStatusLabel } from "../utils";
 import type { Route } from "./+types/order-detail-page";
-
-/**
- * 반품/교환 진행 상태 라벨
- *
- * status는 검수 완료(최종 확정) 전까지 'return_requested'에 머물러 있고, 그 사이의
- * 세부 진행(1차승인/거절)은 return_approved_at/reject_reason으로만 표현된다 (P2.5-3).
- */
-function getReturnStatusLabel(item: {
-  deliveryItemStatus: string | null;
-  returnApprovedAt: string | null;
-  returnRejectReason: string | null;
-  returnRefundedAt: string | null;
-}): string | null {
-  if (!item.deliveryItemStatus || item.deliveryItemStatus === "normal") {
-    return null;
-  }
-
-  if (item.deliveryItemStatus === "return_requested") {
-    if (item.returnRejectReason) {
-      return `반품 거절: ${item.returnRejectReason}`;
-    }
-    if (item.returnApprovedAt) {
-      return "반품 승인됨 (반송 택배를 보내주세요)";
-    }
-    return "반품 신청됨 (판매자 확인 대기)";
-  }
-
-  if (item.deliveryItemStatus === "returned") {
-    return item.returnRefundedAt ? "반품 완료 (환불 처리됨)" : "반품 승인됨 (환불 처리 중)";
-  }
-
-  if (item.deliveryItemStatus === "exchange_requested") return "교환 신청됨";
-  if (item.deliveryItemStatus === "exchanged") return "교환 완료";
-
-  return null;
-}
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -148,8 +113,15 @@ export default function OrderDetailPage() {
 
         {/* 판매자별 주문 블록 */}
         {orderGroup.orders.map((order) => {
+          const hasPendingReturnOrExchange = order.items.some(
+            (item) =>
+              item.deliveryItemStatus === "return_requested" ||
+              item.deliveryItemStatus === "exchange_requested"
+          );
           const canConfirmPurchase =
-            order.status === "delivered" && !order.purchaseConfirmedAt;
+            order.status === "delivered" &&
+            !order.purchaseConfirmedAt &&
+            !hasPendingReturnOrExchange;
 
           return (
             <div key={order.id} className="flex flex-col bg-white border-b border-gray-100 mt-2">
@@ -176,7 +148,9 @@ export default function OrderDetailPage() {
                       )}
                       {returnStatusLabel && (
                         <div className="pb-3">
-                          <span className="text-xs text-gray-500">{returnStatusLabel}</span>
+                          <span className={`text-xs font-medium ${returnStatusLabel.color}`}>
+                            {returnStatusLabel.label}
+                          </span>
                         </div>
                       )}
                     </div>

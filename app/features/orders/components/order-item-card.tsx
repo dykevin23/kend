@@ -16,7 +16,7 @@ export default function OrderItemCard({ item, sellerName }: OrderItemCardProps) 
     ? Object.values(item.options).join(" / ")
     : null;
 
-  return (
+  const content = (
     <div className="flex gap-3 py-3">
       {/* 대표 이미지 */}
       <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden shrink-0">
@@ -57,5 +57,11 @@ export default function OrderItemCard({ item, sellerName }: OrderItemCardProps) 
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <Link to={`/products/${item.productCode}`} className="block">
+      {content}
+    </Link>
   );
 }

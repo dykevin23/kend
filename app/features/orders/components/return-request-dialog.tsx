@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
+import BottomSheet from "~/common/components/bottom-sheet";
 import { Button } from "~/common/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/common/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -66,43 +59,47 @@ export default function ReturnRequestDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-xs">
-          반품 신청
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>반품 신청</DialogTitle>
-        </DialogHeader>
-        <div className="py-2">
-          <Select
-            value={reason}
-            onValueChange={(value) => setReason(value as ReturnReasonType)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="반품 사유를 선택하세요" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(RETURN_REASON_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <DialogFooter>
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        className="text-xs"
+        onClick={() => setOpen(true)}
+      >
+        반품 신청
+      </Button>
+      <BottomSheet open={open} setOpen={setOpen}>
+        <div className="w-full">
+          <h2 className="text-xl font-bold pt-2 pb-6">반품 신청</h2>
+
+          <div className="mb-6">
+            <Select
+              value={reason}
+              onValueChange={(value) => setReason(value as ReturnReasonType)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="반품 사유를 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(RETURN_REASON_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button
-            className="w-full"
+            className="w-full py-6 rounded-full"
+            variant="secondary"
             disabled={!reason || isSubmitting}
             onClick={handleSubmit}
           >
             {isSubmitting ? "신청 중..." : "반품 신청하기"}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </BottomSheet>
+    </>
   );
 }
