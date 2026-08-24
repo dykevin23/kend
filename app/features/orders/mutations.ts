@@ -200,41 +200,62 @@ export const createOrder = async (
 };
 
 /**
- * 구매확정 (수동)
+ * 구매확정 (수동, delivery_item 단위)
  *
- * 배송완료(delivered)된 주문(판매자 단위)만 확정 가능. 확정 이후에는
+ * 배송완료(delivered)된 주문의 정상(normal) 상품만 확정 가능 — 반품/교환
+ * 진행중이거나 이미 끝난 상품은 대상이 아니다. 확정 이후에는 그 상품에 한해
  * 반품/교환 신청 채널이 닫히고 "문의하기"(AS)로만 접수된다 (Phase 2.5).
  * 확정 시각은 Phase 3.5 정산 대상 판정 기준이 된다.
  */
 export const confirmPurchase = async (
   client: Client,
-  { userId, orderId }: { userId: string; orderId: string }
+  { userId, deliveryItemId }: { userId: string; deliveryItemId: string }
 ) => {
-  const { data: order, error } = await client
-    .from("orders")
-    .select("id, status, purchase_confirmed_at, order_groups!inner(user_id)")
-    .eq("id", orderId)
-    .eq("order_groups.user_id", userId)
+  const { data: deliveryItem, error } = await client
+    .from("delivery_items")
+    .select(
+      `
+      id,
+      status,
+      purchase_confirmed_at,
+      order_items!inner (
+        orders!inner (
+          status,
+          order_groups!inner ( user_id )
+        )
+      )
+    `
+    )
+    .eq("id", deliveryItemId)
     .single();
 
-  if (error || !order) {
-    throw new Error("주문을 찾을 수 없습니다.");
+  if (error || !deliveryItem) {
+    throw new Error("상품을 찾을 수 없습니다.");
+  }
+
+  const order = deliveryItem.order_items.orders;
+
+  if (order.order_groups.user_id !== userId) {
+    throw new Error("본인 주문만 구매확정할 수 있습니다.");
   }
   if (order.status !== "delivered") {
-    throw new Error("배송 완료된 주문만 구매확정할 수 있습니다.");
+    throw new Error("배송 완료된 상품만 구매확정할 수 있습니다.");
   }
-  if (order.purchase_confirmed_at) {
-    throw new Error("이미 구매확정된 주문입니다.");
+  if (deliveryItem.status !== "normal") {
+    throw new Error("반품/교환 처리 중이거나 완료된 상품은 구매확정할 수 없습니다.");
+  }
+  if (deliveryItem.purchase_confirmed_at) {
+    throw new Error("이미 구매확정된 상품입니다.");
   }
 
   const { error: updateError } = await client
-    .from("orders")
+    .from("delivery_items")
     .update({ purchase_confirmed_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .eq("id", deliveryItemId);
 
   if (updateError) throw updateError;
 
-  return { orderId };
+  return { deliveryItemId };
 };
 
 /**
@@ -258,10 +279,10 @@ export const requestReturn = async (
       `
       id,
       status,
+      purchase_confirmed_at,
       order_items!inner (
         orders!inner (
           status,
-          purchase_confirmed_at,
           order_groups!inner ( user_id )
         )
       ),
@@ -286,7 +307,7 @@ export const requestReturn = async (
   if (order.status !== "delivered") {
     throw new Error("배송 완료된 상품만 반품 신청할 수 있습니다.");
   }
-  if (order.purchase_confirmed_at) {
+  if (deliveryItem.purchase_confirmed_at) {
     throw new Error("구매확정 후에는 반품 대신 문의하기(AS)로 접수해 주세요.");
   }
 

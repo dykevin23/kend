@@ -295,7 +295,6 @@ export const payments = pgTable("payments", {
  * seller_name       판매자명 (스냅샷)
  * seller_code       판매자 코드 (스냅샷)
  * confirmed_at      판매자 주문확인(pending→confirmed) 시각 — 발송 SLA 기산점 + 주문상세 타임라인용
- * purchase_confirmed_at 구매확정 시각 (수동 또는 배송완료 후 자동, P2.5-2) — 정산(Phase 3.5) 대상 판정 기준
  * created_at        생성일시
  * updated_at        수정일시
  */
@@ -321,7 +320,6 @@ export const orders = pgTable("orders", {
   seller_code: text().notNull(),
 
   confirmed_at: timestamp({ withTimezone: true }),
-  purchase_confirmed_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -451,6 +449,10 @@ export const deliveries = pgTable("deliveries", {
  *                     비운다. 별도 이력 테이블 없이 "현재 거절 상태인지"만 표현
  * refunded_at         Toss 부분환불 처리 완료 시각 (P2.5-3) — status='returned'인데 이 값이
  *                     NULL이면 판매자가 최종 승인은 했지만 환불 크론이 아직 처리 전이라는 뜻
+ * purchase_confirmed_at 구매확정 시각 (수동 또는 배송완료 후 자동) — 원래 orders(주문 단위)
+ *                     컬럼이었으나, 한 주문 안에서도 상품별로 반품 진행 여부가 갈릴 수 있어
+ *                     상품(delivery_item) 단위로 이전(P2.5-3 후속). 확정 이후 반품/교환 채널이
+ *                     닫히고, Phase 3.5 정산 대상 판정 기준이 된다
  * created_at          생성일시
  * updated_at          수정일시
  */
@@ -470,6 +472,7 @@ export const deliveryItems = pgTable("delivery_items", {
   return_received_at: timestamp({ withTimezone: true }),
   reject_reason: text(),
   refunded_at: timestamp({ withTimezone: true }),
+  purchase_confirmed_at: timestamp({ withTimezone: true }),
 
   created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),

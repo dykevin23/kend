@@ -319,7 +319,6 @@ export const getOrderGroupDetail = async (
         shipping_fee,
         total_amount,
         confirmed_at,
-        purchase_confirmed_at,
         order_items (
           id,
           product_id,
@@ -350,7 +349,8 @@ export const getOrderGroupDetail = async (
             return_approved_at,
             return_received_at,
             reject_reason,
-            refunded_at
+            refunded_at,
+            purchase_confirmed_at
           )
         )
       )
@@ -388,7 +388,6 @@ export const getOrderGroupDetail = async (
       shippingFee: order.shipping_fee,
       totalAmount: order.total_amount,
       confirmedAt: order.confirmed_at,
-      purchaseConfirmedAt: order.purchase_confirmed_at,
       delivery: order.deliveries[0]
         ? {
             status: order.deliveries[0].status,
@@ -423,6 +422,7 @@ export const getOrderGroupDetail = async (
           returnReceivedAt: deliveryItem?.return_received_at ?? null,
           returnRejectReason: deliveryItem?.reject_reason ?? null,
           returnRefundedAt: deliveryItem?.refunded_at ?? null,
+          purchaseConfirmedAt: deliveryItem?.purchase_confirmed_at ?? null,
         };
       }),
     })),

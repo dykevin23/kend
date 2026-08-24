@@ -38,7 +38,6 @@ function OrderTimeline({ order }: { order: Route.ComponentProps["loaderData"]["o
     { label: "판매자확인", at: order.confirmedAt },
     { label: "발송", at: order.delivery?.shippedAt ?? null },
     { label: "배송완료", at: order.delivery?.deliveredAt ?? null },
-    { label: "구매확정", at: order.purchaseConfirmedAt },
   ].filter((step) => step.at !== null || step.label === "주문접수");
 
   return (
@@ -78,10 +77,10 @@ export default function OrderDetailPage() {
     }
   }, [fetcher.data]);
 
-  const handleConfirmPurchase = (orderId: string) => {
+  const handleConfirmPurchase = (deliveryItemId: string) => {
     const formData = new FormData();
     formData.append("intent", "confirmPurchase");
-    formData.append("orderId", orderId);
+    formData.append("deliveryItemId", deliveryItemId);
     fetcher.submit(formData, { method: "POST", action: "/orders/action" });
   };
 
@@ -113,16 +112,6 @@ export default function OrderDetailPage() {
 
         {/* 판매자별 주문 블록 */}
         {orderGroup.orders.map((order) => {
-          const hasPendingReturnOrExchange = order.items.some(
-            (item) =>
-              item.deliveryItemStatus === "return_requested" ||
-              item.deliveryItemStatus === "exchange_requested"
-          );
-          const canConfirmPurchase =
-            order.status === "delivered" &&
-            !order.purchaseConfirmedAt &&
-            !hasPendingReturnOrExchange;
-
           return (
             <div key={order.id} className="flex flex-col bg-white border-b border-gray-100 mt-2">
               <div className="px-4 pt-4 pb-2">
@@ -131,26 +120,51 @@ export default function OrderDetailPage() {
 
               <div className="px-4">
                 {order.items.map((item) => {
+                  const isNormal = item.deliveryItemStatus === "normal";
                   const canRequestReturn =
                     order.status === "delivered" &&
-                    !order.purchaseConfirmedAt &&
+                    !item.purchaseConfirmedAt &&
                     item.deliveryItemId &&
-                    item.deliveryItemStatus === "normal";
+                    isNormal;
+                  const canConfirmPurchase =
+                    order.status === "delivered" &&
+                    isNormal &&
+                    !item.purchaseConfirmedAt;
                   const returnStatusLabel = getReturnStatusLabel(item);
 
                   return (
                     <div key={item.id} className="border-b border-gray-100 last:border-b-0">
                       <OrderItemCard item={item} sellerName={order.sellerName} />
-                      {canRequestReturn && (
-                        <div className="pb-3">
-                          <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
-                        </div>
-                      )}
                       {returnStatusLabel && (
                         <div className="pb-3">
                           <span className={`text-xs font-medium ${returnStatusLabel.color}`}>
                             {returnStatusLabel.label}
                           </span>
+                        </div>
+                      )}
+                      {item.purchaseConfirmedAt && (
+                        <div className="pb-3">
+                          <span className="text-xs text-green-600">
+                            구매확정 완료 ({formatDate(item.purchaseConfirmedAt)})
+                          </span>
+                        </div>
+                      )}
+                      {(canRequestReturn || canConfirmPurchase) && (
+                        <div className="flex items-center gap-2 pb-3">
+                          {canRequestReturn && (
+                            <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
+                          )}
+                          {canConfirmPurchase && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                              disabled={fetcher.state !== "idle"}
+                              onClick={() => handleConfirmPurchase(item.deliveryItemId!)}
+                            >
+                              {fetcher.state !== "idle" ? "처리 중..." : "구매확정"}
+                            </Button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -161,27 +175,6 @@ export default function OrderDetailPage() {
               <div className="px-4 pb-3">
                 <OrderTimeline order={order} />
               </div>
-
-              {canConfirmPurchase && (
-                <div className="px-4 pb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs"
-                    disabled={fetcher.state !== "idle"}
-                    onClick={() => handleConfirmPurchase(order.id)}
-                  >
-                    {fetcher.state !== "idle" ? "처리 중..." : "구매확정"}
-                  </Button>
-                </div>
-              )}
-              {order.purchaseConfirmedAt && (
-                <div className="px-4 pb-4">
-                  <span className="text-xs text-green-600">
-                    구매확정 완료 ({formatDate(order.purchaseConfirmedAt)})
-                  </span>
-                </div>
-              )}
             </div>
           );
         })}

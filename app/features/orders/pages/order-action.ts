@@ -81,15 +81,15 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
   if (intent === "confirmPurchase") {
     try {
-      const orderId = formData.get("orderId") as string;
+      const deliveryItemId = formData.get("deliveryItemId") as string;
 
-      if (!orderId) {
-        return { success: false, error: "주문 정보가 없습니다." };
+      if (!deliveryItemId) {
+        return { success: false, error: "상품 정보가 없습니다." };
       }
 
-      const result = await confirmPurchase(client, { userId: user.id, orderId });
+      const result = await confirmPurchase(client, { userId: user.id, deliveryItemId });
 
-      return { success: true, orderId: result.orderId };
+      return { success: true, deliveryItemId: result.deliveryItemId };
     } catch (error) {
       return actionErrorResponse(error);
     }

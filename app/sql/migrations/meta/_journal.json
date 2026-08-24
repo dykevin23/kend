@@ -162,6 +162,13 @@
       "when": 1786693834264,
       "tag": "0022_vengeful_brother_voodoo",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1787537438527,
+      "tag": "0023_neat_richard_fisk",
+      "breakpoints": true
     }
   ]
 }
