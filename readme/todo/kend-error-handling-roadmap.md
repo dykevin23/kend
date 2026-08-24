@@ -139,6 +139,8 @@ export function actionErrorResponse(error: unknown) {
 
 **현재 상태**: 404/HTTP 에러 분기 + DEV에서 스택트레이스 표시만 있음, 복구 방법 미제공
 
+**구체 사례 (2026-08-21, P2.5-4 문의하기 테스트 중 확인)**: 본인 소유가 아닌 리소스(`inquiries`, `orders` 등)에 접근하면 loader가 `throw new Error(...)`를 그대로 던져서, 소유권 체크 자체는 정상 작동(데이터 유출 없음)하지만 사용자에게는 이 일반 크래시 화면(스택트레이스 포함)이 그대로 뜬다. `getOrderGroupDetail`(orders/queries.ts)도 동일 패턴이라 kend 전역에 해당하는 문제 — Fallback UI 개선 시 이 케이스도 같이 검증할 것
+
 **체크리스트**
 - [ ] Fallback UI: "잠시 문제가 생겼어요" + 재시도 버튼 + 홈으로 버튼
 - [ ] 프로덕션에서 스택트레이스 비노출 확인

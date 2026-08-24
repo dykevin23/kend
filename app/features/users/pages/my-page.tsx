@@ -8,6 +8,7 @@ import {
   Star,
   Bell,
   CircleHelp,
+  MessageCircleQuestion,
   Headphones,
   FileText,
   ShieldCheck,
@@ -311,6 +312,11 @@ export default function MyPage() {
           icon: <CircleHelp className="w-5 h-5" />,
           label: "공지사항 및 FAQ",
           href: "/myPage/notices",
+        },
+        {
+          icon: <MessageCircleQuestion className="w-5 h-5" />,
+          label: "문의 내역",
+          href: "/myPage/inquiries",
         },
         {
           icon: <Headphones className="w-5 h-5" />,
