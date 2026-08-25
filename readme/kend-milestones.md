@@ -198,7 +198,7 @@
 
 ---
 
-### Phase 2.5 — 주문 라이프사이클 완결 (신설, 2026-08-04 계획)
+### Phase 2.5 — 주문 라이프사이클 완결 ✅ 종료 (신설 2026-08-04 ~ 종료 2026-08-25)
 
 > **왜 필요한가**: P2-4 작업 중 "판매자 취소가 결제취소로 안 이어짐" 등 버그 3건을 발견하면서,
 > 취소 이후의 흐름(반품/교환/AS/구매확정)이 통째로 미정의 상태였음이 드러났다. 업계표준
@@ -218,11 +218,12 @@
 - **미포함(별도 이연)**: 교환(exchange, 정책 미정 다수), 구매확정 상품단위 개별화(다음 착수 예정), 반품 정책 법률 검토(전자상거래법 대조 — [상세](todo/order-cancel-refund-exchange-flow.md#5-알려진-미해결-이슈))
 - **담당**: kend(스키마+Toss연동+탭), kend-seller(승인/검수 화면+UX개선+송장검증) — 양쪽 완료
 
-#### 🟡 P2.5-4. 문의하기 (Q&A) 코어 시스템 (신규) — kend + seller 처리화면 완료, admin 화면만 남음 (2026-08-25)
+#### ✅ P2.5-4. 문의하기 (Q&A) 코어 시스템 (신규) — 완료 (2026-08-25)
 - **완료(kend)**: `inquiries` 테이블 신규, 카테고리별(배송/상품/결제/기타) 문의 작성/목록/상세. 반품/교환처럼 상태전이 액션이 아니라 단일질문+단일답변 순수 Q&A(스레드 아님) — **CS관리 운영기능(Phase 3)의 기반**. 연결 대상은 `order_group_id`가 아니라 **`order_item_id`**(판매자를 항상 유일하게 특정하기 위함, `order_items.order_id → orders.seller_id`)
-- **완료(kend-seller, seller 권한)**: 담당 상품에 달린 문의 목록/답변 화면. 답변 작성 시 `status='answered'` 전이까지 실사용 E2E 확인 완료(kend 상세화면에 답변 노출 확인)
-- **🔴 미해결 — admin 권한 화면 없음**: `order_item_id`가 null인 일반 문의(특정 상품과 무관, 지금 테스트 데이터 2건)는 설계상 seller 목록에서 의도적으로 제외되는데, 이걸 받아서 답변할 admin 화면이 아직 없어서 **현재 아무도 답변할 방법이 없음**. kend-seller 안에 admin 권한 화면으로 만들기로 결정(2026-08-25) — 착수 전
-- **담당**: kend(접수 UI) ✅ + kend-seller(seller 처리화면 ✅ / admin 처리화면 🔴 대기)
+- **완료(kend-seller, seller 권한)**: 담당 상품에 달린 문의 목록/답변 화면(`/orders/inquiries`) — `order_item_id → orders.seller_id` 체인으로 본인 상품 문의만 필터링(inner join이라 일반 문의는 자연히 제외)
+- **완료(kend-seller, admin 권한)**: `order_item_id`가 null인 일반 문의 전용 화면(`/system/inquiries`, admin-layout 가드) — 애초 스펙("seller/admin 권한 둘 다")대로 양쪽 다 구현 완료
+- 실사용 E2E 확인 완료: 구매자 작성 → 판매자/admin 답변 등록 → kend 상세화면에 답변 노출까지
+- **담당**: kend(접수 UI) ✅ + kend-seller(seller 처리화면 ✅ + admin 처리화면 ✅)
 
 #### ✅ P2.5-5. 플랫폼 조건부 무료배송 (신규) — 완료 (2026-08-07)
 - **완료**: kend-seller `platform_settings` 테이블 + admin 설정화면, kend `createOrder`에서 임계값 비교 후 `order_items.shipping_fee_bearer`(SELLER/PLATFORM) 반영 — Phase 3.5 정산 계산 입력값으로 사용 예정
