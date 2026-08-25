@@ -26,14 +26,15 @@ export default function InquiriesListPage() {
   const { inquiries } = useLoaderData<typeof loader>();
 
   return (
-    <Content headerPorps={{ title: "문의 내역", useRight: false }}>
+    <Content
+      headerPorps={{ title: "문의 내역", useRight: false }}
+      footer={
+        <Button className="w-full" asChild>
+          <Link to="/myPage/inquiries/new">문의하기</Link>
+        </Button>
+      }
+    >
       <div className="flex flex-col w-full bg-gray-50 min-h-full">
-        <div className="px-4 py-3 bg-white border-b border-gray-100">
-          <Button className="w-full" asChild>
-            <Link to="/myPage/inquiries/new">문의하기</Link>
-          </Button>
-        </div>
-
         {inquiries.length > 0 ? (
           <div className="flex flex-col">
             {inquiries.map((inquiry) => {

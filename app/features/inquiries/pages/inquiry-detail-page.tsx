@@ -1,6 +1,7 @@
 import { Link, redirect, useLoaderData } from "react-router";
 import { DateTime } from "luxon";
 import Content from "~/common/components/content";
+import { Button } from "~/common/components/ui/button";
 import { makeSSRClient } from "~/supa-client";
 import { getInquiryDetail } from "../queries";
 import { INQUIRY_CATEGORY_LABELS, getInquiryStatusLabel } from "../utils";
@@ -29,7 +30,14 @@ export default function InquiryDetailPage() {
   const status = getInquiryStatusLabel(inquiry.status);
 
   return (
-    <Content headerPorps={{ title: "문의 상세", useRight: false }}>
+    <Content
+      headerPorps={{ title: "문의 상세", useRight: false }}
+      footer={
+        <Button className="w-full" asChild>
+          <Link to="/myPage/inquiries">목록으로</Link>
+        </Button>
+      }
+    >
       <div className="flex flex-col w-full bg-gray-50 min-h-full">
         <div className="flex flex-col gap-2 px-4 py-4 bg-white border-b border-gray-100">
           <div className="flex items-center justify-between">
