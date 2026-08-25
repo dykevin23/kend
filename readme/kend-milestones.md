@@ -78,14 +78,23 @@
 
 ### Phase 0 — 잔여 마무리 (2026-04-27 ~ 2026-05-01)
 
-#### 🚨 P0-1. iOS 심사 — **3달+ 정체 (블로커, 진행 중)**
-- **Due**: 2026-05-01 → **미해결**
-- **우선순위**: 🔴 블로커
-- **상황**: 결제 "서비스 준비 중" 처리 후 재제출했으나 **3개월 넘게 심사 정체**. 문의에도 "곧 처리" 답변만 받고 진척 없음
-- **대응 트랙**:
-  - [ ] App Store Connect 상태 확인 — 진짜 "심사 중"인지 / Resolution Center에 미확인 메시지(우리 회신 대기) 있는지
-  - [ ] Apple Developer Support **전화 콜백 예약** + 기존 케이스 escalate (expedite 약속 미이행 명시)
-  - [ ] 막판 카드: 제출 취소 후 **새 빌드 재제출**로 큐 리셋 (단, 위 회신 대기 여부 먼저 확인)
+#### 🚨 P0-1. iOS 심사 — **Guideline 5.6 재제출 정지 → appeal 승인, 재제출은 개발 완성도 확보 후로 의도적 보류**
+- **Due**: 2026-05-01 → **미해결 (전략적 보류)**
+- **우선순위**: 🔴 블로커 (단, 지금 당장 급한 액션은 없음 — 아래 참고)
+- **전체 타임라인**:
+  - 2026-04-14: 최초 리젝 4건 (4.8 로그인 / 2.1(a) 카메라 크래시 / 4 iPad UI / 2.1(a) 결제·버튼 미완성)
+  - 2026-04-15: 카메라 크래시 수정(`NSCameraUsageDescription` 등), Vision Pro 해제 → 재제출
+  - (이후) 결제 "서비스 준비 중" placeholder UI로 교체 → 재제출
+  - **2026-06-23**: Apple이 **Guideline 5.6 Developer Code of Conduct — Review Suspended**로 거절. "품질 기준 미달", "이 앱은 재제출 자격 없음, 답변/재제출 검토 안 하고 자동 거절 처리". placeholder content/unfinished 요소를 콕 집어 지적 → 반복 위반 시 Developer Program 제명 경고까지 포함된 심각한 등급
+  - 2026-07-22: 부당하다고 판단해 App Review Board에 appeal 제출
+  - **2026-07-29**: Apple 답변(Appeal Ticket APL512440) — "Guideline 5.6.4 이슈는 해소된 것으로 판단, 검토를 진행하려면 **새 binary를 재제출**하라." (새 App ID/앱 레코드가 아니라 **같은 앱에 새 빌드**를 의미)
+  - 증빙(로컬 전용, gitignore): [ios-review-evidence/](active/ios-review-evidence/) — 06-23 suspension, 07-22 appeal 접수, 07-29 appeal 승인 스크린샷
+- **현재 판단 (2026-08-25)**: 07-29 이후 아직 재제출 안 함 — **의도적 보류**. 06-23 거절 사유가 "placeholder content/unfinished"였던 만큼, `PAYMENT_COMING_SOON`으로 막힌 현재 상태에서 무리하게 재제출하면 같은 사유로 다시 걸릴 위험이 높다고 판단. Phase 2.5 개발 완성도를 더 끌어올린 뒤 재제출하는 쪽으로 전략 확정
+- **TestFlight ≠ 심사 제출**: Internal Testing은 App Review를 거치지 않으므로, TestFlight 테스트 빌드는 재제출 자격과 무관하게 자유롭게 만들어도 됨. "Submit for Review" 버튼을 누르는 순간만 실제 심사 제출(suspension 관련)이 발동
+- **재제출 전 필수 체크리스트** (Apple 06-23 Next Steps 기준):
+  - [ ] placeholder/미완성 UI 전부 제거 (결제 "준비 중" 화면 재검토 — 가능하면 Toss 실키 적용 후 실제 동작 상태로)
+  - [ ] 04-14 지적 4건 iPhone 실기기 재검증 (Apple Sign In, 카메라, iPad only 제외, 마이페이지 버튼)
+  - [ ] 전 화면 안정성/일관성 재점검 후 새 build number로 제출
 - **참고**: [ios-review-rejection-apr14.md](active/ios-review-rejection-apr14.md)
 - **note**: 심사 정체는 **출시(release)만 막고 개발은 막지 않음** → 개발 병렬 진행
 
