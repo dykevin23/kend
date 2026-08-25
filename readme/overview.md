@@ -12,26 +12,23 @@
 
 ---
 
-## 🚦 지금 상황 (2026-08-21)
+## 🚦 지금 상황 (2026-08-25)
 
-- 🚨 **iOS App Store 심사 3달+ 정체** — 문의에도 "곧 처리"만. ASC 상태/Resolution Center 확인 → escalate → 빌드 리셋 재제출 트랙. **개발은 병렬 진행**
+- 🚨 **iOS App Store 심사 3달+ 정체** — Guideline 5.6 재제출정지 → appeal 승인(새 binary 재제출 가능)됐으나, 개발 완성도 더 끌어올린 뒤 재제출하는 쪽으로 **의도적 보류** 중. 상세: [kend-milestones.md P0-1](./kend-milestones.md)
 - 🎉 **법인 설립·법인 계좌 완료** → 결제/정산 외부 의존성 해소. **TossPayments 실키 신청 완료(심사 대기)**. NICE는 Holding(본인확인 불필요 방향)
 - ✅ **결제 도메인 실질 완성**: 결제 E2E + 주문 취소·전액 환불(P1-5) 모두 테스트 키로 동작 확인. `PAYMENT_COMING_SOON=true`로 차단 중
-- ✅ **Phase 2.5 — P2.5-1(SLA)·P2.5-2(구매확정)·P2.5-5(플랫폼 조건부 무료배송) 완료**
-- ✅ **P2.5-3(반품) — kend+kend-seller 통합 E2E 검증 완료**: 반품 신청→1차승인→회수확인→최종승인→Toss 부분환불·재고복원 전 구간 실제 데이터로 검증(정상 플로우 14단계 + 예외 케이스 8종 전부 통과). 검증 중 발견한 UI/로직 버그 6건 전부 수정 + 주문/배송 탭을 상품(delivery_item) 단위로 재정의(전체/주문접수/배송중/배송완료/취소·환불). 교환(exchange)은 정책 미정 항목 많아 별도 스텝으로 미룸
-- ✅ **구매확정을 상품(delivery_item) 단위로 개별화 완료**: `orders.purchase_confirmed_at` → `delivery_items.purchase_confirmed_at`로 이전(마이그레이션 적용 완료). 한 주문에 정상+반품 상품 섞여도 정상 상품만 구매확정 가능해짐, 실사용 테스트 확인 완료
-- ✅ **P2.5-4(문의하기) kend 부분 완료**: `inquiries` 테이블 신규(카테고리별 단일질문+단일답변 Q&A). 연결 대상은 `order_group_id`가 아니라 `order_item_id`로 설계(판매자를 항상 유일하게 특정하기 위함, `order_items.order_id → orders.seller_id`). 작성폼은 "관련 주문→상품" 2단계 계층 선택. **kend-seller 처리화면(답변 작성)은 스코프 밖** — seller 완료 전까지 문의는 전부 답변대기로 남음
+- ✅ **Phase 2.5(주문 라이프사이클 완결) 전체 종료**: P2.5-1(SLA)·P2.5-2(구매확정, 이후 상품단위로 개별화)·P2.5-3(반품, kend+seller E2E 검증)·P2.5-4(문의하기, kend 접수+seller 처리+admin 처리 3단 전부 완료)·P2.5-5(플랫폼 조건부 무료배송)·P2.5-6(RTS/장기미수령 기간기반 플래깅) 전부 완료. 교환(exchange, P2.5-3 하위)만 정책 미정으로 별도 이연. 상세: [kend-milestones.md Phase 2.5](./kend-milestones.md)
 - ⚠️ **반품 정책 법률 검토 필요 발견**: 반품 사유 자가신고(증빙 없음) + 반품배송비 부담주체 미구현 + 판매자귀책 사유 반품기간이 전자상거래법 법정기준보다 짧을 가능성 — 상세는 [order-cancel-refund-exchange-flow.md §5-4](./todo/order-cancel-refund-exchange-flow.md). **Toss 실키 전환 전 법률 검토 권장**
 - 📌 **배송조회 상세 이력(택배사 단계별 이력) 화면은 백로그로 보류**: 스마트택배 API에 데이터는 있으나 kend-seller `sync-tracking`이 현재 안 읽고 있음, Phase 미배정 상태로 기록만 해둠
-- **다음 개발 후보**: P2.5-3 교환 → `.server.ts` 시크릿 노출 감사 / P0-3 잔여 (kend 쪽 Phase 2.5 핵심 항목은 이걸로 소진, 남은 건 kend-seller의 P2.5-4 처리화면·P2.5-6 RTS)
+- **다음 개발 후보**: P2.5-3 교환(정책 결정 선행) → `.server.ts` 시크릿 노출 감사 / P0-3 잔여 → Phase 3(관리보완)·Phase 3.5(정산) 착수 검토
 
 ---
 
 ## ✅ 최근 완료
 
-- 2026-08-21: **P2.5-4(문의하기) kend 부분 완료** — 카테고리별 문의 작성/목록/상세, 주문→상품 2단계 선택. kend-seller 처리화면은 별도 ✅
-- 2026-08-21: **구매확정 상품(delivery_item) 단위 개별화 완료** — `orders`→`delivery_items` 컬럼 이전, 정상+반품 상품 섞인 주문에서 정상 상품만 구매확정되는지 실사용 테스트 확인 ✅
-- 2026-08-21: **P2.5-3(반품) kend+kend-seller 통합 E2E 검증 완료** — 정상 플로우 14단계 + 예외 케이스 8종 전부 실제 데이터로 통과. 발견된 UI/로직 버그 6건 수정, 주문/배송 탭 상품 단위 재정의 ✅
+- 2026-08-25: **Phase 2.5(주문 라이프사이클 완결) 전체 종료** — P2.5-4 문의하기 admin 처리화면(kend-seller)까지 완료로 마지막 항목 마감. kend+kend-seller 6개 하위항목 전부 완료 ✅
+- 2026-08-21: **P2.5-4(문의하기) kend 부분 완료** — 카테고리별 문의 작성/목록/상세, 주문→상품 2단계 선택 ✅
+- 2026-08-21: **구매확정 상품(delivery_item) 단위 개별화 완료** — 정상+반품 상품 섞인 주문에서 정상 상품만 구매확정되는지 실사용 테스트 확인 ✅
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
@@ -45,7 +42,7 @@
 | [internal-test-1st](./active/internal-test-1st.md) | 15/18 완료, 잔여는 휴대폰 인증 연계(이연) |
 | [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 네이티브 적용 대기 |
 | [environment-separation-plan](./active/environment-separation-plan.md) | 출시 전 필수, 미착수 |
-| [order-lifecycle-master-plan](./todo/order-lifecycle-master-plan.md) | Phase 2.5 진행 중 — P2.5-1/2/5 완료, P2.5-3(반품) E2E 검증 완료, P2.5-4(문의) kend 부분 완료. 교환은 별도 스텝, P2.5-4 seller 처리화면·P2.5-6은 kend-seller 담당 |
+| [order-lifecycle-master-plan](./todo/order-lifecycle-master-plan.md) | Phase 2.5 종료(2026-08-25) — 교환(P2.5-3 하위)만 정책 미정으로 별도 이연 |
 
 ---
 
