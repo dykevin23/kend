@@ -43,6 +43,7 @@ export default [
     route("/support", "features/users/pages/support-page.tsx"),
     route("/terms", "features/users/pages/terms-page.tsx"),
     route("/privacy", "features/users/pages/privacy-page.tsx"),
+    route("/refund-policy", "features/users/pages/refund-policy-page.tsx"),
   ]),
   ...prefix("orders", [
     index("features/orders/pages/orders-page.tsx"),
@@ -58,6 +59,8 @@ export default [
   ]),
   route("/terms", "common/pages/terms-page.tsx"),
   route("/privacy", "common/pages/privacy-page.tsx"),
+  route("/refund-policy", "common/pages/refund-policy-page.tsx"),
+  route("/intro", "common/pages/intro-page.tsx"),
   ...prefix("auth", [
     route("/login", "features/auth/pages/login-page.tsx"),
     route("/join", "features/auth/pages/join-page.tsx"),

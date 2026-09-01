@@ -21,6 +21,7 @@ import { isProductLiked } from "~/features/likes/queries";
 import { toggleProductLike } from "~/features/likes/mutations";
 import { actionErrorResponse } from "~/lib/error-handler";
 import ProductInformationSection from "../components/product-information-section";
+import ProductPolicySection from "../components/product-policy-section";
 import ProductSizeDescription from "../components/product-size-description";
 import ProductRatingSection from "../components/product-rating-section";
 import ProductReviewSection from "../components/product-review-section";
@@ -426,6 +427,12 @@ export default function ProductPage() {
             productName={product.name}
             descriptionImages={product.descriptionImages}
           />
+
+          {/* 배송/교환/반품 안내 */}
+          <div className="w-full px-4">
+            <ProductPolicySection />
+          </div>
+          <Divider className="w-full" />
 
           {/* 사이즈 섹션 */}
           <div ref={sizeRef}>

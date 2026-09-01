@@ -12,11 +12,13 @@ import {
   Headphones,
   FileText,
   ShieldCheck,
+  RotateCcw,
   MapPin,
   User,
   LogOut,
 } from "lucide-react";
 import { Link, useLoaderData, useNavigate, useFetcher } from "react-router";
+import CompanyFooter from "~/common/components/company-footer";
 import { createClient } from "@supabase/supabase-js";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
@@ -333,6 +335,11 @@ export default function MyPage() {
           label: "개인정보 처리 방침",
           href: "/myPage/privacy",
         },
+        {
+          icon: <RotateCcw className="w-5 h-5" />,
+          label: "교환·반품·환불 정책",
+          href: "/myPage/refund-policy",
+        },
       ],
     },
   ];
@@ -423,6 +430,8 @@ export default function MyPage() {
             {fetcher.state !== "idle" ? "처리 중..." : "회원탈퇴"}
           </button>
         </div>
+
+        <CompanyFooter />
       </div>
     </Content>
   );

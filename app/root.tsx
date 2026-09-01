@@ -84,7 +84,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } else {
     const url = new URL(request.url);
     const pathname = url.pathname;
-    const publicPaths = ["/auth", "/terms", "/privacy", "/myPage/terms", "/myPage/privacy"];
+    const publicPaths = [
+      "/auth",
+      "/terms",
+      "/privacy",
+      "/refund-policy",
+      "/intro",
+      "/myPage/terms",
+      "/myPage/privacy",
+      "/myPage/refund-policy",
+    ];
     if (!publicPaths.some((p) => pathname.startsWith(p))) {
       return redirect("/auth/login", { headers });
     }
