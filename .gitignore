@@ -12,3 +12,6 @@ AuthKey_*.p8
 
 /references
 .vercel
+
+# iOS 심사 관련 증빙 스크린샷 (민감정보 포함 가능 - 커밋 금지)
+/readme/active/ios-review-evidence/

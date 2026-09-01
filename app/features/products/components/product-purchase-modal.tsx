@@ -12,8 +12,8 @@ import {
 import type { UserAddress } from "~/features/users/queries";
 import { useAlert } from "~/hooks/useAlert";
 
-// 결제 기능 미구현 - iOS 심사 대응용 "서비스 준비 중" 모드
-const PAYMENT_COMING_SOON = true;
+// iOS 심사 재제출 시 결제 기능을 숨겨야 하면 true로 전환 (2026-09-01: 현재 심사 진행 중 아님, 결제 활성화 상태로 둠)
+const PAYMENT_COMING_SOON = false;
 
 interface ProductPurchaseModalProps {
   open: boolean;
