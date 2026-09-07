@@ -4,6 +4,35 @@ import type { Database } from "~/supa-client";
 type Client = SupabaseClient<Database>;
 
 /**
+ * 상품 기본 정보만 조회 (id, 이름, 대표이미지) — 리뷰 작성 폼처럼 가벼운 조회가 필요한 곳에서 사용
+ */
+export const getProductSummaryByCode = async (client: Client, productCode: string) => {
+  const { data, error } = await client
+    .from("products")
+    .select(
+      `
+      id,
+      product_code,
+      name,
+      product_images!product_images_product_id_products_id_fk ( url, type )
+    `
+    )
+    .eq("product_code", productCode)
+    .single();
+
+  if (error) throw error;
+
+  const mainImage = data.product_images.find((img) => img.type === "MAIN");
+
+  return {
+    id: data.id,
+    productCode: data.product_code,
+    name: data.name,
+    mainImage: mainImage?.url ?? null,
+  };
+};
+
+/**
  * 상품 상세 조회 (by product_code)
  * - 상품 기본 정보
  * - 이미지 (메인 + 추가)

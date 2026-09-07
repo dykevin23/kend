@@ -68,3 +68,66 @@ export const toggleProductLike = async (
     return true;
   }
 };
+
+/**
+ * 스토어 찜 추가
+ */
+export const addStoreLike = async (
+  client: Client,
+  userId: string,
+  sellerId: string
+) => {
+  const { data, error } = await client
+    .from("store_likes")
+    .insert({
+      user_id: userId,
+      seller_id: sellerId,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * 스토어 찜 취소
+ */
+export const removeStoreLike = async (
+  client: Client,
+  userId: string,
+  sellerId: string
+) => {
+  const { error } = await client
+    .from("store_likes")
+    .delete()
+    .eq("user_id", userId)
+    .eq("seller_id", sellerId);
+
+  if (error) throw error;
+};
+
+/**
+ * 스토어 찜 토글 (있으면 삭제, 없으면 추가)
+ * @returns 토글 후 찜 상태 (true: 찜됨, false: 찜 취소됨)
+ */
+export const toggleStoreLike = async (
+  client: Client,
+  userId: string,
+  sellerId: string
+): Promise<boolean> => {
+  const { data: existing } = await client
+    .from("store_likes")
+    .select("seller_id")
+    .eq("user_id", userId)
+    .eq("seller_id", sellerId)
+    .maybeSingle();
+
+  if (existing) {
+    await removeStoreLike(client, userId, sellerId);
+    return false;
+  } else {
+    await addStoreLike(client, userId, sellerId);
+    return true;
+  }
+};

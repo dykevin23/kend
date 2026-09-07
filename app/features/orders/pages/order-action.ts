@@ -95,6 +95,24 @@ export const action = async ({ request }: Route.ActionArgs) => {
     }
   }
 
+  if (intent === "confirmPurchaseBulk") {
+    try {
+      const deliveryItemIds = formData.getAll("deliveryItemId") as string[];
+
+      if (deliveryItemIds.length === 0) {
+        return { success: false, error: "상품 정보가 없습니다." };
+      }
+
+      for (const deliveryItemId of deliveryItemIds) {
+        await confirmPurchase(client, { userId: user.id, deliveryItemId });
+      }
+
+      return { success: true, deliveryItemIds };
+    } catch (error) {
+      return actionErrorResponse(error);
+    }
+  }
+
   if (intent === "requestReturn") {
     try {
       const deliveryItemId = formData.get("deliveryItemId") as string;

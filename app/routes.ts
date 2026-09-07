@@ -41,6 +41,8 @@ export default [
     route("/inquiries/new", "features/inquiries/pages/inquiry-new-page.tsx"),
     route("/inquiries/:inquiryId", "features/inquiries/pages/inquiry-detail-page.tsx"),
     route("/support", "features/users/pages/support-page.tsx"),
+    route("/reviews", "features/reviews/pages/my-reviews-page.tsx"),
+    route("/reviews/action", "features/reviews/pages/review-action.ts"),
     route("/terms", "features/users/pages/terms-page.tsx"),
     route("/privacy", "features/users/pages/privacy-page.tsx"),
     route("/refund-policy", "features/users/pages/refund-policy-page.tsx"),

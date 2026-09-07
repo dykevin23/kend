@@ -3,9 +3,6 @@ import {
   ChevronRight,
   Package,
   MessageSquare,
-  Ticket,
-  Coins,
-  Star,
   Bell,
   CircleHelp,
   MessageCircleQuestion,
@@ -26,6 +23,7 @@ import { cn } from "~/lib/utils";
 import { makeSSRClient, browserClient } from "~/supa-client";
 import { actionErrorResponse } from "~/lib/error-handler";
 import { getUserOrderCount } from "~/features/orders/queries";
+import { getUserReviewCount } from "~/features/reviews/queries";
 import { getUserProfile } from "../queries";
 import { useAlert } from "~/hooks/useAlert";
 import type { Route } from "./+types/my-page";
@@ -128,21 +126,22 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await client.auth.getUser();
 
   if (!user) {
-    return { profile: null, orderCount: 0, storageImageUrl: null };
+    return { profile: null, orderCount: 0, reviewCount: 0, storageImageUrl: null };
   }
 
   try {
-    const [profile, orderCount] = await Promise.all([
+    const [profile, orderCount, reviewCount] = await Promise.all([
       getUserProfile(client, user.id),
       getUserOrderCount(client, user.id),
+      getUserReviewCount(client, user.id),
     ]);
 
     const storageImageUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profiles/${user.id}`;
 
-    return { profile, orderCount, storageImageUrl };
+    return { profile, orderCount, reviewCount, storageImageUrl };
   } catch (error) {
     console.error("Failed to load my page data:", error);
-    return { profile: null, orderCount: 0, storageImageUrl: null };
+    return { profile: null, orderCount: 0, reviewCount: 0, storageImageUrl: null };
   }
 };
 
@@ -179,7 +178,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
 };
 
 export default function MyPage() {
-  const { profile, orderCount, storageImageUrl } = useLoaderData<typeof loader>();
+  const { profile, orderCount, reviewCount, storageImageUrl } =
+    useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -262,26 +262,8 @@ export default function MyPage() {
     {
       icon: <MessageSquare className="w-6 h-6" />,
       label: "리뷰",
-      count: 0,
-      href: "/reviews",
-    },
-    {
-      icon: <Ticket className="w-6 h-6" />,
-      label: "쿠폰",
-      count: 0,
-      href: "/coupons",
-    },
-    {
-      icon: <Coins className="w-6 h-6" />,
-      label: "포인트",
-      count: 0,
-      href: "/points",
-    },
-    {
-      icon: <Star className="w-6 h-6" />,
-      label: "마일리지",
-      count: 0,
-      href: "/mileage",
+      count: reviewCount,
+      href: "/myPage/reviews",
     },
   ];
 
@@ -393,7 +375,7 @@ export default function MyPage() {
 
         {/* 빠른 메뉴 영역 */}
         <div className="bg-gray-100 py-5 px-4">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-start gap-4">
             {quickMenuItems.map((item, index) => (
               <QuickMenuCard
                 key={index}

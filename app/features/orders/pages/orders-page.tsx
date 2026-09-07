@@ -5,6 +5,7 @@ import Content from "~/common/components/content";
 import { Input } from "~/common/components/ui/input";
 import { makeSSRClient } from "~/supa-client";
 import { getUserOrderGroups, type OrderTabFilter } from "../queries";
+import { getReviewedDeliveryItems } from "~/features/reviews/queries";
 import OrderGroupCard from "../components/order-group-card";
 import OrderStatusCard from "../components/order-status-card";
 import type { Route } from "./+types/orders-page";
@@ -25,19 +26,25 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await client.auth.getUser();
 
   if (!user) {
-    return { result: { kind: "grouped" as const, orderGroups: [] } };
+    return {
+      result: { kind: "grouped" as const, orderGroups: [] },
+      reviewedDeliveryItems: [],
+    };
   }
 
   const url = new URL(request.url);
   const filter = (url.searchParams.get("filter") as OrderTabFilter) || "all";
 
-  const result = await getUserOrderGroups(client, user.id, filter);
+  const [result, reviewedDeliveryItems] = await Promise.all([
+    getUserOrderGroups(client, user.id, filter),
+    getReviewedDeliveryItems(client, user.id),
+  ]);
 
-  return { result };
+  return { result, reviewedDeliveryItems };
 };
 
 export default function OrdersPage() {
-  const { result } = useLoaderData<typeof loader>();
+  const { result, reviewedDeliveryItems } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState<{
@@ -156,7 +163,10 @@ export default function OrdersPage() {
               filteredGroups.map((orderGroup, index) => (
                 <div key={orderGroup.id}>
                   {index > 0 && <div className="h-3 bg-gray-100" />}
-                  <OrderGroupCard orderGroup={orderGroup} />
+                  <OrderGroupCard
+                    orderGroup={orderGroup}
+                    reviewedDeliveryItems={reviewedDeliveryItems}
+                  />
                 </div>
               ))
             ) : (
@@ -168,7 +178,7 @@ export default function OrdersPage() {
             filteredCards.map((card, index) => (
               <div key={`${card.order.id}-${card.items[0]?.id}`}>
                 {index > 0 && <div className="h-3 bg-gray-100" />}
-                <OrderStatusCard card={card} />
+                <OrderStatusCard card={card} reviewedDeliveryItems={reviewedDeliveryItems} />
               </div>
             ))
           ) : (

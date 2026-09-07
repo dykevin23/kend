@@ -17,7 +17,7 @@ export default function LikeProductCard({ item }: LikeProductCardProps) {
       prefetch="intent"
       className="flex px-4 items-start gap-4 self-stretch"
     >
-      <div className="flex pb-6 items-start gap-4 flex-gsb self-stretch border-b-1 border-b-muted/30">
+      <div className="flex py-4 items-start gap-4 flex-gsb self-stretch border-b-1 border-b-muted/30">
         <div className="size-28 shrink-0">
           {product.mainImage ? (
             <img

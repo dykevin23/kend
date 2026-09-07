@@ -113,8 +113,11 @@ export type Database = {
       }
       admin_sellers: {
         Row: {
+          account_holder_name: string | null
+          account_number: string | null
           address: string
           address_detail: string
+          bank_name: string | null
           bizr_no: string
           business: string
           created_at: string
@@ -129,8 +132,11 @@ export type Database = {
           zone_code: string
         }
         Insert: {
+          account_holder_name?: string | null
+          account_number?: string | null
           address: string
           address_detail: string
+          bank_name?: string | null
           bizr_no: string
           business: string
           created_at?: string
@@ -145,8 +151,11 @@ export type Database = {
           zone_code: string
         }
         Update: {
+          account_holder_name?: string | null
+          account_number?: string | null
           address?: string
           address_detail?: string
+          bank_name?: string | null
           bizr_no?: string
           business?: string
           created_at?: string
@@ -1004,16 +1013,19 @@ export type Database = {
       }
       platform_settings: {
         Row: {
+          commission_rate: number
           free_shipping_threshold: number
           id: string
           updated_at: string
         }
         Insert: {
+          commission_rate?: number
           free_shipping_threshold?: number
           id?: string
           updated_at?: string
         }
         Update: {
+          commission_rate?: number
           free_shipping_threshold?: number
           id?: string
           updated_at?: string
@@ -1491,6 +1503,93 @@ export type Database = {
         }
         Relationships: []
       }
+      review_images: {
+        Row: {
+          created_at: string
+          id: string
+          review_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_images_review_id_reviews_id_fk"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          content: string
+          created_at: string
+          delivery_item_id: string
+          id: string
+          product_id: string
+          rating: number
+          seller_replied_at: string | null
+          seller_reply: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          delivery_item_id: string
+          id?: string
+          product_id: string
+          rating: number
+          seller_replied_at?: string | null
+          seller_reply?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          delivery_item_id?: string
+          id?: string
+          product_id?: string
+          rating?: number
+          seller_replied_at?: string | null
+          seller_reply?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_delivery_item_id_delivery_items_id_fk"
+            columns: ["delivery_item_id"]
+            isOneToOne: true
+            referencedRelation: "delivery_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_product_id_products_id_fk"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       seller_banners: {
         Row: {
           created_at: string
@@ -1582,6 +1681,106 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seller_information_view"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      settlement_items: {
+        Row: {
+          commission_amount: number
+          commission_rate: number
+          created_at: string
+          id: string
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          seller_id: string
+          settlement_amount: number
+          shipping_reimbursement: number
+          status: Database["public"]["Enums"]["settlement_status"]
+          total_sales_amount: number
+        }
+        Insert: {
+          commission_amount: number
+          commission_rate: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          seller_id: string
+          settlement_amount: number
+          shipping_reimbursement?: number
+          status?: Database["public"]["Enums"]["settlement_status"]
+          total_sales_amount: number
+        }
+        Update: {
+          commission_amount?: number
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          seller_id?: string
+          settlement_amount?: number
+          shipping_reimbursement?: number
+          status?: Database["public"]["Enums"]["settlement_status"]
+          total_sales_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlement_items_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "admin_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settlement_items_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_information_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_likes: {
+        Row: {
+          created_at: string
+          seller_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          seller_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          seller_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_likes_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "admin_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_likes_seller_id_admin_sellers_id_fk"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_information_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_likes_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
           },
         ]
       }
@@ -1709,8 +1908,11 @@ export type Database = {
     Views: {
       seller_information_view: {
         Row: {
+          account_holder_name: string | null
+          account_number: string | null
           address: string | null
           address_detail: string | null
+          bank_name: string | null
           bizr_no: string | null
           business: string | null
           created_at: string | null
@@ -1738,6 +1940,7 @@ export type Database = {
     }
     Functions: {
       auto_confirm_purchase: { Args: never; Returns: number }
+      calculate_monthly_settlements: { Args: never; Returns: undefined }
       decrement_stock: {
         Args: { p_quantity: number; p_sku_id: string }
         Returns: undefined
@@ -1835,6 +2038,7 @@ export type Database = {
         | "STOP"
         | "END"
       seller_status: "PENDING" | "APPROVED" | "REJECTED"
+      settlement_status: "pending" | "paid"
       shipping_fee_bearer: "SELLER" | "PLATFORM"
       shipping_fee_type: "FREE" | "PAID" | "COD" | "CONDITIONAL"
       target_age_type: "BABY" | "KIDS"
@@ -1854,12 +2058,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1883,11 +2087,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1908,11 +2112,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1933,11 +2137,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1950,11 +2154,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2050,6 +2254,7 @@ export const Constants = {
         "END",
       ],
       seller_status: ["PENDING", "APPROVED", "REJECTED"],
+      settlement_status: ["pending", "paid"],
       shipping_fee_bearer: ["SELLER", "PLATFORM"],
       shipping_fee_type: ["FREE", "PAID", "COD", "CONDITIONAL"],
       target_age_type: ["BABY", "KIDS"],

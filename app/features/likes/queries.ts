@@ -116,3 +116,66 @@ export const getLikedProducts = async (client: Client, userId: string) => {
 };
 
 export type LikedProduct = Awaited<ReturnType<typeof getLikedProducts>>[number];
+
+/**
+ * 사용자가 특정 스토어를 찜 했는지 확인
+ */
+export const isStoreLiked = async (
+  client: Client,
+  userId: string,
+  sellerId: string
+) => {
+  const { data, error } = await client
+    .from("store_likes")
+    .select("seller_id")
+    .eq("user_id", userId)
+    .eq("seller_id", sellerId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return !!data;
+};
+
+/**
+ * 사용자의 찜한 스토어 목록 조회
+ */
+export const getLikedStores = async (client: Client, userId: string) => {
+  const { data, error } = await client
+    .from("store_likes")
+    .select(
+      `
+      seller_id,
+      created_at,
+      admin_sellers!store_likes_seller_id_admin_sellers_id_fk (
+        id,
+        seller_code,
+        name
+      )
+    `
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data.map((item) => {
+    const {
+      data: { publicUrl: logoUrl },
+    } = client.storage
+      .from("sellers")
+      .getPublicUrl(`${item.admin_sellers.seller_code}/logo`);
+
+    return {
+      sellerId: item.seller_id,
+      likedAt: item.created_at,
+      store: {
+        id: item.admin_sellers.id,
+        sellerCode: item.admin_sellers.seller_code,
+        name: item.admin_sellers.name,
+        profileImage: logoUrl,
+      },
+    };
+  });
+};
+
+export type LikedStore = Awaited<ReturnType<typeof getLikedStores>>[number];

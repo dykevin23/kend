@@ -78,6 +78,41 @@ export function getReturnStatusLabel(
   return null;
 }
 
+export interface ConfirmPurchaseCandidate {
+  deliveryItemId: string | null;
+  deliveryItemStatus: string | null;
+  purchaseConfirmedAt: string | null;
+}
+
+/**
+ * 주문(판매자) 내 구매확정 버튼을 개별로 보여줄지, 전체 구매확정 버튼 하나로
+ * 묶을지 판단한다. 상품이 전부 정상 상태(반품 등으로 갈리지 않음)면 미확정
+ * 건을 한 번에 처리하는 전체 구매확정 버튼을 쓴다. 하나라도 상태가 갈리면
+ * (반품 등) 그 순간부터 상품별 개별 버튼으로 돌아간다 — 대상이 1개면 굳이
+ * "전체" 버튼을 쓸 이유가 없어 그 경우도 개별 버튼 쪽으로 둔다.
+ * 주문상세/주문목록/전체탭 3곳에서 동일하게 사용.
+ */
+export function getConfirmPurchaseGroup(
+  items: ConfirmPurchaseCandidate[],
+  orderStatus: string
+): { useBulkConfirm: boolean; unconfirmedNormalItemIds: string[] } {
+  const allNormal = items.every((item) => item.deliveryItemStatus === "normal");
+  const unconfirmedNormalItemIds = items
+    .filter(
+      (item) =>
+        item.deliveryItemStatus === "normal" &&
+        orderStatus === "delivered" &&
+        !item.purchaseConfirmedAt &&
+        !!item.deliveryItemId
+    )
+    .map((item) => item.deliveryItemId!);
+
+  return {
+    useBulkConfirm: allNormal && unconfirmedNormalItemIds.length > 1,
+    unconfirmedNormalItemIds,
+  };
+}
+
 /**
  * 상품(delivery_item) 하나의 최종 상태 배지
  * 반품/교환이 진행중이면 그 상태를, 아니면 주문(orders) 상태를 보여준다 —

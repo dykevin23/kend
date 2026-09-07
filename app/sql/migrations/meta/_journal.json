@@ -190,6 +190,41 @@
       "when": 1787551612284,
       "tag": "0026_broad_boomer",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1788327040966,
+      "tag": "0027_modern_edwin_jarvis",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1788334242948,
+      "tag": "0028_wooden_roland_deschain",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788416166586,
+      "tag": "0029_clean_ultragirl",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1788488378724,
+      "tag": "0030_nappy_the_phantom",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1788498884247,
+      "tag": "0031_even_vance_astro",
+      "breakpoints": true
     }
   ]
 }

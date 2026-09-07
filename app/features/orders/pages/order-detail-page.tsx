@@ -1,14 +1,18 @@
-import { useEffect } from "react";
-import { redirect, useFetcher, useLoaderData } from "react-router";
+import { redirect, useLoaderData, Link } from "react-router";
 import { DateTime } from "luxon";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
-import { useAlert } from "~/hooks/useAlert";
 import { makeSSRClient } from "~/supa-client";
 import { getOrderGroupDetail } from "../queries";
 import OrderItemCard from "../components/order-item-card";
 import ReturnRequestDialog from "../components/return-request-dialog";
-import { getReturnStatusLabel } from "../utils";
+import {
+  ConfirmPurchaseButton,
+  BulkConfirmPurchaseButton,
+} from "../components/confirm-purchase-button";
+import { getReturnStatusLabel, getConfirmPurchaseGroup } from "../utils";
+import { getReviewedDeliveryItems } from "~/features/reviews/queries";
+import ReviewWriteButton from "~/features/reviews/components/review-write-button";
 import type { Route } from "./+types/order-detail-page";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
@@ -21,9 +25,12 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     throw redirect("/auth/login");
   }
 
-  const orderGroup = await getOrderGroupDetail(client, params.orderGroupId, user.id);
+  const [orderGroup, reviewedDeliveryItems] = await Promise.all([
+    getOrderGroupDetail(client, params.orderGroupId, user.id),
+    getReviewedDeliveryItems(client, user.id),
+  ]);
 
-  return { orderGroup };
+  return { orderGroup, reviewedDeliveryItems };
 };
 
 const formatDate = (value: string | null) =>
@@ -63,26 +70,7 @@ function OrderTimeline({ order }: { order: Route.ComponentProps["loaderData"]["o
 }
 
 export default function OrderDetailPage() {
-  const { orderGroup } = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
-  const { alert } = useAlert();
-
-  useEffect(() => {
-    if (fetcher.data && fetcher.data.success === false) {
-      alert({
-        title: "구매확정 실패",
-        message: fetcher.data.error ?? "구매확정 처리에 실패했어요.",
-        primaryButton: { label: "확인" },
-      });
-    }
-  }, [fetcher.data]);
-
-  const handleConfirmPurchase = (deliveryItemId: string) => {
-    const formData = new FormData();
-    formData.append("intent", "confirmPurchase");
-    formData.append("deliveryItemId", deliveryItemId);
-    fetcher.submit(formData, { method: "POST", action: "/orders/action" });
-  };
+  const { orderGroup, reviewedDeliveryItems } = useLoaderData<typeof loader>();
 
   return (
     <Content headerPorps={{ title: "주문 상세", useRight: false }}>
@@ -112,6 +100,9 @@ export default function OrderDetailPage() {
 
         {/* 판매자별 주문 블록 */}
         {orderGroup.orders.map((order) => {
+          const { useBulkConfirm, unconfirmedNormalItemIds } =
+            getConfirmPurchaseGroup(order.items, order.status);
+
           return (
             <div key={order.id} className="flex flex-col bg-white border-b border-gray-100 mt-2">
               <div className="px-4 pt-4 pb-2">
@@ -127,10 +118,17 @@ export default function OrderDetailPage() {
                     item.deliveryItemId &&
                     isNormal;
                   const canConfirmPurchase =
+                    !useBulkConfirm &&
                     order.status === "delivered" &&
                     isNormal &&
                     !item.purchaseConfirmedAt;
                   const returnStatusLabel = getReturnStatusLabel(item);
+                  const isConfirmed = isNormal && !!item.purchaseConfirmedAt;
+                  const matchedReview = reviewedDeliveryItems.find(
+                    (r) => r.deliveryItemId === item.deliveryItemId
+                  );
+                  const canWriteReview = isConfirmed && !matchedReview;
+                  const hasReviewed = isConfirmed && !!matchedReview;
 
                   return (
                     <div key={item.id} className="border-b border-gray-100 last:border-b-0">
@@ -149,20 +147,32 @@ export default function OrderDetailPage() {
                           </span>
                         </div>
                       )}
-                      {(canRequestReturn || canConfirmPurchase) && (
+                      {(canRequestReturn ||
+                        canConfirmPurchase ||
+                        canWriteReview ||
+                        hasReviewed) && (
                         <div className="flex items-center gap-2 pb-3">
                           {canRequestReturn && (
                             <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
                           )}
                           {canConfirmPurchase && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                              disabled={fetcher.state !== "idle"}
-                              onClick={() => handleConfirmPurchase(item.deliveryItemId!)}
-                            >
-                              {fetcher.state !== "idle" ? "처리 중..." : "구매확정"}
+                            <ConfirmPurchaseButton deliveryItemId={item.deliveryItemId!} />
+                          )}
+                          {canWriteReview && (
+                            <ReviewWriteButton
+                              productId={item.productId!}
+                              deliveryItemId={item.deliveryItemId!}
+                              productName={item.productName}
+                              mainImage={item.mainImage}
+                              options={item.options}
+                              salePrice={item.salePrice}
+                            />
+                          )}
+                          {hasReviewed && (
+                            <Button variant="outline" size="sm" className="text-xs" asChild>
+                              <Link to={`/myPage/reviews?reviewId=${matchedReview!.reviewId}`}>
+                                내가 쓴 리뷰 보기
+                              </Link>
                             </Button>
                           )}
                         </div>
@@ -171,6 +181,12 @@ export default function OrderDetailPage() {
                   );
                 })}
               </div>
+
+              {useBulkConfirm && (
+                <div className="px-4 pb-3">
+                  <BulkConfirmPurchaseButton deliveryItemIds={unconfirmedNormalItemIds} />
+                </div>
+              )}
 
               <div className="px-4 pb-3">
                 <OrderTimeline order={order} />

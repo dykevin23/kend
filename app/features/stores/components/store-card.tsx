@@ -71,7 +71,7 @@ export const StoreInfo = ({
         <img
           src={profileImage}
           alt={name}
-          className="size-10 aspect-square rounded-full object-contain"
+          className="size-10 aspect-square rounded-full object-contain bg-gray-100"
           onError={() => setImageError(true)}
         />
       ) : (

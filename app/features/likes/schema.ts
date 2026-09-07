@@ -6,6 +6,11 @@ const products = pgTable("products", {
   id: uuid().primaryKey(),
 });
 
+// admin_sellers 테이블 참조 (kend-seller 소유 외부 테이블)
+const adminSellers = pgTable("admin_sellers", {
+  id: uuid().primaryKey(),
+});
+
 /**
  * 좋아요(product_likes) 테이블
  * user_id      사용자 ID (FK → profiles.profile_id)
@@ -26,4 +31,26 @@ export const productLikes = pgTable(
     created_at: timestamp().notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.user_id, table.product_id] })]
+);
+
+/**
+ * 스토어 찜(store_likes) 테이블
+ * user_id      사용자 ID (FK → profiles.profile_id)
+ * seller_id    판매자(스토어) ID (FK → admin_sellers.id)
+ * created_at   찜한 시점
+ *
+ * PK: user_id + seller_id 복합키 (한 스토어당 한 번만 찜)
+ */
+export const storeLikes = pgTable(
+  "store_likes",
+  {
+    user_id: uuid()
+      .notNull()
+      .references(() => profiles.profile_id, { onDelete: "cascade" }),
+    seller_id: uuid()
+      .notNull()
+      .references(() => adminSellers.id, { onDelete: "cascade" }),
+    created_at: timestamp().notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.user_id, table.seller_id] })]
 );

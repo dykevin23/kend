@@ -2,23 +2,95 @@ import { useEffect } from "react";
 import { Link, useFetcher } from "react-router";
 import { DateTime } from "luxon";
 import type { UserOrderGroup, UserOrder } from "../queries";
+import type { ReviewedDeliveryItem } from "~/features/reviews/queries";
 import OrderItemCard from "./order-item-card";
+import {
+  ConfirmPurchaseButton,
+  BulkConfirmPurchaseButton,
+} from "./confirm-purchase-button";
+import ReviewWriteButton from "~/features/reviews/components/review-write-button";
 import { Button } from "~/common/components/ui/button";
 import { useAlert } from "~/hooks/useAlert";
-import { getItemStatusLabel } from "../utils";
+import { getItemStatusLabel, getConfirmPurchaseGroup } from "../utils";
 
 /** 이미 결론이 난 상태 — 구매자가 (재)취소할 수 없다 (배송 시작됐거나, 이미 취소됨) */
 const RESOLVED_ORDER_STATUSES = ["shipped", "delivered", "cancelled"];
 
 interface OrderGroupCardProps {
   orderGroup: UserOrderGroup;
+  reviewedDeliveryItems: ReviewedDeliveryItem[];
 }
 
 /**
  * 개별 주문 블록 (판매자별)
  * - 상태 + 아이템들 + 액션 버튼
  */
-function OrderBlock({ order, orderGroupId }: { order: UserOrder; orderGroupId: string }) {
+function OrderBlock({
+  order,
+  orderGroupId,
+  reviewedDeliveryItems,
+}: {
+  order: UserOrder;
+  orderGroupId: string;
+  reviewedDeliveryItems: ReviewedDeliveryItem[];
+}) {
+  // 구매확정된(normal + purchaseConfirmedAt) 건만 리뷰 버튼 대상 — 정책: 구매확정
+  // 건(delivery_item)당 1개라 같은 상품도 구매확정 건이 다르면 각각 작성 가능.
+  // 대상이 1개면 그 화면으로 바로 연결(단축), 여러 개면 상품별로 정확한 주문상세로 보낸다.
+  const confirmedItems = order.items.filter(
+    (item) => item.deliveryItemStatus === "normal" && !!item.purchaseConfirmedAt
+  );
+  const reviewableItems = confirmedItems.filter(
+    (item) =>
+      !reviewedDeliveryItems.some((r) => r.deliveryItemId === item.deliveryItemId)
+  );
+  const reviewedItems = confirmedItems
+    .map((item) => ({
+      item,
+      review: reviewedDeliveryItems.find(
+        (r) => r.deliveryItemId === item.deliveryItemId
+      ),
+    }))
+    .filter((x) => x.review);
+
+  const singleReviewableItem =
+    order.status === "delivered" && reviewableItems.length === 1
+      ? reviewableItems[0]
+      : null;
+
+  const reviewButton =
+    order.status !== "delivered"
+      ? null
+      : (() => {
+          if (reviewableItems.length > 1) {
+            return {
+              label: `리뷰 작성 (${reviewableItems.length})`,
+              to: `/orders/${orderGroupId}`,
+              replace: false,
+            };
+          }
+          if (reviewedItems.length === 1) {
+            return {
+              label: "리뷰 보기",
+              to: `/myPage/reviews?reviewId=${reviewedItems[0].review!.reviewId}`,
+              replace: false,
+            };
+          }
+          if (reviewedItems.length > 1) {
+            return {
+              label: `리뷰 보기 (${reviewedItems.length})`,
+              to: `/orders/${orderGroupId}`,
+              replace: false,
+            };
+          }
+          return null;
+        })();
+
+  const { useBulkConfirm, unconfirmedNormalItemIds } = getConfirmPurchaseGroup(
+    order.items,
+    order.status
+  );
+
   return (
     <div>
       {/* 상품 목록 — 상품마다 상태가 다를 수 있어(P2.5-3) 상품별로 배지를 보여준다 */}
@@ -43,10 +115,42 @@ function OrderBlock({ order, orderGroupId }: { order: UserOrder; orderGroupId: s
         <Button variant="outline" size="sm" className="flex-1 text-xs" asChild>
           <Link to={`/orders/${orderGroupId}`}>배송·주문 관리</Link>
         </Button>
-        <Button variant="outline" size="sm" className="flex-1 text-xs" asChild>
-          <Link to={`/orders/${orderGroupId}`}>배송 조회</Link>
-        </Button>
+        {singleReviewableItem ? (
+          <ReviewWriteButton
+            productId={singleReviewableItem.productId!}
+            deliveryItemId={singleReviewableItem.deliveryItemId!}
+            productName={singleReviewableItem.productName}
+            mainImage={singleReviewableItem.mainImage}
+            options={singleReviewableItem.options}
+            salePrice={singleReviewableItem.salePrice}
+            className="flex-1"
+          />
+        ) : reviewButton ? (
+          <Button variant="outline" size="sm" className="flex-1 text-xs" asChild>
+            <Link to={reviewButton.to} replace={reviewButton.replace}>
+              {reviewButton.label}
+            </Link>
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" className="flex-1 text-xs" asChild>
+            <Link to={`/orders/${orderGroupId}`}>배송 조회</Link>
+          </Button>
+        )}
       </div>
+
+      {useBulkConfirm ? (
+        <div className="px-4 pb-3">
+          <BulkConfirmPurchaseButton deliveryItemIds={unconfirmedNormalItemIds} />
+        </div>
+      ) : (
+        unconfirmedNormalItemIds.length > 0 && (
+          <div className="flex flex-col gap-2 px-4 pb-3">
+            {unconfirmedNormalItemIds.map((id) => (
+              <ConfirmPurchaseButton key={id} deliveryItemId={id} className="w-full" />
+            ))}
+          </div>
+        )
+      )}
     </div>
   );
 }
@@ -56,7 +160,10 @@ function OrderBlock({ order, orderGroupId }: { order: UserOrder; orderGroupId: s
  * - order_group 단위로 하나의 카드
  * - 하위 orders(판매자별)는 붙여서 표시
  */
-export default function OrderGroupCard({ orderGroup }: OrderGroupCardProps) {
+export default function OrderGroupCard({
+  orderGroup,
+  reviewedDeliveryItems,
+}: OrderGroupCardProps) {
   const fetcher = useFetcher();
   const { alert, confirm } = useAlert();
   const orderDate = DateTime.fromISO(orderGroup.createdAt).toFormat(
@@ -115,7 +222,12 @@ export default function OrderGroupCard({ orderGroup }: OrderGroupCardProps) {
 
       {/* 주문별 블록 (판매자별) - 붙여서 표시 */}
       {orderGroup.orders.map((order) => (
-        <OrderBlock key={order.id} order={order} orderGroupId={orderGroup.id} />
+        <OrderBlock
+          key={order.id}
+          order={order}
+          orderGroupId={orderGroup.id}
+          reviewedDeliveryItems={reviewedDeliveryItems}
+        />
       ))}
 
       {/* 주문 취소 — 결제 단위(order_group) 전체 취소 */}

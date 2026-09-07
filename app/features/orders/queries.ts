@@ -31,6 +31,7 @@ const RETURN_OR_EXCHANGE_STATUSES = [
 
 type RawOrderItem = {
   id: string;
+  product_id: string | null;
   product_code: string;
   product_name: string;
   options: unknown;
@@ -49,6 +50,7 @@ type RawDeliveryItem = {
   return_received_at: string | null;
   reject_reason: string | null;
   refunded_at: string | null;
+  purchase_confirmed_at: string | null;
 };
 
 const mapOrderItem = (
@@ -60,6 +62,7 @@ const mapOrderItem = (
   );
   return {
     id: item.id,
+    productId: item.product_id,
     productCode: item.product_code,
     productName: item.product_name,
     options: item.options as Record<string, string> | null,
@@ -74,6 +77,7 @@ const mapOrderItem = (
     returnReceivedAt: deliveryItem?.return_received_at ?? null,
     returnRejectReason: deliveryItem?.reject_reason ?? null,
     returnRefundedAt: deliveryItem?.refunded_at ?? null,
+    purchaseConfirmedAt: deliveryItem?.purchase_confirmed_at ?? null,
   };
 };
 
@@ -140,6 +144,7 @@ export const getUserOrderGroups = async (
         status,
         order_items (
           id,
+          product_id,
           product_code,
           product_name,
           options,
@@ -161,7 +166,8 @@ export const getUserOrderGroups = async (
             return_approved_at,
             return_received_at,
             reject_reason,
-            refunded_at
+            refunded_at,
+            purchase_confirmed_at
           )
         )
       )

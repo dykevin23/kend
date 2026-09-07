@@ -3,8 +3,10 @@ import { redirect, useLoaderData } from "react-router";
 import Content from "~/common/components/content";
 import { Tab, Tabs } from "~/common/components/tabs";
 import LikeProductCard from "../components/like-product-card";
+import LikeStoreCard from "../components/like-store-card";
 import { makeSSRClient } from "~/supa-client";
-import { getLikedProducts } from "../queries";
+import { getLikedProducts, getLikedStores } from "../queries";
+import { toggleStoreLike } from "../mutations";
 import type { Route } from "./+types/likes-page";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -17,12 +19,37 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return redirect("/auth/login", { headers });
   }
 
-  const likedProducts = await getLikedProducts(client, user.id);
-  return { likedProducts };
+  const [likedProducts, likedStores] = await Promise.all([
+    getLikedProducts(client, user.id),
+    getLikedStores(client, user.id),
+  ]);
+  return { likedProducts, likedStores };
+};
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+
+  if (!user) {
+    return redirect("/auth/login", { headers });
+  }
+
+  if (intent === "unlikeStore") {
+    const sellerId = formData.get("sellerId") as string;
+    await toggleStoreLike(client, user.id, sellerId);
+    return { success: true };
+  }
+
+  return { success: false };
 };
 
 export default function LikesPage() {
-  const { likedProducts } = useLoaderData<typeof loader>();
+  const { likedProducts, likedStores } = useLoaderData<typeof loader>();
   const [isActiveTab, setIsActiveTab] = useState<string>("product");
 
   const handleClickTab = (key: string) => () => {
@@ -58,6 +85,10 @@ export default function LikesPage() {
                 <span className="text-muted">좋아요한 상품이 없습니다.</span>
               </div>
             )
+          ) : likedStores.length > 0 ? (
+            likedStores.map((item) => (
+              <LikeStoreCard key={item.sellerId} item={item} />
+            ))
           ) : (
             <div className="flex w-full py-10 justify-center items-center">
               <span className="text-muted">찜한 스토어가 없습니다.</span>

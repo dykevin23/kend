@@ -10,6 +10,7 @@ import { cn } from "~/lib/utils";
 import Divider from "~/common/components/divider";
 import { makeSSRClient } from "~/supa-client";
 import { getProductByCode } from "../queries";
+import { getProductRatingSummary, getProductReviews } from "~/features/reviews/queries";
 import {
   Carousel,
   CarouselContent,
@@ -47,6 +48,11 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     data: { user },
   } = await client.auth.getUser();
 
+  const [ratingSummary, reviews] = await Promise.all([
+    getProductRatingSummary(client, product.id),
+    getProductReviews(client, product.id),
+  ]);
+
   if (user) {
     const [liked, userProfile, defaultAddress] = await Promise.all([
       isProductLiked(client, user.id, product.id),
@@ -58,7 +64,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     address = defaultAddress;
   }
 
-  return { product, isLiked, profile, address };
+  return { product, isLiked, profile, address, ratingSummary, reviews };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -123,7 +129,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
 type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 
 export default function ProductPage() {
-  const { product, isLiked, address } = useLoaderData<typeof loader>();
+  const { product, isLiked, address, ratingSummary, reviews } =
+    useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const { confirm } = useAlert();
@@ -402,7 +409,7 @@ export default function ProductPage() {
               onClick={handleTabClick("size")}
             />
             <Tab
-              title="리뷰(4,321)"
+              title={`리뷰(${reviews.length.toLocaleString()})`}
               isActive={activeTab === "review"}
               className={{ "text-muted": activeTab !== "review" }}
               onClick={handleTabClick("review")}
@@ -440,12 +447,19 @@ export default function ProductPage() {
           </div>
           <Divider className="w-full" />
 
-          {/* 상품평점 섹션 */}
-          <ProductRatingSection />
-          <Divider className="w-full" />
+          {/* 상품평점 섹션 (리뷰 없으면 렌더 안 함) */}
+          {ratingSummary.count > 0 && (
+            <>
+              <ProductRatingSection
+                averageRating={ratingSummary.average}
+                totalReviews={ratingSummary.count}
+              />
+              <Divider className="w-full" />
+            </>
+          )}
 
           {/* 리뷰 섹션 */}
-          <ProductReviewSection ref={reviewRef} />
+          <ProductReviewSection ref={reviewRef} reviews={reviews} />
           <Divider className="w-full" />
 
           {/* 추천상품 */}

@@ -3,7 +3,9 @@ import { cn } from "~/lib/utils";
 export const Tabs = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col w-full items-start">
-      <div className="flex w-full items-center">{children}</div>
+      <div className="flex w-full items-center border-b border-muted/20">
+        {children}
+      </div>
     </div>
   );
 };
