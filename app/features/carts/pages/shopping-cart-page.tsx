@@ -17,7 +17,11 @@ import {
   removeMultipleFromCart,
   updateCartQuantity,
 } from "../mutations";
-import { type OrderItem, cartItemToOrderItem } from "~/features/orders/types";
+import {
+  type OrderItem,
+  cartItemToOrderItem,
+  groupOrderItemsBySeller,
+} from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -155,16 +159,17 @@ export default function ShoppingCartPage() {
     setSelectedIds(new Set());
   };
 
-  // 선택된 상품들의 총 금액 계산
+  // 선택된 상품들의 총 금액 계산 — 결제 모달과 동일한 판매자별 그룹핑으로 배송비 계산
   const { totalProductPrice, totalPrice } = useMemo(() => {
-    let productTotal = 0;
-    cartItems.forEach((item) => {
-      if (selectedIds.has(item.id)) {
-        productTotal += item.sku.salePrice * item.quantity;
-      }
-    });
-    // TODO: 배송비 계산 로직 추가
-    const shippingFee = 0;
+    const selectedCartItems = cartItems.filter((item) => selectedIds.has(item.id));
+    const productTotal = selectedCartItems.reduce(
+      (sum, item) => sum + item.sku.salePrice * item.quantity,
+      0
+    );
+    const sellerGroups = groupOrderItemsBySeller(
+      selectedCartItems.map(cartItemToOrderItem)
+    );
+    const shippingFee = sellerGroups.reduce((sum, g) => sum + g.shippingFee, 0);
     return {
       totalProductPrice: productTotal,
       totalPrice: productTotal + shippingFee,
@@ -295,7 +300,7 @@ export default function ShoppingCartPage() {
                 </div>
                 <div className="flex px-4 justify-end items-center gap-1 flex-gsb self-stretch">
                   <span className="text-sm leading-[140%] tracking-[-0.4px]">
-                    0원
+                    {(totalPrice - totalProductPrice).toLocaleString()}원
                   </span>
                 </div>
               </div>

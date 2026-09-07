@@ -451,8 +451,7 @@ function OrderItemCard({ item }: { item: OrderItem }) {
           </div>
           <div className="flex items-center self-stretch">
             <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-              {/* TODO: 발송 예정일 */}
-              발송 예정
+              판매자 확인 후 3영업일 이내 발송 예정
             </span>
           </div>
         </div>
