@@ -3,7 +3,7 @@
 > 2026-05-07 작성
 > iOS swipe back UX 개선 작업의 후속. 현재 `/stores`, `/stores/:storeId`에만 적용됨.
 >
-> ⚠️ **2026-09-09 폐기(superseded)**: [data-freshness-caching-policy.md](./data-freshness-caching-policy.md)로 대체.
+> ⚠️ **2026-09-09 폐기(superseded)**: [data-freshness-caching-policy.md](../todo/data-freshness-caching-policy.md)로 대체.
 > 영구 캐시가 "스토어 목록이 며칠째 stale" 버그를 일으킴이 확인됨. 이 문서의 "캐시를 넓게 펼치고
 > mutation마다 무효화" 방향은 기각. 최종 결정 = **`makeCachedClientLoader` 완전 삭제**, 전 라우트
 > 항상 신선 + 뒤로가기 잔상은 렌더링 레이어에서 해결 + 앱 포그라운드 revalidation.

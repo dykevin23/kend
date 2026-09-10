@@ -39,11 +39,13 @@
 
 | 항목 | 상태 |
 |------|------|
-| [ios-review-rejection-apr14](./active/ios-review-rejection-apr14.md) | 🚨 심사 정체 → escalate 필요 |
-| [internal-test-1st](./active/internal-test-1st.md) | 15/18 완료, 잔여는 휴대폰 인증 연계(이연) |
-| [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 네이티브 적용 대기 |
-| [environment-separation-plan](./active/environment-separation-plan.md) | 출시 전 필수, 미착수 |
-| [order-lifecycle-master-plan](./todo/order-lifecycle-master-plan.md) | Phase 2.5 종료(2026-08-25) — 교환(P2.5-3 하위)만 정책 미정으로 별도 이연 |
+| iOS 심사 (P0-1) | 🚨 appeal 승인, 개발 완성도 확보 후 재제출 (의도적 보류) — 상세 [milestones P0-1](./kend-milestones.md) |
+| 결제 앱 WebView 보강 | kend 재배포 + [native-payment-webview-handoff](./todo/native-payment-webview-handoff.md) EAS 빌드 대기 |
+| [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 결제 리다이렉트 구간 포함 재정비 완료 (2026-09-10), EAS 빌드 대기 |
+| [environment-separation-plan](./todo/environment-separation-plan.md) | Phase 4, 출시 전 필수, 미착수 |
+| 교환(exchange) | Phase 3, 정책 미정으로 착수 불가 |
+
+> 완료된 계획은 `archive/`로 이동함 (internal-test-1st 15/18, ios-review-rejection-apr14 스냅샷 등).
 
 ---
 
