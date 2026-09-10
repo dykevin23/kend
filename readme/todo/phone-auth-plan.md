@@ -9,7 +9,7 @@
 >
 > - **결정 배경**: SMS OTP는 본인인증(NICE)이 아니라 단순 번호 점유 확인일 뿐. MVP에서 ① 비밀번호 찾기는 Supabase 이메일 재설정으로 대체 가능 ② 아이디 찾기는 소셜 재로그인/이메일로 대체 ③ 배송 연락처는 checkout에서 별도 수집 → **출시 블로커 아님**. SMS 벤더 미정 + 비용/QA 부담 회피 위해 출시 후로 이연.
 > - **구현 상태**: 휴대폰 인증 전체(게이트, OTP Edge Function, 추가정보, 아이디/비번 찾기, 번호 중복방지, 트리거 정비)를 **코드로 완성**했으나 적용/배포하지 않음. 전부 **`feature/phone-auth` 브랜치(commit d6ec2b0)에 보존**. kend-newbuild 에는 미반영.
-> - **재개 시**: 해당 브랜치 병합 → 마이그레이션(0016/0017) 적용 + Edge Function 배포 + SMS 벤더 확정([sms-vendor-comparison.md] — 해당 브랜치에 있음) + RLS. 자세한 내역은 feature/phone-auth 의 changelog-kend.md(2026-06-16) 참조.
+> - **재개 시**: 해당 브랜치 병합 → 마이그레이션(0016/0017) 적용 + Edge Function 배포 + SMS 벤더 확정(`feature/phone-auth` 브랜치의 `sms-vendor-comparison.md`) + RLS. 자세한 내역은 `feature/phone-auth`의 changelog-kend.md(2026-06-16) 참조. (브랜치 최종 커밋: 2026-06-17)
 > - **대체**: 출시 전 계정 복구는 **이메일 기반 비밀번호 재설정**으로 처리(SMS 불필요).
 
 ---
@@ -163,7 +163,7 @@ Supabase Edge Function으로 구현:
 
 ## 관련 문서
 
-- [internal-test-1st.md](../active/internal-test-1st.md) - 1차 내부 테스트에서 도출된 미해결 항목
+- [internal-test-1st.md](../archive/internal-test-1st.md) - 1차 내부 테스트에서 도출된 미해결 항목 (아이디/비번찾기·소셜 추가정보 2건이 이 계획으로 이연됨)
 - [auth-model.md](../core/auth-model.md) - 현재 인증 모델
 - [database.md](../core/database.md) - DB 구조
 - [native-swipe-blacklist.md](../active/native-swipe-blacklist.md) - 신규 페이지 blacklist 추가 필요

@@ -99,20 +99,20 @@
   - [ ] placeholder/미완성 UI 전부 제거 (결제 "준비 중" 화면 재검토 — 가능하면 Toss 실키 적용 후 실제 동작 상태로)
   - [ ] 04-14 지적 4건 iPhone 실기기 재검증 (Apple Sign In, 카메라, iPad only 제외, 마이페이지 버튼)
   - [ ] 전 화면 안정성/일관성 재점검 후 새 build number로 제출
-- **참고**: [ios-review-rejection-apr14.md](active/ios-review-rejection-apr14.md)
+- **참고**: [ios-review-rejection-apr14.md](archive/ios-review-rejection-apr14.md) (4/14 스냅샷, 이후 경과는 위 타임라인)
 - **note**: 심사 정체는 **출시(release)만 막고 개발은 막지 않음** → 개발 병렬 진행
 
 #### 🟢 P0-2. 1차 내부 테스트 잔여 처리 (대부분 완료, swipe rollout 잔여)
 - **Due**: 2026-05-01 (일부 잔여 진행 중)
-- **참고**: [internal-test-1st.md](active/internal-test-1st.md)
+- **참고**: [internal-test-1st.md](archive/internal-test-1st.md) (15/18 완료, 잔여 2건은 휴대폰 인증 이연분)
 - **포함**: 스와이프 뒤로가기 UX 개선, 네이티브 스와이프 차단 URL blacklist 적용
 - **제외**: 휴대폰 인증 연계 2건 (→ Phase 1에서 통합)
 - **Sub-task**:
   - [x] Cache-Control 정책 조정 — [app/entry.server.tsx](../app/entry.server.tsx) (`/auth`, `/payments`, `/children` 민감 경로 `no-store` / 그 외 `private, max-age=60`)
   - [x] iOS 실기기 swipe back 진단 (가설: bfcache 미작동 → 결과: **bfcache가 아닌 React Router single fetch의 loader 재실행**이 원인)
-  - [x] `clientLoader` 캐시 헬퍼 도입 + `/stores`, `/stores/:storeId` 2개 라우트 적용 → swipe back 시 loader 단계 없이 즉시 복귀 확인
-  - [ ] **나머지 라우트로 펼치기** (저위험 일괄 + 고위험 invalidation 인프라) → [client-loader-cache-rollout](todo/client-loader-cache-rollout.md)
-  - [ ] 네이티브 스와이프 차단 URL blacklist 최종 적용
+  - [x] `clientLoader` 캐시 헬퍼 도입 + `/stores`, `/stores/:storeId` 2개 라우트 적용
+  - [ ] **캐싱 전략 재정립** — 2026-09-09: `clientLoader` 영구캐시가 "스토어 목록 stale" 버그를 유발함 확인. `makeCachedClientLoader` 삭제 + 전 라우트 항상 신선 방향으로 재확정 → [data-freshness-caching-policy.md](todo/data-freshness-caching-policy.md) (구 `client-loader-cache-rollout.md`는 archive)
+  - [x] 네이티브 스와이프 차단 URL blacklist 적용 (2026-09-10, 결제 리다이렉트 구간 포함해 재정비 — [native-swipe-blacklist.md](active/native-swipe-blacklist.md))
 
 #### 🟢 P0-3. 에러 핸들링 — Week 1 완료, Week 2-3 일부 잔여
 - **Due**: 2026-05-01 (잔여 진행 중)
@@ -253,7 +253,7 @@
 - **CS관리 운영기능** (필터링/담당자배정/통계 — P2.5-4 문의 코어 위에 얹는 레이어)
 - **최근 본 상품 (kend)** — `recent-products-page.tsx`가 항상 "최근 본 상품이 없습니다" 고정 표시하는 정적 스텁, 열람 이력 저장/조회 로직 없음
 - **상품 사이즈표 가짜 데이터 (kend)** — `product-size-description.tsx`가 상품과 무관하게 고정 사이즈표(12M/24M/36M) 표시. 상품/SKU별 사이즈 데이터 자체가 스키마에 없음
-- **데이터 신선도 / 캐싱 정책 (kend + kend-native)** — 앱에서 스토어 목록이 며칠째 갱신 안 되던 버그(영구 clientLoader 캐시가 원인) 발견. 결론: `makeCachedClientLoader` 삭제 + 전 라우트 항상 신선 + 뒤로가기 잔상은 렌더링 레이어에서 + 앱 포그라운드(30초/30분 기준) revalidation. 5-Phase 로드맵 확정. 상세: [todo/data-freshness-caching-policy.md](./todo/data-freshness-caching-policy.md) (구 [todo/client-loader-cache-rollout.md](./todo/client-loader-cache-rollout.md)는 폐기)
+- **데이터 신선도 / 캐싱 정책 (kend + kend-native)** — 앱에서 스토어 목록이 며칠째 갱신 안 되던 버그(영구 clientLoader 캐시가 원인) 발견. 결론: `makeCachedClientLoader` 삭제 + 전 라우트 항상 신선 + 뒤로가기 잔상은 렌더링 레이어에서 + 앱 포그라운드(30초/30분 기준) revalidation. 5-Phase 로드맵 확정. 상세: [todo/data-freshness-caching-policy.md](./todo/data-freshness-caching-policy.md). ※ Phase 3 편의기능은 아니고 kend/native 공통 기술부채 — 착수 시 별도 트랙 판단 필요
 
 **진행 중**
 - 🔄 **리뷰 관리 (구 P2-10 잔여, kend-seller)** — kend 쪽(작성/조회/이미지/판매자답변 스키마)은 전부 완료·실사용 테스트 통과(2026-09-07). kend-seller가 답변 작성·통계·날짜검색·미답변필터 화면 진행 중 — kend은 추가 작업 불필요
@@ -304,7 +304,7 @@
 
 #### 🟡 P4-1. Supabase dev/prod 환경 분리
 - **Due**: 2026-07-24
-- **참고**: [environment-separation-plan.md](active/environment-separation-plan.md)
+- **참고**: [environment-separation-plan.md](todo/environment-separation-plan.md)
 - **Sub-task**: (착수 시 추가)
 
 #### 🟡 P4-2. 통합 QA

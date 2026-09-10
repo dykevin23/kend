@@ -1,7 +1,7 @@
 # 데이터 신선도 / 캐싱 정책 로드맵
 
 > 2026-09-08 작성 · 2026-09-09 결정 반영
-> [client-loader-cache-rollout.md](./client-loader-cache-rollout.md)의 캐싱 부분을 대체(supersede)한다.
+> [../archive/client-loader-cache-rollout.md](../archive/client-loader-cache-rollout.md)의 캐싱 부분을 대체(supersede)한다.
 > 기존 문서는 캐시를 "swipe back UX" 관점으로만 봤고, "데이터 신선도" 관점이 빠져 있었다.
 > 최종 지향점(React Query)은 [client-rendering-plan.md](./client-rendering-plan.md) 유지.
 

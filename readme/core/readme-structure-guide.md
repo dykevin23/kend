@@ -42,12 +42,10 @@ readme/
 현재 진행 중이거나, 가까운 시일 내 완료 예정인 작업 계획/기록.
 
 **예시**:
-- `internal-test-1st.md` — 1차 내부 테스트 개선사항
-- `ios-review-rejection-apr14.md` — iOS 심사 대응
-- `environment-separation-plan.md` — Supabase 환경 분리
-- `native-swipe-blacklist.md` — 네이티브 협업 항목
+- `native-swipe-blacklist.md` — 네이티브 협업 항목 (현재 작업 중)
 
 **판단 기준**: "지금 내가 일하고 있는/곧 할 일" → active
+> ⚠️ 착수 안 한 계획이 `active/`에 쌓이지 않게 한다 — 시작 전이면 `todo/`, 끝났으면 `archive/`.
 
 ### `todo/` — 아직 시작 전 plan
 
