@@ -253,6 +253,7 @@
 - **CS관리 운영기능** (필터링/담당자배정/통계 — P2.5-4 문의 코어 위에 얹는 레이어)
 - **최근 본 상품 (kend)** — `recent-products-page.tsx`가 항상 "최근 본 상품이 없습니다" 고정 표시하는 정적 스텁, 열람 이력 저장/조회 로직 없음
 - **상품 사이즈표 가짜 데이터 (kend)** — `product-size-description.tsx`가 상품과 무관하게 고정 사이즈표(12M/24M/36M) 표시. 상품/SKU별 사이즈 데이터 자체가 스키마에 없음
+- **데이터 신선도 / 캐싱 정책 (kend + kend-native)** — 앱에서 스토어 목록이 며칠째 갱신 안 되던 버그(영구 clientLoader 캐시가 원인) 발견. 결론: `makeCachedClientLoader` 삭제 + 전 라우트 항상 신선 + 뒤로가기 잔상은 렌더링 레이어에서 + 앱 포그라운드(30초/30분 기준) revalidation. 5-Phase 로드맵 확정. 상세: [todo/data-freshness-caching-policy.md](./todo/data-freshness-caching-policy.md) (구 [todo/client-loader-cache-rollout.md](./todo/client-loader-cache-rollout.md)는 폐기)
 
 **진행 중**
 - 🔄 **리뷰 관리 (구 P2-10 잔여, kend-seller)** — kend 쪽(작성/조회/이미지/판매자답변 스키마)은 전부 완료·실사용 테스트 통과(2026-09-07). kend-seller가 답변 작성·통계·날짜검색·미답변필터 화면 진행 중 — kend은 추가 작업 불필요
