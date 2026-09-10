@@ -1,5 +1,12 @@
 import { useMemo, useState, useRef, useEffect } from "react";
-import { redirect, useLoaderData, useFetcher, useSearchParams, Link } from "react-router";
+import {
+  redirect,
+  useLoaderData,
+  useFetcher,
+  useSearchParams,
+  Link,
+  type ShouldRevalidateFunction,
+} from "react-router";
 import type { Route } from "./+types/shopping-cart-page";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
@@ -84,11 +91,26 @@ export const action = async ({ request }: Route.ActionArgs) => {
   }
 };
 
+// 주문 생성(결제 시작) 직후엔 Toss 결제창으로 페이지를 떠나므로 이 loader를
+// revalidate하지 않는다 — revalidation fetch가 페이지 이동으로 abort되면서
+// ErrorBoundary가 잠깐 뜨는 문제 방지. (그 외 fetcher 제출은 정상 revalidate)
+export const shouldRevalidate: ShouldRevalidateFunction = ({
+  formData,
+  defaultShouldRevalidate,
+}) => {
+  if (formData?.get("intent") === "create") return false;
+  return defaultShouldRevalidate;
+};
+
 export default function ShoppingCartPage() {
   const { cartItems, address } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [paymentError, setPaymentError] = useState<string | null>(null);
+  // 결제 후 안내 배너 — tone: 실패(error, 빨강) / 취소(cancelled, 회색)
+  const [paymentBanner, setPaymentBanner] = useState<{
+    tone: "error" | "cancelled";
+    text: string;
+  } | null>(null);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     () => new Set(cartItems.map((item) => item.id)),
@@ -97,18 +119,25 @@ export default function ShoppingCartPage() {
   const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
   const purchaseCartIdsRef = useRef<string[]>([]);
 
-  // 결제 실패 후 redirect로 넘어온 경우 에러 메시지 표시
+  // 결제 실패/취소 후 redirect로 넘어온 경우 안내 배너 표시
   useEffect(() => {
     const error = searchParams.get("payment_error");
-    if (error) {
-      setPaymentError(error);
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete("payment_error");
-      setSearchParams(newParams, { replace: true });
+    const cancelled = searchParams.get("payment_cancelled");
+    if (!error && !cancelled) return;
 
-      const timer = setTimeout(() => setPaymentError(null), 5000);
-      return () => clearTimeout(timer);
-    }
+    setPaymentBanner(
+      error
+        ? { tone: "error", text: error }
+        : { tone: "cancelled", text: "결제가 취소되었습니다." },
+    );
+
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("payment_error");
+    newParams.delete("payment_cancelled");
+    setSearchParams(newParams, { replace: true });
+
+    const timer = setTimeout(() => setPaymentBanner(null), 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   const isAllSelected =
@@ -211,13 +240,31 @@ export default function ShoppingCartPage() {
         )
       }
     >
-      {/* 결제 실패 배너 */}
-      {paymentError && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border-b border-red-200">
-          <span className="text-sm text-red-800">{paymentError}</span>
+      {/* 결제 실패/취소 배너 */}
+      {paymentBanner && (
+        <div
+          className={
+            paymentBanner.tone === "error"
+              ? "flex items-center gap-3 px-4 py-3 bg-red-50 border-b border-red-200"
+              : "flex items-center gap-3 px-4 py-3 bg-muted/10 border-b border-muted/20"
+          }
+        >
+          <span
+            className={
+              paymentBanner.tone === "error"
+                ? "text-sm text-red-800"
+                : "text-sm text-muted-foreground"
+            }
+          >
+            {paymentBanner.text}
+          </span>
           <button
-            className="ml-auto text-red-600 text-xs shrink-0"
-            onClick={() => setPaymentError(null)}
+            className={
+              paymentBanner.tone === "error"
+                ? "ml-auto text-red-600 text-xs shrink-0"
+                : "ml-auto text-muted text-xs shrink-0"
+            }
+            onClick={() => setPaymentBanner(null)}
           >
             닫기
           </button>

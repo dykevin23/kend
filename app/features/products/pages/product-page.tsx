@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { redirect, useLoaderData, useFetcher, useNavigate } from "react-router";
+import {
+  redirect,
+  useLoaderData,
+  useFetcher,
+  useNavigate,
+  useSearchParams,
+  type ShouldRevalidateFunction,
+} from "react-router";
 import type { Route } from "./+types/product-page";
 import BottomSheet from "~/common/components/bottom-sheet";
 import Content from "~/common/components/content";
@@ -126,6 +133,17 @@ export const action = async ({ request }: Route.ActionArgs) => {
   }
 };
 
+// 바로구매 → 주문 생성(intent=create) 직후엔 Toss 결제창으로 페이지를 떠나므로
+// 이 무거운 loader를 revalidate하지 않는다 — revalidation fetch가 페이지 이동으로
+// abort되면서 ErrorBoundary가 잠깐 뜨는 문제 방지.
+export const shouldRevalidate: ShouldRevalidateFunction = ({
+  formData,
+  defaultShouldRevalidate,
+}) => {
+  if (formData?.get("intent") === "create") return false;
+  return defaultShouldRevalidate;
+};
+
 type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 
 export default function ProductPage() {
@@ -133,7 +151,29 @@ export default function ProductPage() {
     useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const navigate = useNavigate();
-  const { confirm } = useAlert();
+  const { confirm, alert } = useAlert();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // 결제 취소/실패로 이 화면(바로구매 시작 지점)에 되돌아온 경우
+  useEffect(() => {
+    const error = searchParams.get("payment_error");
+    const cancelled = searchParams.get("payment_cancelled");
+    if (!error && !cancelled) return;
+
+    if (error) {
+      alert({
+        title: "결제 실패",
+        message: error,
+        primaryButton: { label: "확인" },
+      });
+    }
+    // 취소는 별도 안내 없이 조용히 (사용자가 스스로 취소)
+
+    const next = new URLSearchParams(searchParams);
+    next.delete("payment_error");
+    next.delete("payment_cancelled");
+    setSearchParams(next, { replace: true });
+  }, []);
 
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);

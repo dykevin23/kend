@@ -52,6 +52,17 @@ export default function ProductPurchaseModal({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [paymentWidget, setPaymentWidget] = useState<any>(null);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
+  // 위젯 초기화/렌더 실패 시 사용자에게 보여줄 메시지 (null이면 정상)
+  const [widgetError, setWidgetError] = useState<string | null>(null);
+  // "다시 시도" 클릭 시 증가시켜 초기화 effect 재실행
+  const [widgetRetryNonce, setWidgetRetryNonce] = useState(0);
+
+  const handleRetryWidget = () => {
+    setWidgetError(null);
+    setIsWidgetReady(false);
+    setPaymentWidget(null);
+    setWidgetRetryNonce((n) => n + 1);
+  };
 
   // 모달이 열릴 때 초기 주소로 리셋
   useEffect(() => {
@@ -59,6 +70,7 @@ export default function ProductPurchaseModal({
       setSelectedAddress(initialAddress);
       setDeliveryMessageOption("none");
       setCustomDeliveryMessage("");
+      setIsOpeningPayment(false);
       hasHandledRef.current = false;
     }
   }, [open, initialAddress]);
@@ -87,22 +99,44 @@ export default function ProductPurchaseModal({
     return productAmount + shippingFee;
   }, [sellerGroups]);
 
+  // 금액이 유효한지 (NaN/음수/0 방어 — `<= 0`만으로는 NaN을 못 거른다)
+  const isAmountValid = Number.isFinite(totalAmount) && totalAmount > 0;
+
   // 모달이 열릴 때 TossPayments 위젯 초기화
   useEffect(() => {
     if (PAYMENT_COMING_SOON) return;
-    if (!open || totalAmount <= 0) {
+    if (!open) {
       setPaymentWidget(null);
       setIsWidgetReady(false);
+      setWidgetError(null);
+      return;
+    }
+    if (!isAmountValid) {
+      setPaymentWidget(null);
+      setIsWidgetReady(false);
+      setWidgetError(
+        "결제 금액을 계산할 수 없습니다. 장바구니를 다시 확인해주세요."
+      );
+      return;
+    }
+
+    const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY;
+    if (!clientKey) {
+      console.error("VITE_TOSS_CLIENT_KEY가 설정되지 않았습니다.");
+      setPaymentWidget(null);
+      setIsWidgetReady(false);
+      setWidgetError(
+        "결제 설정 오류로 결제를 진행할 수 없습니다. 문제가 지속되면 고객센터로 문의해주세요."
+      );
       return;
     }
 
     let cancelled = false;
+    setWidgetError(null);
 
     const initWidget = async () => {
       try {
-        const tossPayments = await loadTossPayments(
-          import.meta.env.VITE_TOSS_CLIENT_KEY
-        );
+        const tossPayments = await loadTossPayments(clientKey);
         if (cancelled) return;
 
         const widget = tossPayments.widgets({ customerKey: "anonymous" });
@@ -111,7 +145,9 @@ export default function ProductPurchaseModal({
         if (cancelled) return;
         setPaymentWidget(widget);
       } catch (error) {
+        if (cancelled) return;
         console.error("TossPayments 초기화 실패:", error);
+        setWidgetError("결제 수단을 불러오지 못했습니다. 다시 시도해주세요.");
       }
     };
 
@@ -120,7 +156,7 @@ export default function ProductPurchaseModal({
     return () => {
       cancelled = true;
     };
-  }, [open, totalAmount]);
+  }, [open, totalAmount, isAmountValid, widgetRetryNonce]);
 
   // 위젯이 준비되면 DOM에 렌더링
   useEffect(() => {
@@ -138,7 +174,9 @@ export default function ProductPurchaseModal({
         });
         if (!cancelled) setIsWidgetReady(true);
       } catch (error) {
+        if (cancelled) return;
         console.error("TossPayments 위젯 렌더링 실패:", error);
+        setWidgetError("결제 수단을 표시하지 못했습니다. 다시 시도해주세요.");
       }
     };
 
@@ -151,12 +189,15 @@ export default function ProductPurchaseModal({
 
   // 금액 변경 시 위젯 업데이트
   useEffect(() => {
-    if (paymentWidget && totalAmount > 0) {
+    if (paymentWidget && isAmountValid) {
       paymentWidget.setAmount({ currency: "KRW", value: totalAmount });
     }
-  }, [paymentWidget, totalAmount]);
+  }, [paymentWidget, totalAmount, isAmountValid]);
 
   const isSubmitting = fetcher.state !== "idle";
+  // 주문 생성 후 Toss 결제창으로 이동하기 직전까지의 상태
+  // (requestPayment의 네트워크 호출 ~수백ms 동안 버튼 잠금 + 이중탭 방지)
+  const [isOpeningPayment, setIsOpeningPayment] = useState(false);
 
   // 주문 결과 처리 → 서버 응답 후 requestPayment() 호출
   useEffect(() => {
@@ -178,22 +219,54 @@ export default function ProductPurchaseModal({
           );
         }
 
+        setIsOpeningPayment(true);
+
+        // 결제 취소/실패 시 돌아올 화면 (장바구니 vs 상품상세 등 시작 지점)
+        const returnTo = window.location.pathname;
+
         paymentWidget
           .requestPayment({
             orderId: orderNumber,
             orderName,
             successUrl: `${window.location.origin}/payments/success`,
-            failUrl: `${window.location.origin}/payments/fail`,
+            failUrl: `${window.location.origin}/payments/fail?returnTo=${encodeURIComponent(
+              returnTo
+            )}`,
+            // 모바일/WebView에서는 현재 창을 그대로 결제창으로 이동시킨다
+            // (팝업/새 창을 열지 않음 — 모바일 기본값이지만 명시)
+            windowTarget: "self",
           })
-          .catch((error: { code?: string }) => {
-            if (error.code === "USER_CANCEL") {
-              // 사용자가 결제를 취소한 경우 - 다시 시도 가능하도록 리셋
+          .catch((error: { code?: string; message?: string }) => {
+            // requestPayment 실패/취소 시엔 페이지 이동이 없으므로 상태를 되돌린다
+            setIsOpeningPayment(false);
+            // 사용자가 결제를 취소/중단한 경우 - 조용히 다시 시도 가능하게만 리셋
+            if (
+              error.code === "USER_CANCEL" ||
+              error.code === "PAY_PROCESS_CANCELED"
+            ) {
               hasHandledRef.current = false;
+              return;
             }
             console.error("[결제] 결제 요청 실패:", error);
+            hasHandledRef.current = false;
+            alert({
+              title: "결제 실패",
+              message:
+                error.message ??
+                "결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.",
+              primaryButton: { label: "확인" },
+            });
           });
       } else if (fetcher.data.success && !paymentWidget) {
         console.error("[결제] 주문은 생성됐지만 paymentWidget이 null입니다");
+        hasHandledRef.current = false;
+        setIsOpeningPayment(false);
+        alert({
+          title: "결제 오류",
+          message:
+            "결제 수단이 준비되지 않았습니다. 결제 창을 닫고 다시 시도해주세요.",
+          primaryButton: { label: "확인" },
+        });
       } else if (!fetcher.data.success) {
         console.error("[결제] 주문 생성 실패:", fetcher.data.error);
         alert({
@@ -218,6 +291,14 @@ export default function ProductPurchaseModal({
       alert({
         title: "알림",
         message: "주문할 상품이 없습니다.",
+        primaryButton: { label: "확인", onClick: () => {} },
+      });
+      return;
+    }
+    if (widgetError) {
+      alert({
+        title: "알림",
+        message: "결제 수단을 불러오지 못했습니다. '다시 시도'를 눌러주세요.",
         primaryButton: { label: "확인", onClick: () => {} },
       });
       return;
@@ -255,13 +336,22 @@ export default function ProductPurchaseModal({
           variant="secondary"
           className="flex w-full h-12.5 rounded-full"
           onClick={handleSubmitOrder}
-          disabled={PAYMENT_COMING_SOON || isSubmitting || !isWidgetReady}
+          disabled={
+            PAYMENT_COMING_SOON ||
+            isSubmitting ||
+            isOpeningPayment ||
+            !isWidgetReady
+          }
         >
           {PAYMENT_COMING_SOON
             ? "서비스 준비 중"
             : isSubmitting
               ? "주문 처리중..."
-              : `${totalAmount.toLocaleString()}원 결제하기`}
+              : isOpeningPayment
+                ? "결제창 여는 중..."
+                : isAmountValid
+                  ? `${totalAmount.toLocaleString()}원 결제하기`
+                  : "결제하기"}
         </Button>
       }
     >
@@ -319,12 +409,27 @@ export default function ProductPurchaseModal({
           <>
             <div id="toss-payment-method" className="w-full" />
             <div id="toss-agreement" className="w-full" />
-            {!isWidgetReady && (
-              <div className="flex w-full h-32 items-center justify-center">
-                <span className="text-sm text-muted">
-                  결제 수단을 불러오는 중...
+            {widgetError ? (
+              <div className="flex w-full flex-col items-center justify-center gap-3 py-8 px-4 rounded-lg bg-muted/5">
+                <span className="text-sm text-muted text-center leading-5">
+                  {widgetError}
                 </span>
+                <Button
+                  variant="outline"
+                  className="h-9 rounded-full px-5"
+                  onClick={handleRetryWidget}
+                >
+                  다시 시도
+                </Button>
               </div>
+            ) : (
+              !isWidgetReady && (
+                <div className="flex w-full h-32 items-center justify-center">
+                  <span className="text-sm text-muted">
+                    결제 수단을 불러오는 중...
+                  </span>
+                </div>
+              )
             )}
           </>
         )}

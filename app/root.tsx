@@ -108,8 +108,13 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
   currentUrl,
   nextUrl,
   formMethod,
+  formData,
   defaultShouldRevalidate,
 }) => {
+  // 주문 생성(intent=create) 직후엔 곧바로 Toss 결제창으로 페이지를 떠난다.
+  // 이때 revalidation fetch가 페이지 이동에 의해 abort되면 ErrorBoundary가
+  // 잠깐 떴다 사라지는 현상이 있어, 이 케이스만 revalidate를 건너뛴다.
+  if (formData?.get("intent") === "create") return false;
   if (formMethod && formMethod !== "GET") return true;
   if (currentUrl.pathname !== nextUrl.pathname) return false;
   return defaultShouldRevalidate;
