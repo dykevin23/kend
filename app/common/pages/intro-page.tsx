@@ -1,8 +1,9 @@
 import CompanyFooter from "~/common/components/company-footer";
 
-// kend-native EAS preview 빌드 (2026-09-01). EAS 빌드 아티팩트 URL은 일정 기간 후 만료될 수 있음 — 재빌드 시 갱신 필요
+// kend-native EAS preview 빌드 (2026-09-11, versionCode 20 — BC카드 팝업/앱스킴 핸드오프 수정 포함).
+// EAS 빌드 아티팩트 URL은 일정 기간 후 만료될 수 있음 — 재빌드 시 갱신 필요
 const ANDROID_APK_URL =
-  "https://expo.dev/artifacts/eas/OeMaWgXWkvcZTor6UpSI8VD2TsCo3Udme3EpIRIOauI.apk";
+  "https://expo.dev/artifacts/eas/YjwNoK-HLoFKcz-GzkCpTaYfFBqOc351GbJeaRr_owg.apk";
 
 export default function IntroPage() {
   return (
