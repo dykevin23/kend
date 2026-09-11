@@ -1,6 +1,7 @@
 import { redirect } from "react-router";
 import type { Route } from "./+types/payment-fail-page";
 import { makeSSRClient } from "~/supa-client";
+import { failOrderGroup } from "~/features/orders/mutations.server";
 
 /**
  * 결제 실패 콜백 페이지 (TossPayments → 리다이렉트)
@@ -30,7 +31,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const orderId = url.searchParams.get("orderId");
   const returnTo = safeReturnPath(url.searchParams.get("returnTo"));
 
-  // order_group 상태를 failed로 업데이트 (취소든 실패든 미결제 주문은 정리)
+  // order_group을 failed로 정리 + 하위 orders도 cancelled로 전이(재고 복원 트리거 발동)
   if (orderId) {
     const { client } = makeSSRClient(request);
     const {
@@ -38,11 +39,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     } = await client.auth.getUser();
 
     if (user) {
-      await client
+      const { data: orderGroup } = await client
         .from("order_groups")
-        .update({ status: "failed" })
+        .select("id")
         .eq("order_number", orderId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (orderGroup) {
+        await failOrderGroup(client, orderGroup.id);
+      }
     }
   }
 

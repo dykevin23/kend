@@ -5,6 +5,7 @@ import {
   confirmPayment,
   mapTossMethodToEnum,
 } from "~/features/payments/mutations.server";
+import { failOrderGroup } from "~/features/orders/mutations.server";
 import type { Json } from "database.types";
 
 /**
@@ -50,10 +51,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   }
 
   if (orderGroup.total_amount !== amount) {
-    await client
-      .from("order_groups")
-      .update({ status: "failed" })
-      .eq("id", orderGroup.id);
+    // order_group만 failed로 바꾸면 하위 orders가 pending에 방치돼 재고가 안 돌아온다
+    // (handle_order_cancelled 트리거는 orders.status='cancelled' 전이에만 반응) —
+    // failOrderGroup이 orders 취소까지 같이 처리한다
+    await failOrderGroup(client, orderGroup.id);
     return redirect("/carts?payment_error=" + encodeURIComponent("결제 금액이 일치하지 않습니다."));
   }
 
@@ -61,10 +62,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const confirmResult = await confirmPayment({ paymentKey, orderId, amount });
 
   if (!confirmResult.success) {
-    await client
-      .from("order_groups")
-      .update({ status: "failed" })
-      .eq("id", orderGroup.id);
+    await failOrderGroup(client, orderGroup.id);
     return redirect(
       "/carts?payment_error=" + encodeURIComponent(confirmResult.error ?? "결제 확인에 실패했습니다.")
     );

@@ -8,6 +8,35 @@ type Client = SupabaseClient<Database>;
 /** 배송이 시작된 이후 상태 — 구매자가 직접 취소할 수 없다 */
 const SHIPPED_ORDER_STATUSES = ["shipped", "delivered"];
 
+/**
+ * 결제 실패(취소/실패/금액불일치/confirm실패) 시 order_group을 failed로 정리한다.
+ *
+ * ⚠️ order_groups.status만 바꾸고 끝내면 안 된다 — 재고 복원은 `handle_order_cancelled`
+ * 트리거가 **orders.status가 cancelled로 바뀌는 순간**에만 동작한다. order_groups를
+ * failed로 바꾸는 것과 orders를 cancelled로 바꾸는 것은 별개 동작이라, 하위 orders를
+ * 같이 cancelled로 전이시키지 않으면 재고가 영구히 깎인 채로 남는다
+ * (2026-09-11, kend-seller 재고 불일치 리포트로 발견 — payment-fail-page.tsx의
+ * 원래 구현이 order_groups만 갱신하고 있었음).
+ *
+ * `expire_pending_orders` cron도 이 패턴을 따른다: order_groups.failed 처리와
+ * orders.cancelled 처리를 항상 같이 한다. 이 함수가 거기 쓰인 것과 동일한 패턴을
+ * loader(payment-fail-page, payment-success-page)에서도 쓰도록 통일한 것.
+ */
+export const failOrderGroup = async (client: Client, orderGroupId: string) => {
+  await client
+    .from("order_groups")
+    .update({ status: "failed" })
+    .eq("id", orderGroupId);
+
+  // handle_order_cancelled 트리거가 재고를 복원한다. order_groups는 이미 failed로
+  // 바뀐 뒤라 트리거의 "그룹 승격"(status='paid'일 때만 동작)은 안 걸려 failed로 유지된다.
+  await client
+    .from("orders")
+    .update({ status: "cancelled" })
+    .eq("order_group_id", orderGroupId)
+    .neq("status", "cancelled");
+};
+
 interface CancelOrderGroupParams {
   userId: string;
   orderGroupId: string;
