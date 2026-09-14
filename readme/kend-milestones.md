@@ -317,6 +317,9 @@
 - **포함**: 실키 전환, ~~NICE 실서비스~~(Holding), Supabase prod 확인, 도메인/SSL, PostHog 프로덕션, 1호 판매자 온보딩, 차단 플래그 테스트, 무결성 쿼리, 약관 최신화, 결제 웹훅 처리 확인
   - **🔒 전체 테이블 RLS 적용·검증** (~33개, kend/seller 공유 DB라 seller 조율 필요). 전수점검 쿼리는 [error-handling-roadmap](todo/kend-error-handling-roadmap.md) 1-5. **정책 작성은 이 단계 전 개발기간에 선행**(켜면 createOrder 등 깨지므로 테스트 버퍼 필수)
   - **인덱스** (P1-3 잔여): 주문 조회 인덱스 정의·마이그레이션
+  - **결제-주문 무결성 안전망** (2026-09-14, kend-seller 재고버그 리포트 후속, 당장 아님 → 여기로 이연):
+    1. `order_groups.status='failed'`인데 하위 `orders`가 `cancelled`로 안 넘어간 케이스를 15분 주기로 쓸어주는 보강 크론 — 지금은 알려진 3개 호출부(`failOrderGroup` 적용)만 막혀있고, 새 코드 경로가 같은 실수를 반복하면 3일 SLA 크론까지 재고가 묶임. `expire_pending_orders`와 같은 패턴, RPC 트랜잭션화까지 하면 더 견고(현재 `failOrderGroup`은 순차 update라 원자성 없음 — `applyCancellationToDb`와 동일한 기존 한계)
+    2. 결제 실패/취소 시 `payments`가 아닌 별도 로그 테이블(예: `payment_attempt_logs`, `payment_key` nullable)에 시도 기록 적재 — CS 대응·실패율 분석용. confirm 실패로 Toss 승인은 됐는데 confirm 안 된 케이스는 로그만으론 부족, **Toss 취소(void) API 호출까지 필요** (`toss-payments.md` "라이브 전환 시 처리해야 할 사항"과 동일 계열, 실키 전환 시점에 같이)
 - **참고**: [tosspayments-review-checklist.md](tosspayments-review-checklist.md)
 - **Sub-task**: (착수 시 추가)
 
