@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "~/supa-client";
+import { isProductDiscoverable, isSkuPurchasable } from "./status";
 
 type Client = SupabaseClient<Database>;
 
@@ -118,10 +119,15 @@ export const getProductByCode = async (client: Client, productCode: string) => {
     ? [mainImage, ...additionalImages]
     : additionalImages;
 
-  // 사용 가능한 SKU (REGISTERED 제외, 재고 있음)
-  const availableSkus = data.product_stock_keepings
-    .filter((sku) => sku.status !== "REGISTERED" && sku.stock > 0)
-    .sort((a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0));
+  // 구매 가능한 SKU(SALE 상태 + 재고 있음) 중 최저가. 전부 품절/중단이라도
+  // 상세는 계속 보여줘야 하는 화면이라(참조 그룹) 가격이 0원으로 꺼지면 안 됨 —
+  // 그때는 전체 SKU 기준 최저가로 폴백한다 (likes와 동일한 규칙).
+  const purchasableSkus = data.product_stock_keepings.filter(isSkuPurchasable);
+  const availableSkus = (
+    purchasableSkus.length > 0
+      ? purchasableSkus
+      : data.product_stock_keepings.filter((sku) => sku.status !== "REGISTERED")
+  ).sort((a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0));
 
   const lowestPriceSku = availableSkus[0];
   const regularPrice = lowestPriceSku?.regular_price ?? 0;
@@ -226,13 +232,13 @@ export const getRandomProducts = async (client: Client, limit = 10) => {
       )
     `
     )
-    .neq("status", "REGISTERED")
+    .eq("status", "SALE")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
   const available = data.filter((product) =>
-    product.product_stock_keepings.some((sku) => sku.status !== "REGISTERED")
+    isProductDiscoverable(product.status, product.product_stock_keepings)
   );
 
   const shuffled = available.sort(() => Math.random() - 0.5).slice(0, limit);
@@ -240,7 +246,7 @@ export const getRandomProducts = async (client: Client, limit = 10) => {
   return shuffled.map((product) => {
     const mainImage = product.product_images.find((img) => img.type === "MAIN");
     const availableSkus = product.product_stock_keepings
-      .filter((sku) => sku.status !== "REGISTERED" && sku.stock > 0)
+      .filter(isSkuPurchasable)
       .sort((a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0));
 
     const activeSku = availableSkus[0];

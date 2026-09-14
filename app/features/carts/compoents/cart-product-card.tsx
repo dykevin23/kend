@@ -2,6 +2,7 @@ import { Minus, Plus, X } from "lucide-react";
 import { Checkbox } from "~/common/components/ui/checkbox";
 import { Label } from "~/common/components/ui/label";
 import type { CartItem } from "../queries";
+import { isSkuOrderable, getSkuUnavailableLabel } from "~/features/products/status";
 
 interface CartProductCardProps {
   item: CartItem;
@@ -30,6 +31,10 @@ export default function CartProductCard({
   // 상품 금액
   const itemTotal = sku.salePrice * quantity;
 
+  // 구매 가능 여부 — 항목 자체는 유지하되(참조 그룹) 구매 액션만 차단 (§3)
+  const orderable = isSkuOrderable(product.status, sku);
+  const unavailableLabel = getSkuUnavailableLabel(product.status, sku);
+
   return (
     <div className="flex w-full flex-col pt-4.5 px-4 pb-4 items-start gap-4">
       <div className="flex items-center gap-2.5 self-stretch">
@@ -37,6 +42,7 @@ export default function CartProductCard({
           className="size-6"
           id={`item-${item.id}`}
           checked={checked}
+          disabled={!orderable}
           onCheckedChange={onCheckChange}
         />
         <Label
@@ -45,6 +51,11 @@ export default function CartProductCard({
         >
           {seller?.name ?? "판매자"}
         </Label>
+        {unavailableLabel && (
+          <span className="text-xs text-red-500 font-bold">
+            {unavailableLabel}
+          </span>
+        )}
       </div>
       <div className="flex flex-col items-center self-stretch rounded-md border-1 border-muted/30">
         <div className="flex flex-col w-full px-4 items-center gap-2.5 self-stretch rounded-md">
@@ -101,7 +112,7 @@ export default function CartProductCard({
                   <div className="flex h-6 px-2.5 justify-end items-center gap-4">
                     <button
                       onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1 || isUpdating}
+                      disabled={quantity <= 1 || isUpdating || !orderable}
                       className="p-1 hover:bg-gray-100 rounded disabled:opacity-30"
                     >
                       <Minus className="size-3" />
@@ -113,7 +124,7 @@ export default function CartProductCard({
                     </div>
                     <button
                       onClick={() => onQuantityChange(quantity + 1)}
-                      disabled={quantity >= sku.stock || isUpdating}
+                      disabled={quantity >= sku.stock || isUpdating || !orderable}
                       className="p-1 hover:bg-gray-100 rounded disabled:opacity-30"
                     >
                       <Plus className="size-3" />

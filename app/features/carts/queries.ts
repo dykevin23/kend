@@ -33,6 +33,7 @@ export const getCartItems = async (client: Client, userId: string) => {
           id,
           product_code,
           name,
+          status,
           seller_id,
           admin_sellers!products_seller_id_admin_sellers_id_fk (
             id,
@@ -84,6 +85,7 @@ export const getCartItems = async (client: Client, userId: string) => {
         id: product.id,
         productCode: product.product_code,
         name: product.name,
+        status: product.status,
         mainImage: mainImage?.url ?? null,
       },
       // 판매자 정보

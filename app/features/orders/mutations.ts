@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "~/supa-client";
 import type { OrderItem, ReturnReasonType, SellerOrderGroup } from "./types";
 import type { UserAddress } from "~/features/users/queries";
+import { isSkuOrderable } from "~/features/products/status";
 
 /** 반품 사유별 신청 기한(일). 기산점은 배송완료일. 법정 최소 기간을 코드 상수로 고정한다. */
 const RETURN_WINDOW_DAYS: Record<ReturnReasonType, number> = {
@@ -34,6 +35,38 @@ interface CreateOrderParams {
 }
 
 /**
+ * 주문 생성 직전 서버측 재검증 — 상세/장바구니를 열어둔 채 셀러가 상태를
+ * 바꾸거나 재고가 소진돼도 그대로 결제가 통과되지 않도록 한다.
+ * (readme/todo/product-sku-status-model.md §3 "SKU 단위 구매가능 판정")
+ */
+async function assertItemsOrderable(client: Client, items: OrderItem[]) {
+  const skuIds = [...new Set(items.map((item) => item.skuId))];
+  if (skuIds.length === 0) return;
+
+  const { data: skuRows, error } = await client
+    .from("product_stock_keepings")
+    .select("id, status, stock, products!inner ( status )")
+    .in("id", skuIds);
+
+  if (error) throw error;
+
+  const skuMap = new Map(skuRows.map((row) => [row.id, row]));
+
+  for (const item of items) {
+    const row = skuMap.get(item.skuId);
+    if (!row) {
+      throw new Error(`${item.product.name} 상품을 찾을 수 없습니다.`);
+    }
+    if (!isSkuOrderable(row.products.status, row)) {
+      throw new Error(`${item.product.name}은(는) 지금 구매할 수 없는 상품입니다.`);
+    }
+    if (row.stock < item.quantity) {
+      throw new Error(`${item.product.name}의 재고가 부족합니다.`);
+    }
+  }
+}
+
+/**
  * 주문 생성
  * 1. order_group 생성 (결제 단위)
  * 2. 판매자별 orders 생성
@@ -44,6 +77,10 @@ export const createOrder = async (
   client: Client,
   { userId, address, sellerGroups, deliveryMessage }: CreateOrderParams
 ) => {
+  // 상태/재고 재검증 — 통과 못하면 아래 order_group insert 전에 여기서 중단
+  const allItems = sellerGroups.flatMap((group) => group.items);
+  await assertItemsOrderable(client, allItems);
+
   const groupOrderNumber = generateOrderNumber();
 
   // 전체 상품금액 (플랫폼 조건부 무료배송 판정 기준, Phase 2.5-5)

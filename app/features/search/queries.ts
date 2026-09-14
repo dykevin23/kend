@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "~/supa-client";
+import { isProductDiscoverable, isSkuPurchasable } from "~/features/products/status";
 
 type Client = SupabaseClient<Database>;
 
@@ -32,7 +33,7 @@ export const searchProductsByName = async (client: Client, query: string) => {
       )
     `
     )
-    .neq("status", "REGISTERED")
+    .eq("status", "SALE")
     .ilike("name", `%${trimmed}%`)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -40,13 +41,13 @@ export const searchProductsByName = async (client: Client, query: string) => {
   if (error) throw error;
 
   const available = data.filter((product) =>
-    product.product_stock_keepings.some((sku) => sku.status !== "REGISTERED")
+    isProductDiscoverable(product.status, product.product_stock_keepings)
   );
 
   return available.map((product) => {
     const mainImage = product.product_images.find((img) => img.type === "MAIN");
     const availableSkus = product.product_stock_keepings
-      .filter((sku) => sku.status !== "REGISTERED" && sku.stock > 0)
+      .filter(isSkuPurchasable)
       .sort((a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0));
 
     const activeSku = availableSkus[0];

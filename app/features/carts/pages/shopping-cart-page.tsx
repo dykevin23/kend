@@ -30,6 +30,7 @@ import {
   groupOrderItemsBySeller,
 } from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
+import { isSkuOrderable } from "~/features/products/status";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);
@@ -112,8 +113,13 @@ export default function ShoppingCartPage() {
     text: string;
   } | null>(null);
 
+  // 구매 불가(품절/판매중지/상품상태) 항목은 기본 선택에서 제외
+  const purchasableCartItems = cartItems.filter((item) =>
+    isSkuOrderable(item.product.status, item.sku)
+  );
+
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
-    () => new Set(cartItems.map((item) => item.id)),
+    () => new Set(purchasableCartItems.map((item) => item.id)),
   );
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchaseItems, setPurchaseItems] = useState<OrderItem[]>([]);
@@ -141,17 +147,22 @@ export default function ShoppingCartPage() {
   }, []);
 
   const isAllSelected =
-    cartItems.length > 0 && selectedIds.size === cartItems.length;
+    purchasableCartItems.length > 0 &&
+    selectedIds.size === purchasableCartItems.length;
 
   const handleCheckAll = () => {
     if (isAllSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(cartItems.map((item) => item.id)));
+      setSelectedIds(new Set(purchasableCartItems.map((item) => item.id)));
     }
   };
 
   const handleCheckItem = (id: string, checked: boolean) => {
+    // 구매 불가 항목은 체크 자체를 막음 (카드 쪽 체크박스도 disabled지만 방어적으로)
+    const item = cartItems.find((i) => i.id === id);
+    if (item && !isSkuOrderable(item.product.status, item.sku)) return;
+
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (checked) {
@@ -211,9 +222,9 @@ export default function ShoppingCartPage() {
   const handlePurchase = () => {
     if (selectedIds.size === 0) return;
 
-    // 선택된 장바구니 아이템을 OrderItem으로 변환
-    const selectedCartItems = cartItems.filter((item) =>
-      selectedIds.has(item.id)
+    // 선택된 장바구니 아이템을 OrderItem으로 변환 (구매 불가 항목은 방어적으로 제외)
+    const selectedCartItems = cartItems.filter(
+      (item) => selectedIds.has(item.id) && isSkuOrderable(item.product.status, item.sku)
     );
     const orderItems = selectedCartItems.map(cartItemToOrderItem);
 

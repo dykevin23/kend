@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "~/supa-client";
+import { isSkuPurchasable } from "~/features/products/status";
 
 type Client = SupabaseClient<Database>;
 
@@ -63,6 +64,7 @@ export const getLikedProducts = async (client: Client, userId: string) => {
         product_stock_keepings!product_stock_keepings_product_id_products_id_fk (
           regular_price,
           sale_price,
+          stock,
           status
         )
       )
@@ -77,11 +79,14 @@ export const getLikedProducts = async (client: Client, userId: string) => {
     const product = item.products;
     const mainImage = product.product_images.find((img) => img.type === "MAIN");
 
-    // 사용 가능한 SKU 중 최저가
-    const availableSkus = product.product_stock_keepings.filter(
-      (sku) => sku.status !== "REGISTERED"
-    );
-    const lowestPriceSku = availableSkus.sort(
+    // 구매 가능한 SKU 중 최저가. 전부 구매불가(품절/중단 등)라도 참조 화면이라
+    // 상품 자체는 계속 보여줘야 하므로, 그때는 전체 SKU 기준 최저가로 폴백한다.
+    const purchasableSkus = product.product_stock_keepings.filter(isSkuPurchasable);
+    const priceSkus =
+      purchasableSkus.length > 0
+        ? purchasableSkus
+        : product.product_stock_keepings.filter((sku) => sku.status !== "REGISTERED");
+    const lowestPriceSku = priceSkus.sort(
       (a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0)
     )[0];
 

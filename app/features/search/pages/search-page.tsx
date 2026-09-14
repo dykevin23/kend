@@ -47,6 +47,7 @@ export default function SearchPage() {
         <Form
           method="get"
           action="/search"
+          replace
           className="flex flex-1 py-2.5 px-4 items-center gap-2 rounded-xl bg-muted/10"
         >
           <Input
@@ -153,6 +154,7 @@ export default function SearchPage() {
                   <Link
                     key={num}
                     to={`/search?q=${encodeURIComponent(label)}`}
+                    replace
                     className="flex items-center gap-3"
                   >
                     <span className="w-5 shrink-0 text-right text-xs font-bold leading-[100%] tracking-[-0.4px]">

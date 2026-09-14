@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "~/supa-client";
+import { isProductDiscoverable, isSkuPurchasable } from "~/features/products/status";
 
 type Client = SupabaseClient<Database>;
 
@@ -54,8 +55,7 @@ export type MainCategory = Awaited<ReturnType<typeof getMainCategories>>[number]
 /**
  * 스토어 목록 조회 (대표 상품 이미지 포함)
  * - 판매 가능한 상품의 대표이미지를 최대 6개까지 가져옴
- * - 상품: REGISTERED 상태 제외
- * - SKU: REGISTERED 상태가 아닌 SKU가 하나라도 있어야 노출
+ * - 상품: status === 'SALE' 이고, 구매 가능한(SALE + 재고>0) SKU가 1개 이상 있어야 노출
  */
 export const getStoresWithProducts = async (client: Client) => {
   const { data, error } = await client
@@ -81,7 +81,8 @@ export const getStoresWithProducts = async (client: Client) => {
           type
         ),
         product_stock_keepings!product_stock_keepings_product_id_products_id_fk (
-          status
+          status,
+          stock
         )
       )
     `
@@ -115,15 +116,7 @@ export const getStoresWithProducts = async (client: Client) => {
         followerCount: 0, // TODO: followers 테이블 구현 후 교체
         // 판매 가능한 상품의 대표이미지만 추출 (최대 6개)
         productImages: store.products
-          .filter((p) => {
-            // 상품이 REGISTERED 상태면 제외
-            if (p.status === "REGISTERED") return false;
-            // SKU 중 REGISTERED가 아닌 것이 하나라도 있어야 함
-            const hasAvailableSku = p.product_stock_keepings.some(
-              (sku) => sku.status !== "REGISTERED"
-            );
-            return hasAvailableSku;
-          })
+          .filter((p) => isProductDiscoverable(p.status, p.product_stock_keepings))
           .flatMap((p) =>
             p.product_images
               .filter((img) => img.type === "MAIN")
@@ -191,8 +184,7 @@ export type Store = Awaited<ReturnType<typeof getStoreByCode>>;
 
 /**
  * 특정 스토어의 상품 목록 조회
- * - 상품: REGISTERED 상태 제외
- * - SKU: REGISTERED 상태가 아닌 SKU가 하나라도 있어야 노출
+ * - 상품: status === 'SALE' 이고, 구매 가능한(SALE + 재고>0) SKU가 1개 이상 있어야 노출
  */
 export const getProductsBySeller = async (
   client: Client,
@@ -224,7 +216,7 @@ export const getProductsBySeller = async (
     `
     )
     .eq("seller_id", sellerId)
-    .neq("status", "REGISTERED") // REGISTERED 상태 제외
+    .eq("status", "SALE")
     .order("created_at", { ascending: false });
 
   if (options?.limit) {
@@ -235,19 +227,15 @@ export const getProductsBySeller = async (
 
   if (error) throw error;
 
-  // SKU 중 REGISTERED가 아닌 것이 하나라도 있는 상품만 필터링
-  const filteredProducts = data.filter((product) => {
-    const hasAvailableSku = product.product_stock_keepings.some(
-      (sku) => sku.status !== "REGISTERED"
-    );
-    return hasAvailableSku;
-  });
+  const filteredProducts = data.filter((product) =>
+    isProductDiscoverable(product.status, product.product_stock_keepings)
+  );
 
   return filteredProducts.map((product) => {
     const mainImage = product.product_images.find((img) => img.type === "MAIN");
-    // SKU 중 REGISTERED가 아닌 것들 중 최저가
+    // 구매 가능한 SKU 중 최저가
     const availableSkus = product.product_stock_keepings
-      .filter((sku) => sku.status !== "REGISTERED" && sku.stock > 0)
+      .filter(isSkuPurchasable)
       .sort((a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0));
 
     const activeSku = availableSkus[0];

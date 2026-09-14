@@ -35,6 +35,7 @@ import ProductRatingSection from "../components/product-rating-section";
 import ProductReviewSection from "../components/product-review-section";
 import ProductPurchaseModal from "../components/product-purchase-modal";
 import RecommendProducts from "../components/recommend-products";
+import { getPurchaseBlockReason, isSkuOrderable, type PurchaseBlockReason } from "../status";
 import type { OrderItem } from "~/features/orders/types";
 import { getUserProfile, getDefaultAddress } from "~/features/users/queries";
 import { addUserAddress } from "~/features/users/mutations";
@@ -229,7 +230,12 @@ export default function ProductPage() {
     }
   };
 
+  // 지금 이 상품을 구매할 수 없다면 그 이유 (§3 참조 화면 규칙 — 상세 진입은
+  // 항상 허용하되 구매 액션만 막는다)
+  const purchaseBlock = getPurchaseBlockReason(product.status, product.skus);
+
   const handleBuyClick = () => {
+    if (purchaseBlock) return;
     setIsOptionSheetOpen(true);
   };
 
@@ -274,10 +280,37 @@ export default function ProductPage() {
       return {
         triggerLabel: displayName,
         value: key,
-        options: values.map((val) => ({ label: val, value: val })),
+        // 이 옵션값 + 이미 선택된 다른 옵션값 조합에 해당하는 SKU 중 구매 가능한
+        // 게 하나도 없으면 숨기지 말고 선택 불가(회색) 처리 (§3)
+        options: values.map((val) => {
+          const matchingSkus = product.skus.filter((sku) => {
+            if (!sku.options || sku.options[key] !== val) return false;
+            const matchesOtherSelections = Object.entries(buyOption).every(
+              ([otherKey, otherVal]) =>
+                otherKey === key || !otherVal || sku.options?.[otherKey] === otherVal
+            );
+            return matchesOtherSelections;
+          });
+          const hasOrderableMatch = matchingSkus.some((sku) =>
+            isSkuOrderable(product.status, sku)
+          );
+          // 불가 사유 라벨 — 매칭되는 SKU가 전부 STOP이면 "판매중지", 그 외
+          // (품절/재고0 포함)엔 "품절" (§3 "일부 옵션만 불가" 표)
+          const unavailableSuffix =
+            !hasOrderableMatch && matchingSkus.length > 0
+              ? matchingSkus.every((sku) => sku.status === "STOP")
+                ? " (판매중지)"
+                : " (품절)"
+              : "";
+          return {
+            label: `${val}${unavailableSuffix}`,
+            value: val,
+            disabled: !hasOrderableMatch,
+          };
+        }),
       };
     });
-  }, [product.skus, product.optionCodeToName]);
+  }, [product.skus, product.optionCodeToName, product.status, buyOption]);
 
   // 선택한 옵션으로 SKU 찾기
   const findMatchingSku = (selectedOptions: Record<string, string>) => {
@@ -292,7 +325,7 @@ export default function ProductPage() {
   // 장바구니 담기
   const handleAddToCart = () => {
     const matchedSku = findMatchingSku(buyOption);
-    if (matchedSku) {
+    if (matchedSku && isSkuOrderable(product.status, matchedSku)) {
       fetcher.submit(
         {
           intent: "addToCart",
@@ -310,7 +343,7 @@ export default function ProductPage() {
   // 바로 구매
   const handlePurchase = () => {
     const matchedSku = findMatchingSku(buyOption);
-    if (matchedSku) {
+    if (matchedSku && isSkuOrderable(product.status, matchedSku)) {
       // 주문 아이템 생성
       const orderItem: OrderItem = {
         skuId: matchedSku.id,
@@ -360,7 +393,16 @@ export default function ProductPage() {
 
   return (
     <>
-      <Content footer={<ProductFooter product={product} isLiked={isLiked} onBuyClick={handleBuyClick} />}>
+      <Content
+        footer={
+          <ProductFooter
+            product={product}
+            isLiked={isLiked}
+            purchaseBlock={purchaseBlock}
+            onBuyClick={handleBuyClick}
+          />
+        }
+      >
         {/* 상품 이미지 캐러셀 */}
         {product.images.length > 0 ? (
           <div className="relative">
@@ -577,10 +619,11 @@ interface ProductFooterProps {
     salePrice: number;
   };
   isLiked: boolean;
+  purchaseBlock: PurchaseBlockReason | null;
   onBuyClick: () => void;
 }
 
-function ProductFooter({ product, isLiked, onBuyClick }: ProductFooterProps) {
+function ProductFooter({ product, isLiked, purchaseBlock, onBuyClick }: ProductFooterProps) {
   const likeFetcher = useFetcher();
 
   // optimistic UI: 요청 중이면 반전된 상태 표시
@@ -652,13 +695,14 @@ function ProductFooter({ product, isLiked, onBuyClick }: ProductFooterProps) {
           )}
         </svg>
       </button>
-      {/* 구매하기 버튼 */}
+      {/* 구매하기 버튼 — 구매불가 상태면 안내 문구로 대체하고 클릭 차단 */}
       <Button
         variant="secondary"
-        className="flex h-12.5 px-10 justify-center items-center rounded-full text-base font-bold"
+        disabled={!!purchaseBlock}
+        className="flex h-12.5 px-10 justify-center items-center rounded-full text-base font-bold disabled:opacity-50"
         onClick={onBuyClick}
       >
-        구매하기
+        {purchaseBlock ? purchaseBlock.label : "구매하기"}
       </Button>
     </>
   );
