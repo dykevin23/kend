@@ -29,6 +29,7 @@ export default [
   ...prefix("search", [index("features/search/pages/search-page.tsx")]),
   ...prefix("users", [
     route("/addresses", "features/users/pages/address-action.ts"),
+    route("/addresses/reverse-geocode", "features/users/pages/reverse-geocode-action.ts"),
   ]),
   ...prefix("myPage", [
     index("features/users/pages/my-page.tsx"),

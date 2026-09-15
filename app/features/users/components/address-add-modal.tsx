@@ -18,6 +18,8 @@ interface AddressAddModalProps {
   onSuccess?: () => void;
   /** 수정할 주소 (수정 모드일 때 전달) */
   editAddress?: UserAddress | null;
+  /** 현재 위치로 찾은 주소로 미리 채우기 (신규 추가 모드 유지) */
+  initialAddress?: { zoneCode: string; address: string } | null;
 }
 
 export default function AddressAddModal({
@@ -25,6 +27,7 @@ export default function AddressAddModal({
   onClose,
   onSuccess,
   editAddress,
+  initialAddress,
 }: AddressAddModalProps) {
   const fetcher = useFetcher();
   const deleteFetcher = useFetcher();
@@ -59,6 +62,14 @@ export default function AddressAddModal({
       setIsDefault(editAddress.isDefault);
     }
   }, [open, editAddress]);
+
+  // 현재 위치로 찾은 주소로 미리 채우기 (신규 추가 모드 유지 — isEditMode는 그대로 false)
+  useEffect(() => {
+    if (open && !editAddress && initialAddress) {
+      setZoneCode(initialAddress.zoneCode);
+      setAddress(initialAddress.address);
+    }
+  }, [open, editAddress, initialAddress]);
 
   const handlePostCodeComplete = (data: {
     zoneCode: string;
