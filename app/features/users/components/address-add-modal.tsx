@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, type FormEvent } from "react";
 import { useFetcher } from "react-router";
-import { Trash2 } from "lucide-react";
+import { MapPin, Trash2 } from "lucide-react";
 import InputWithLabel from "~/common/components/input-with-label";
 import Modal from "~/common/components/modal";
 import DaumPostCodeModal from "~/common/components/daum-post-code-modal";
@@ -44,6 +44,8 @@ export default function AddressAddModal({
   // 주소 검색 결과 state
   const [zoneCode, setZoneCode] = useState("");
   const [address, setAddress] = useState("");
+  // 현재 위치로 채워진 주소인지 (배지 표시용) — 우편번호 직접 검색하면 해제
+  const [isFromLocation, setIsFromLocation] = useState(false);
   // 수정 모드에서 사용할 form 필드 state
   const [label, setLabel] = useState("");
   const [addressDetail, setAddressDetail] = useState("");
@@ -60,6 +62,7 @@ export default function AddressAddModal({
       setRecipientName(editAddress.recipientName);
       setRecipientPhone(editAddress.recipientPhone);
       setIsDefault(editAddress.isDefault);
+      setIsFromLocation(false);
     }
   }, [open, editAddress]);
 
@@ -68,6 +71,7 @@ export default function AddressAddModal({
     if (open && !editAddress && initialAddress) {
       setZoneCode(initialAddress.zoneCode);
       setAddress(initialAddress.address);
+      setIsFromLocation(true);
     }
   }, [open, editAddress, initialAddress]);
 
@@ -77,6 +81,7 @@ export default function AddressAddModal({
   }) => {
     setZoneCode(data.zoneCode);
     setAddress(data.address);
+    setIsFromLocation(false);
   };
 
   const resetForm = () => {
@@ -88,6 +93,7 @@ export default function AddressAddModal({
     setRecipientPhone("");
     setIsDefault(false);
     setIsConfirmed(false);
+    setIsFromLocation(false);
     formRef.current?.reset();
   };
 
@@ -243,6 +249,14 @@ export default function AddressAddModal({
         )}
 
         <div className="flex w-full flex-col items-start gap-6">
+          {isFromLocation && (
+            <div className="flex px-4 items-center gap-1 self-stretch -mb-3">
+              <span className="flex items-center gap-1 text-xs text-primary bg-primary/10 rounded-full px-2 py-1">
+                <MapPin className="size-3" />
+                현재 위치로 찾은 주소예요
+              </span>
+            </div>
+          )}
           <div className="flex w-full items-center gap-1">
             <InputWithLabel
               label="우편번호"
