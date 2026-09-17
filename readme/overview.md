@@ -17,15 +17,15 @@
 - 🟡 **TossPayments 실키 계약심사 — Toss 회신 수신(2026-09-08), 사용자 결정 2건 대기**: URL 제출/실 상품 노출/결제경로 파일 방식은 답 나옴(그대로 진행 가능). **결제 최고가 금액 확정**·**임시 등록할 실 판매 예정 상품 선정**은 사용자(대표) 결정 필요 — 결정되는 대로 임시 상품 등록 → 결제경로 PPT 캡처 → 회신. ⚠️ Toss 문의량 폭주로 **회신까지 1~2개월 소요 가능** 안내받음, 9월 말 내부 타겟에 영향 가능성. 상세: [tosspayments-review-checklist.md](./tosspayments-review-checklist.md)
 - 🚨 **iOS App Store 심사 3달+ 정체** — Guideline 5.6 재제출정지 → appeal 승인(새 binary 재제출 가능)됐으나, 개발 완성도 더 끌어올린 뒤 재제출하는 쪽으로 **의도적 보류** 중. 상세: [kend-milestones.md P0-1](./kend-milestones.md)
 - 🎉 **법인 설립 완료**, **통신판매업 신고는 아직**(Toss PG계약 시 발급되는 구매안전서비스 이용확인증이 선행돼야 해서 순서상 정상 — EXT-1b). NICE는 Holding(본인확인 불필요 방향)
-- ✅ **Phase 3(kend-seller 관리보완) 대량 진척** — 상품수정(B-1)·재고관리 Stocks Keeping(B-2)·Seller 대시보드+디자인시스템 리뉴얼(B-3)·리뷰관리(B-7)·**공지사항(B-5, kend 조회화면까지 연결 완료)** 전부 완료·테스트 통과 확인(2026-09-17). 남은 건 CS관리 운영기능(B-4)·교환(B-6, 정책 대기) 뿐 — 상세 [kend-milestones.md Phase 3](./kend-milestones.md)
+- ✅ **Phase 3(kend-seller 관리보완) 대량 진척** — 상품수정(B-1)·재고관리 Stocks Keeping(B-2)·Seller 대시보드+디자인시스템 리뉴얼(B-3)·공지사항(B-5)·리뷰관리(B-7) 전부 실사용 테스트까지 완료. **CS관리(B-4)는 구현 완료, 클릭 테스트만 대기**(kend-seller 자체 changelog에 명시). 남은 건 교환(B-6, 정책 대기) 뿐 — 상세 [kend-milestones.md Phase 3](./kend-milestones.md)
 - ⚠️ **반품 정책 법률 검토 필요 발견**: 반품 사유 자가신고(증빙 없음) + 반품배송비 부담주체 미구현 + 판매자귀책 사유 반품기간이 전자상거래법 법정기준보다 짧을 가능성 — 상세는 [order-cancel-refund-exchange-flow.md §5-4](./todo/order-cancel-refund-exchange-flow.md). **Toss 실키 전환 전 법률 검토 권장**
-- **다음 개발 후보**: Toss 문의 답변 대응(최우선) → P2.5-3 교환(정책 결정 선행) → `.server.ts` 시크릿 노출 감사 / P0-3 잔여 → CS관리 잔여(B-4, 기간필터+정렬)
+- **다음 개발 후보**: Toss 문의 답변 대응(최우선) → P2.5-3 교환(정책 결정 선행) → `.server.ts` 시크릿 노출 감사 / P0-3 잔여 → CS관리 실사용 클릭 테스트
 
 ---
 
 ## ✅ 최근 완료
 
-- 2026-09-17: **공지사항 화면(kend, B-5)** — kend-seller가 만든 `notices` 스키마(제목/본문/노출여부/대상target) 위에 `/myPage/notices` 조회 연결, `target IN (ALL,BUYER)`+노출중인 것만 아코디언으로 표시, 페이지 제목 "공지사항"으로 정정 ✅
+- 2026-09-17: **공지사항 화면(kend↔seller, B-5)** — kend-seller `notices` 스키마+admin CRUD+판매자 조회화면, kend `/myPage/notices` 연결(target 필터로 SELLER 전용 제외). 양쪽 실사용 테스트 통과(kend-seller 사용자 확인) ✅
 - 2026-09-16: **"현재 위치로 주소 찾기" 배지 표시(kend)** — GPS로 채워진 주소임을 알리는 배지 UI 보강, 우편번호 직접 재검색 시 해제 ✅
 - 2026-09-15: **"현재 위치로 주소 찾기" 기능(kend↔native)** — 그동안 미동작이던 버튼을 웹↔네이티브 브릿지(`native-bridge.ts`) + Kakao 역지오코딩으로 구현, kend-native 위치 브릿지 연동까지 전체 플로우 실사용 테스트 통과 ✅
 - 2026-09-11: **결제 실패 시 재고 미복원 버그 수정 + 데이터 복구(kend)** — `order_groups`만 failed로 바뀌고 하위 `orders`가 방치되던 3개 호출부를 `failOrderGroup()` 헬퍼로 통일, 버그로 묶여있던 실주문 7건 재고 복원 확인. 후속 안전망 2건은 Phase 4(P4-3)로 이연 ✅
@@ -43,6 +43,7 @@
 | 결제 앱 WebView 보강 | kend 재배포 + [native-payment-webview-handoff](./todo/native-payment-webview-handoff.md) EAS 빌드 대기 |
 | [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 결제 리다이렉트 구간 포함 재정비 완료 (2026-09-10), EAS 빌드 대기 |
 | [environment-separation-plan](./todo/environment-separation-plan.md) | Phase 4, 출시 전 필수, 미착수 |
+| CS관리(B-4) | kend-seller 구현 완료, 실사용 클릭 테스트 대기 |
 | 교환(exchange) | Phase 3, 정책 미정으로 착수 불가 |
 
 > 완료된 계획은 `archive/`로 이동함 (internal-test-1st 15/18, ios-review-rejection-apr14 스냅샷 등).
