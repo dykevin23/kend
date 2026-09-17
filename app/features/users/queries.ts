@@ -83,3 +83,22 @@ export const getDefaultAddress = async (client: Client, userId: string) => {
     isDefault: data.is_default,
   };
 };
+
+/**
+ * 공지사항 조회 (노출중이고 구매자 대상인 것만, 최신순)
+ *
+ * `notices` 테이블은 kend-seller 소유(관리자가 등록). `target`으로 대상을
+ * 구분(ALL/SELLER/BUYER) — kend은 구매자 앱이라 SELLER 전용 공지는 제외
+ */
+export const getVisibleNotices = async (client: Client) => {
+  const { data, error } = await client
+    .from("notices")
+    .select("id, title, content, created_at")
+    .eq("is_visible", true)
+    .in("target", ["ALL", "BUYER"])
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data;
+};
