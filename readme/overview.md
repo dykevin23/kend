@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-09-17
+> 최종 업데이트: 2026-09-21
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -25,11 +25,11 @@
 
 ## ✅ 최근 완료
 
+- 2026-09-21: **`follows` 테이블/`profiles.stats` 정리(kend)** — 예전 사람 팔로우 기능 잔재(고아 테이블) DB drop 완료·확인. 스토어 카드 찜 UI는 `likeCount`로 명명 정리 ✅
+- 2026-09-21: **상품상세 타이틀 옆 별점·리뷰수 하드코딩 제거(kend)** — "4.6·리뷰(4,321)" 고정 표기를 실데이터로 교체(09-07 정리 때 놓쳤던 블록), 타이틀과 한 줄 우측정렬로 레이아웃 조정 — 구현됨, 실사용 화면 확인 대기
 - 2026-09-17: **공지사항 화면(kend↔seller, B-5)** — kend-seller `notices` 스키마+admin CRUD+판매자 조회화면, kend `/myPage/notices` 연결(target 필터로 SELLER 전용 제외). 양쪽 실사용 테스트 통과(kend-seller 사용자 확인) ✅
 - 2026-09-16: **"현재 위치로 주소 찾기" 배지 표시(kend)** — GPS로 채워진 주소임을 알리는 배지 UI 보강, 우편번호 직접 재검색 시 해제 ✅
 - 2026-09-15: **"현재 위치로 주소 찾기" 기능(kend↔native)** — 그동안 미동작이던 버튼을 웹↔네이티브 브릿지(`native-bridge.ts`) + Kakao 역지오코딩으로 구현, kend-native 위치 브릿지 연동까지 전체 플로우 실사용 테스트 통과 ✅
-- 2026-09-11: **결제 실패 시 재고 미복원 버그 수정 + 데이터 복구(kend)** — `order_groups`만 failed로 바뀌고 하위 `orders`가 방치되던 3개 호출부를 `failOrderGroup()` 헬퍼로 통일, 버그로 묶여있던 실주문 7건 재고 복원 확인. 후속 안전망 2건은 Phase 4(P4-3)로 이연 ✅
-- 2026-09-14: **상품/SKU 상태 모델 재정의 반영(kend)** — kend-seller가 재정의한 상태 모델(§3)을 탐색 쿼리 4곳·상품상세·장바구니·서버측 주문검증(신규)·찜 가격폴백까지 전면 반영. 프로덕션 데이터로 시나리오 전항목 실사용 테스트 통과, 테스트 중 발견한 버그 2건(검색 뒤로가기, 옵션 비활성 라벨 누락)도 같이 수정 ✅
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
