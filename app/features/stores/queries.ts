@@ -113,7 +113,7 @@ export const getStoresWithProducts = async (client: Client) => {
         domainId: store.domain_id,
         profileImage: logoUrl,
         hashtags: hashtags || null,
-        followerCount: 0, // TODO: followers 테이블 구현 후 교체
+        likeCount: 0, // TODO: store_likes 집계 구현 후 교체 (찜하기 수)
         // 판매 가능한 상품의 대표이미지만 추출 (최대 6개)
         productImages: store.products
           .filter((p) => isProductDiscoverable(p.status, p.product_stock_keepings))
@@ -176,7 +176,7 @@ export const getStoreByCode = async (client: Client, sellerCode: string) => {
     domainId: data.domain_id,
     profileImage: logoUrl,
     hashtags: hashtags || null,
-    followerCount: 0, // TODO: followers 테이블 구현 후 교체
+    likeCount: 0, // TODO: store_likes 집계 구현 후 교체 (찜하기 수)
   };
 };
 

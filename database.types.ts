@@ -500,39 +500,6 @@ export type Database = {
         }
         Relationships: []
       }
-      follows: {
-        Row: {
-          created_at: string
-          follower_id: string | null
-          following_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          follower_id?: string | null
-          following_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          follower_id?: string | null
-          following_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "follows_follower_id_profiles_profile_id_fk"
-            columns: ["follower_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "follows_following_id_profiles_profile_id_fk"
-            columns: ["following_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["profile_id"]
-          },
-        ]
-      }
       growth_records: {
         Row: {
           child_id: string
@@ -1501,7 +1468,6 @@ export type Database = {
           phone: string | null
           profile_id: string
           role: Database["public"]["Enums"]["role"]
-          stats: Json | null
           updated_at: string
           username: string
         }
@@ -1514,7 +1480,6 @@ export type Database = {
           phone?: string | null
           profile_id: string
           role?: Database["public"]["Enums"]["role"]
-          stats?: Json | null
           updated_at?: string
           username: string
         }
@@ -1527,7 +1492,6 @@ export type Database = {
           phone?: string | null
           profile_id?: string
           role?: Database["public"]["Enums"]["role"]
-          stats?: Json | null
           updated_at?: string
           username?: string
         }

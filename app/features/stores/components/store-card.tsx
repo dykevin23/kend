@@ -19,7 +19,7 @@ export default function StoreCard({ store }: StoreCardProps) {
         name={store.name}
         profileImage={store.profileImage}
         hashtags={store.hashtags}
-        followerCount={store.followerCount}
+        likeCount={store.likeCount}
       />
       <div className="flex h-22 py-3 items-center gap-2 shrink-0 self-stretch border-b-1 border-muted/30">
         <div className="flex pr-4 items-center gap-1 overflow-x-auto">
@@ -53,14 +53,14 @@ interface StoreInfoProps {
   name: string;
   profileImage: string | null;
   hashtags: string | null;
-  followerCount: number;
+  likeCount: number;
 }
 
 export const StoreInfo = ({
   name,
   profileImage,
   hashtags,
-  followerCount,
+  likeCount,
 }: StoreInfoProps) => {
   const [imageError, setImageError] = useState(false);
 
@@ -110,7 +110,7 @@ export const StoreInfo = ({
           >
             <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
           </svg>
-          <span className="text-xs leading-3">{followerCount}</span>
+          <span className="text-xs leading-3">{likeCount}</span>
         </div>
       </div>
     </div>

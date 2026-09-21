@@ -107,7 +107,7 @@ export default function StorePage() {
             name={store.name}
             profileImage={store.profileImage}
             hashtags={store.hashtags}
-            followerCount={store.followerCount}
+            likeCount={store.likeCount}
           />
         </div>
         <Button

@@ -1,6 +1,5 @@
 import {
   boolean,
-  jsonb,
   pgEnum,
   pgSchema,
   pgTable,
@@ -26,7 +25,6 @@ export const roles = pgEnum("role", ["customer", "seller", "administrator"]);
  * comment          기타 메세지
  * created_at       등록일시
  * updated_at       수정일시
- * stats            followers(팔로워수), following(팔로잉수)
  */
 export const profiles = pgTable("profiles", {
   profile_id: uuid()
@@ -41,25 +39,6 @@ export const profiles = pgTable("profiles", {
   role: roles().default("customer").notNull(),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
-  stats: jsonb().$type<{
-    followers: number;
-    following: number;
-  }>(),
-});
-
-/**
- * 팔로우(follows) 테이블
- * follower_id      팔로우 사용자 ID(팔로우 하는 사람)
- * following_id     팔로잉 사용자 ID(팔로우 당하는 사람)
- */
-export const follows = pgTable("follows", {
-  follower_id: uuid().references(() => profiles.profile_id, {
-    onDelete: "cascade",
-  }),
-  following_id: uuid().references(() => profiles.profile_id, {
-    onDelete: "cascade",
-  }),
-  created_at: timestamp().notNull().defaultNow(),
 });
 
 /**

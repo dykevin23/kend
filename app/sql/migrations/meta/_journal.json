@@ -225,6 +225,13 @@
       "when": 1788498884247,
       "tag": "0031_even_vance_astro",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1789968448956,
+      "tag": "0032_lumpy_sabra",
+      "breakpoints": true
     }
   ]
 }
