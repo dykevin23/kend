@@ -5,7 +5,7 @@ import { formatCurrency } from "~/lib/utils";
 import type { LikedProduct } from "../queries";
 
 interface LikeProductCardProps {
-  item: LikedProduct;
+  item: Pick<LikedProduct, "product" | "seller">;
 }
 
 export default function LikeProductCard({ item }: LikeProductCardProps) {

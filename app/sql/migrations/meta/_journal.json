@@ -232,6 +232,13 @@
       "when": 1789968448956,
       "tag": "0032_lumpy_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1789974079701,
+      "tag": "0033_brown_zodiak",
+      "breakpoints": true
     }
   ]
 }

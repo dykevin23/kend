@@ -271,3 +271,96 @@ export const getRandomProducts = async (client: Client, limit = 10) => {
 };
 
 export type RandomProduct = Awaited<ReturnType<typeof getRandomProducts>>[number];
+
+/**
+ * 사용자가 최근 조회한 상품 목록 (최근 순)
+ */
+export const getRecentlyViewedProducts = async (
+  client: Client,
+  userId: string,
+  limit = 20
+) => {
+  const { data, error } = await client
+    .from("product_views")
+    .select(
+      `
+      product_id,
+      viewed_at,
+      products!inner (
+        id,
+        product_code,
+        name,
+        seller_id,
+        admin_sellers!products_seller_id_admin_sellers_id_fk (
+          id,
+          name,
+          seller_code
+        ),
+        product_images!product_images_product_id_products_id_fk (
+          id,
+          url,
+          type
+        ),
+        product_stock_keepings!product_stock_keepings_product_id_products_id_fk (
+          regular_price,
+          sale_price,
+          stock,
+          status
+        )
+      )
+    `
+    )
+    .eq("user_id", userId)
+    .order("viewed_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return data.map((item) => {
+    const product = item.products;
+    const mainImage = product.product_images.find((img) => img.type === "MAIN");
+
+    // 구매 가능한 SKU 중 최저가. 전부 구매불가(품절/중단 등)라도 참조 화면이라
+    // 상품 자체는 계속 보여줘야 하므로, 그때는 전체 SKU 기준 최저가로 폴백한다.
+    const purchasableSkus = product.product_stock_keepings.filter(isSkuPurchasable);
+    const priceSkus =
+      purchasableSkus.length > 0
+        ? purchasableSkus
+        : product.product_stock_keepings.filter((sku) => sku.status !== "REGISTERED");
+    const lowestPriceSku = priceSkus.sort(
+      (a, b) => (a.sale_price ?? 0) - (b.sale_price ?? 0)
+    )[0];
+
+    const regularPrice = lowestPriceSku?.regular_price ?? 0;
+    const salePrice = lowestPriceSku?.sale_price ?? 0;
+    const discountRate =
+      regularPrice > 0
+        ? Math.round(((regularPrice - salePrice) / regularPrice) * 100)
+        : 0;
+
+    return {
+      productId: item.product_id,
+      viewedAt: item.viewed_at,
+      product: {
+        id: product.id,
+        productCode: product.product_code,
+        name: product.name,
+        mainImage: mainImage?.url ?? null,
+        regularPrice,
+        salePrice,
+        discountRate,
+      },
+      seller: product.admin_sellers
+        ? {
+            id: product.admin_sellers.id,
+            name: product.admin_sellers.name,
+            sellerCode: product.admin_sellers.seller_code,
+          }
+        : null,
+    };
+  });
+};
+
+export type RecentlyViewedProduct = Awaited<
+  ReturnType<typeof getRecentlyViewedProducts>
+>[number];

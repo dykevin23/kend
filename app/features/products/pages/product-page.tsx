@@ -27,6 +27,7 @@ import {
 import { addToCart } from "~/features/carts/mutations";
 import { isProductLiked } from "~/features/likes/queries";
 import { toggleProductLike } from "~/features/likes/mutations";
+import { recordProductView } from "../mutations";
 import { actionErrorResponse } from "~/lib/error-handler";
 import ProductInformationSection from "../components/product-information-section";
 import ProductPolicySection from "../components/product-policy-section";
@@ -84,6 +85,17 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const {
     data: { user },
   } = await client.auth.getUser();
+
+  // 최근 본 상품 기록 — 컴포넌트가 실제로 마운트된 뒤에만 호출되므로(아래 useEffect),
+  // prefetch="intent"(호버/터치만으로 loader가 도는 것)에 낚이지 않는다. 로그인 안 했으면
+  // 조용히 무시(로그인 페이지로 리다이렉트하면 안 됨 — 배경에서 조용히 도는 호출이라)
+  if (intent === "recordView") {
+    if (user) {
+      const productId = formData.get("productId") as string;
+      await recordProductView(client, user.id, productId);
+    }
+    return { success: true };
+  }
 
   if (!user) {
     return redirect("/auth/login", { headers });
@@ -148,12 +160,23 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 type TabKey = "information" | "size" | "review" | "coordination" | "inquiry";
 
 export default function ProductPage() {
-  const { product, isLiked, address, ratingSummary, reviews } =
+  const { product, isLiked, profile, address, ratingSummary, reviews } =
     useLoaderData<typeof loader>();
   const fetcher = useFetcher();
+  const viewFetcher = useFetcher();
   const navigate = useNavigate();
   const { confirm, alert } = useAlert();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // 실제로 이 페이지가 렌더될 때만 기록 — loader에 넣으면 prefetch="intent"(카드 호버/터치)
+  // 만으로도 "본 것"이 되어버려서 액션으로 분리했다
+  useEffect(() => {
+    if (!profile) return;
+    viewFetcher.submit(
+      { intent: "recordView", productId: product.id },
+      { method: "post" }
+    );
+  }, [product.id, !!profile]);
 
   // 결제 취소/실패로 이 화면(바로구매 시작 지점)에 되돌아온 경우
   useEffect(() => {

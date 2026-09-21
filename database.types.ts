@@ -1374,6 +1374,39 @@ export type Database = {
           },
         ]
       }
+      product_views: {
+        Row: {
+          product_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          product_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          product_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_views_product_id_products_id_fk"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_views_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       products: {
         Row: {
           created_at: string
