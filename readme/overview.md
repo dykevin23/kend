@@ -25,11 +25,11 @@
 
 ## ✅ 최근 완료
 
+- 2026-09-21: **"최근 본 상품" 기능(kend, Phase 3)** — `product_views` 테이블(찜 테이블과 동일 패턴, 로그 아님) 신설, 조회 기록을 컴포넌트 마운트 후 액션으로 분리(loader에 뒀다가 `ProductCard` prefetch로 오탐지되던 버그 실사용 테스트로 발견해 수정). 실사용 재검증 통과 ✅
 - 2026-09-21: **`follows` 테이블/`profiles.stats` 정리(kend)** — 예전 사람 팔로우 기능 잔재(고아 테이블) DB drop 완료·확인. 스토어 카드 찜 UI는 `likeCount`로 명명 정리 ✅
 - 2026-09-21: **상품상세 타이틀 옆 별점·리뷰수 하드코딩 제거(kend)** — "4.6·리뷰(4,321)" 고정 표기를 실데이터로 교체(09-07 정리 때 놓쳤던 블록), 타이틀과 한 줄 우측정렬로 레이아웃 조정 — 구현됨, 실사용 화면 확인 대기
 - 2026-09-17: **공지사항 화면(kend↔seller, B-5)** — kend-seller `notices` 스키마+admin CRUD+판매자 조회화면, kend `/myPage/notices` 연결(target 필터로 SELLER 전용 제외). 양쪽 실사용 테스트 통과(kend-seller 사용자 확인) ✅
 - 2026-09-16: **"현재 위치로 주소 찾기" 배지 표시(kend)** — GPS로 채워진 주소임을 알리는 배지 UI 보강, 우편번호 직접 재검색 시 해제 ✅
-- 2026-09-15: **"현재 위치로 주소 찾기" 기능(kend↔native)** — 그동안 미동작이던 버튼을 웹↔네이티브 브릿지(`native-bridge.ts`) + Kakao 역지오코딩으로 구현, kend-native 위치 브릿지 연동까지 전체 플로우 실사용 테스트 통과 ✅
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
