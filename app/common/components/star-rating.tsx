@@ -6,8 +6,8 @@ function StarIcon({ filled }: { filled: boolean }) {
     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
       <path
         d={STAR_PATH}
-        fill={filled ? "#FBBC05" : "none"}
-        stroke="#FBBC05"
+        fill={filled ? "var(--color-star)" : "none"}
+        stroke="var(--color-star)"
         strokeWidth={filled ? undefined : 2}
       />
     </svg>

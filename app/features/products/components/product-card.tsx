@@ -12,37 +12,35 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Link
       to={`/products/${product.productCode}`}
       prefetch="intent"
-      className="flex w-full flex-col items-start gap-1.5 shrink-0"
+      className="flex w-full flex-col items-start gap-[7px] shrink-0"
     >
-      {/* 상품 이미지 */}
+      {/* 상품 이미지 — 보더 대신 은은한 그림자 */}
       {product.mainImage ? (
         <img
           src={product.mainImage}
           alt={product.name}
-          className="w-full aspect-square shrink-0 object-cover border border-muted/20"
+          className="w-full aspect-square shrink-0 object-cover rounded-[14px] shadow-[0_4px_10px_rgba(15,33,56,0.08)]"
         />
       ) : (
-        <div className="w-full aspect-square shrink-0 bg-gray-300 flex items-center justify-center border border-muted/20">
-          <span className="text-xs text-muted">No Image</span>
+        <div className="w-full aspect-square shrink-0 rounded-[14px] bg-gray-100 flex items-center justify-center">
+          <span className="text-xs text-gray-400">No Image</span>
         </div>
       )}
 
-      {/* 상품명 - 왼쪽 정렬, 최대 2줄, 고정 높이 */}
-      <span className="w-full px-0.5 text-xs leading-4 tracking-[-0.4px] line-clamp-2 min-h-8">
+      {/* 상품명 - 최대 2줄, 고정 높이 */}
+      <span className="w-full text-[12.5px] font-medium leading-[1.35] text-gray-900 line-clamp-2 min-h-[34px]">
         {product.name}
       </span>
 
-      {/* 할인율(좌측) + 가격(우측) */}
-      <div className="flex w-full px-0.5 items-center justify-between">
-        {product.discountRate > 0 ? (
-          <span className="text-sm font-bold leading-4 tracking-[-0.4px] text-accent">
+      {/* 할인율 + 가격 */}
+      <div className="flex w-full items-baseline gap-1">
+        {product.discountRate > 0 && (
+          <span className="text-xs font-extrabold text-orange-600">
             {product.discountRate}%
           </span>
-        ) : (
-          <span />
         )}
-        <span className="text-sm font-bold leading-4 tracking-[-0.4px]">
-          {formattedPrice}
+        <span className="text-[13px] font-extrabold text-gray-900">
+          {formattedPrice}원
         </span>
       </div>
     </Link>
