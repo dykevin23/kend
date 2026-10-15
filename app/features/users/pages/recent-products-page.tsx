@@ -41,7 +41,7 @@ export default function RecentProductsPage() {
 
   return (
     <Content headerPorps={{ title: "최근 본 상품", useRight: false }}>
-      <div className="flex w-full flex-col items-start gap-4 mt-1 pb-20">
+      <div className="flex w-full flex-col items-start pb-20">
         {recentProducts.map((item) => (
           <LikeProductCard key={item.productId} item={item} />
         ))}

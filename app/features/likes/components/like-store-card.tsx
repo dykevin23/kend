@@ -22,25 +22,25 @@ export default function LikeStoreCard({ item }: LikeStoreCardProps) {
   };
 
   return (
-    <div className="flex w-full items-center gap-3 px-4 py-4 border-b-1 border-b-muted/30">
+    <div className="flex w-full items-center gap-3 px-5 py-4 border-b border-gray-100">
       <Link
         to={`/stores/${store.sellerCode}`}
         prefetch="intent"
-        className="flex flex-1 min-w-0 items-center gap-4"
+        className="flex flex-1 min-w-0 items-center gap-3.5"
       >
         {store.profileImage && !imageError ? (
           <img
             src={store.profileImage}
             alt={store.name}
-            className="size-12 shrink-0 rounded-full object-contain bg-gray-100"
+            className="size-[52px] shrink-0 rounded-full object-contain bg-gray-100"
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="size-12 shrink-0 rounded-full bg-gray-300 flex items-center justify-center">
-            <span className="text-xs text-muted">{store.name.charAt(0)}</span>
+          <div className="size-[52px] shrink-0 rounded-full bg-navy-100 flex items-center justify-center">
+            <span className="text-sm font-bold text-primary">{store.name.charAt(0)}</span>
           </div>
         )}
-        <span className="flex-1 min-w-0 truncate text-base leading-[140%]">
+        <span className="flex-1 min-w-0 truncate text-[15px] font-bold text-gray-900">
           {store.name}
         </span>
       </Link>
@@ -50,9 +50,9 @@ export default function LikeStoreCard({ item }: LikeStoreCardProps) {
         onClick={handleRemove}
         disabled={isRemoving}
         aria-label="찜한 스토어 제외"
-        className="flex size-8 shrink-0 items-center justify-center rounded-full hover:bg-muted/10"
+        className="flex size-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-50"
       >
-        <X className="size-4 text-muted" />
+        <X className="size-4" />
       </button>
     </div>
   );

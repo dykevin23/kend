@@ -60,21 +60,21 @@ export default function LikesPage() {
     <Content headerPorps={{ title: "좋아요" }}>
       <div className="pb-20">
         <div className="flex w-full items-center">
-          <Tabs>
+          <Tabs scrollable>
             <Tab
-              title="제품"
+              title={`제품 ${likedProducts.length}`}
               isActive={isActiveTab === "product"}
               onClick={handleClickTab("product")}
             />
             <Tab
-              title="스토어"
+              title={`스토어 ${likedStores.length}`}
               isActive={isActiveTab === "store"}
               onClick={handleClickTab("store")}
             />
           </Tabs>
         </div>
 
-        <div className="flex w-full flex-col items-start gap-4 mt-1">
+        <div className="flex w-full flex-col items-start">
           {isActiveTab === "product" ? (
             likedProducts.length > 0 ? (
               likedProducts.map((item) => (
@@ -82,7 +82,7 @@ export default function LikesPage() {
               ))
             ) : (
               <div className="flex w-full py-10 justify-center items-center">
-                <span className="text-muted">좋아요한 상품이 없습니다.</span>
+                <span className="text-sm text-gray-500">좋아요한 상품이 없습니다.</span>
               </div>
             )
           ) : likedStores.length > 0 ? (
@@ -91,7 +91,7 @@ export default function LikesPage() {
             ))
           ) : (
             <div className="flex w-full py-10 justify-center items-center">
-              <span className="text-muted">찜한 스토어가 없습니다.</span>
+              <span className="text-sm text-gray-500">찜한 스토어가 없습니다.</span>
             </div>
           )}
         </div>
