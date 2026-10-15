@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, ShoppingBag, X } from "lucide-react";
+import { ChevronLeft, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Form,
@@ -7,7 +7,8 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router";
-import { formatCurrency } from "~/lib/utils";
+import CartIcon from "~/common/components/cart-icon";
+import ProductCard from "~/features/products/components/product-card";
 import { Input } from "~/common/components/ui/input";
 import RecommendProducts from "~/features/products/components/recommend-products";
 import { makeSSRClient } from "~/supa-client";
@@ -41,140 +42,95 @@ export default function SearchPage() {
   const excludeIds = results.map((p) => p.id);
 
   return (
-    <div>
-      <div className="flex p-4 items-center gap-2.5 self-stretch">
-        <ArrowLeft size={28} onClick={() => navigate(-1)} />
+    <div className="min-h-screen bg-white">
+      <div className="sticky top-0 z-10 flex items-center gap-1.5 px-3.5 py-3 bg-white border-b border-gray-100">
+        <button
+          type="button"
+          className="flex size-9 shrink-0 items-center justify-center text-gray-900"
+          onClick={() => navigate(-1)}
+          aria-label="뒤로가기"
+        >
+          <ChevronLeft className="size-[22px]" strokeWidth={2} />
+        </button>
         <Form
           method="get"
           action="/search"
           replace
-          className="flex flex-1 py-2.5 px-4 items-center gap-2 rounded-xl bg-muted/10"
+          className="flex flex-1 h-[42px] px-3.5 items-center gap-2 rounded-full bg-gray-50"
         >
+          <button type="submit" className="shrink-0 text-gray-500" aria-label="검색">
+            <Search className="size-[18px]" strokeWidth={1.8} />
+          </button>
           <Input
             name="q"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="flex-1 border-0 shadow-none focus-visible:ring-0 text-left text-xs font-bold leading-4 p-0 h-auto"
-            placeholder="검색어를 입력해주세요."
+            className="flex-1 h-auto p-0 border-0 bg-transparent shadow-none focus-visible:ring-0 text-[13.5px] text-gray-900 placeholder:text-gray-500"
+            placeholder="상품명을 검색해 보세요"
           />
           {keyword && (
             <button
               type="button"
               onClick={() => setKeyword("")}
-              className="shrink-0"
+              className="shrink-0 text-gray-400"
+              aria-label="검색어 지우기"
             >
-              <X className="size-4 text-muted" />
+              <X className="size-4" />
             </button>
           )}
-          <button type="submit" className="shrink-0">
-            <Search className="size-4" />
-          </button>
         </Form>
-        <Link to="/carts">
-          <ShoppingBag className="size-7" />
-        </Link>
+        <CartIcon className="size-9 [&_svg]:size-[21px]" />
       </div>
 
       {hasQuery ? (
-        <div className="flex w-full flex-col gap-4 py-2">
-          <div className="px-4">
-            <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-              "{q}" 검색 결과 {results.length}건
-            </span>
-          </div>
+        <div className="flex w-full flex-col gap-4 pt-[18px]">
+          <span className="px-5 text-[15px] font-extrabold text-gray-900">
+            "{q}" 검색 결과{" "}
+            <span className="text-primary">{results.length}</span>건
+          </span>
           {results.length === 0 ? (
             <div className="flex w-full py-10 justify-center items-center">
-              <span className="text-muted text-sm">
-                검색 결과가 없습니다.
-              </span>
+              <span className="text-sm text-gray-500">검색 결과가 없습니다.</span>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4">
+            <div className="grid grid-cols-3 gap-x-2.5 gap-y-4 px-5">
               {results.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/products/${product.productCode}`}
-                  prefetch="intent"
-                  className="flex flex-col items-start gap-1"
-                >
-                  {product.mainImage ? (
-                    <img
-                      src={product.mainImage}
-                      alt={product.name}
-                      className="w-full aspect-square object-cover rounded-md"
-                    />
-                  ) : (
-                    <div className="w-full aspect-square bg-gray-200 rounded-md flex items-center justify-center">
-                      <span className="text-xs text-muted">No Image</span>
-                    </div>
-                  )}
-                  <span className="text-xs font-bold leading-[140%] tracking-[-0.4px] line-clamp-2">
-                    {product.name}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    {product.discountRate > 0 && (
-                      <span className="text-sm font-bold leading-[100%] tracking-[-0.4px] text-accent">
-                        {product.discountRate}%
-                      </span>
-                    )}
-                    <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-                      {formatCurrency(product.salePrice)}
-                    </span>
-                  </div>
-                </Link>
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
-          <div className="pt-4">
-            <RecommendProducts excludeIds={excludeIds} />
-          </div>
+          <RecommendProducts excludeIds={excludeIds} title="추천 상품" />
         </div>
       ) : (
-        <div className="flex w-full py-4 flex-col items-start gap-6">
-          <RecommendProducts />
-          <div className="flex w-full px-4 flex-col items-start">
-            <div className="flex w-full items-center">
-              <div className="flex w-full h-6 flex-col justify-center shrink-0">
-                <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-                  급상승 검색어
-                </span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 w-full px-2.5 py-4 gap-y-2.5 gap-x-4">
-              {searchs[0]
-                .map((left, i) => {
-                  const right = searchs[1][i];
-                  return [
-                    { label: left, num: i + 1 },
-                    { label: right, num: i + 6 },
-                  ];
-                })
-                .flat()
-                .map(({ label, num }) => (
-                  <Link
-                    key={num}
-                    to={`/search?q=${encodeURIComponent(label)}`}
-                    replace
-                    className="flex items-center gap-3"
-                  >
-                    <span className="w-5 shrink-0 text-right text-xs font-bold leading-[100%] tracking-[-0.4px]">
-                      {num}
-                    </span>
-                    <span className="flex-1 text-xs leading-[100%] tracking-[-0.4px]">
-                      {label}
-                    </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                      className="shrink-0"
-                    >
-                      <path d="M3 7.5L6 4.5L9 7.5" stroke="#FF0000" />
-                    </svg>
-                  </Link>
-                ))}
+        <div className="flex w-full flex-col gap-2 pt-1">
+          <RecommendProducts title="추천 상품" />
+          <div className="flex w-full flex-col px-5 pb-6">
+            <span className="mb-1.5 text-[15px] font-extrabold text-gray-900">
+              급상승 검색어
+            </span>
+            <div className="grid grid-cols-2 gap-x-5">
+              {searchs.map((column, col) => (
+                <div key={col}>
+                  {column.map((label, i) => {
+                    const num = col * column.length + i + 1;
+                    return (
+                      <Link
+                        key={num}
+                        to={`/search?q=${encodeURIComponent(label)}`}
+                        replace
+                        className="flex items-center gap-[9px] py-[9px]"
+                      >
+                        <span className="w-4 shrink-0 text-sm font-extrabold text-primary">
+                          {num}
+                        </span>
+                        <span className="flex-1 text-[13.5px] text-gray-900 truncate">
+                          {label}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </div>

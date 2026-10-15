@@ -10,6 +10,7 @@ import {
 interface RecommendProductsProps {
   excludeIds?: Array<string | number>;
   limit?: number;
+  title?: string;
 }
 
 // 라우팅/리페치 시 추천 목록이 흔들리지 않도록 모듈 스코프 캐시로 1회만 로드
@@ -19,6 +20,7 @@ let cachePromise: Promise<RandomProduct[]> | null = null;
 export default function RecommendProducts({
   excludeIds = [],
   limit = 10,
+  title = "이런 상품은 어때요",
 }: RecommendProductsProps) {
   const [products, setProducts] = useState<RandomProduct[]>(
     cachedRecommends ?? []
@@ -59,7 +61,7 @@ export default function RecommendProducts({
   return (
     <div className="flex w-full flex-col gap-3.5 px-5 pt-5 pb-3">
       <span className="text-[15px] font-extrabold text-gray-900">
-        이런 상품은 어때요
+        {title}
       </span>
       <div className="flex gap-2.5 overflow-x-auto">
         {filtered.map((product) => (

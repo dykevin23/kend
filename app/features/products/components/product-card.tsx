@@ -2,7 +2,11 @@ import { Link } from "react-router";
 import type { ProductListItem } from "~/features/stores/queries";
 
 interface ProductCardProps {
-  product: ProductListItem;
+  // 스토어 상품 목록·검색 결과 등 여러 쿼리 결과를 그대로 받을 수 있게 필요한 필드만 요구
+  product: Pick<
+    ProductListItem,
+    "productCode" | "mainImage" | "name" | "salePrice" | "discountRate"
+  >;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
