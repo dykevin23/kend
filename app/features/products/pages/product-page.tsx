@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronRight, Heart, Star } from "lucide-react";
+import { ChevronRight, Heart, Star, X } from "lucide-react";
 import {
   Link,
   redirect,
@@ -15,7 +15,7 @@ import Content from "~/common/components/content";
 import FloatingHeader, {
   floatingIconButtonClass,
 } from "~/common/components/floating-header";
-import { SelectAccordion } from "~/common/components/select-accordion";
+import { OptionChips } from "~/common/components/option-chips";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -419,6 +419,11 @@ export default function ProductPage() {
     Object.keys(buyOption).length === optionItems.length &&
     !Object.values(buyOption).includes("");
 
+  // 옵션을 다 고르면 해당 SKU 가격, 아니면 대표 판매가
+  const selectedPrice =
+    (isAllOptionsSelected ? findMatchingSku(buyOption)?.salePrice : 0) ||
+    product.salePrice;
+
   return (
     <>
       <Content
@@ -596,30 +601,70 @@ export default function ProductPage() {
 
       {/* 옵션 선택 바텀시트 */}
       <BottomSheet open={isOptionSheetOpen} setOpen={setIsOptionSheetOpen}>
-        <SelectAccordion
-          items={optionItems}
-          values={buyOption}
-          onChange={handleOptionChange}
-        />
-
-        {isAllOptionsSelected && (
-          <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
-            <Button
-              variant="secondary"
-              className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
-              onClick={handleAddToCart}
-              disabled={fetcher.state !== "idle"}
-            >
-              {fetcher.state !== "idle" ? "담는 중..." : "장바구니"}
-            </Button>
-            <Button
-              className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
-              onClick={handlePurchase}
-            >
-              바로 구매
-            </Button>
+        <div className="flex w-full items-center gap-3">
+          {product.images[0] ? (
+            <img
+              src={product.images[0].url}
+              alt=""
+              className="size-[52px] shrink-0 rounded-xl object-cover bg-gray-100"
+            />
+          ) : (
+            <div className="size-[52px] shrink-0 rounded-xl bg-gray-100" />
+          )}
+          <div className="flex flex-1 min-w-0 flex-col gap-[3px]">
+            <span className="text-[13.5px] font-semibold text-gray-900 truncate">
+              {product.name}
+            </span>
+            <span className="text-[15px] font-extrabold text-gray-900">
+              {selectedPrice.toLocaleString()}원
+            </span>
           </div>
-        )}
+          <button
+            type="button"
+            className="p-1 text-gray-400"
+            onClick={() => setIsOptionSheetOpen(false)}
+            aria-label="닫기"
+          >
+            <X className="size-[18px]" strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="h-px w-full bg-gray-100" />
+
+        <div className="w-full max-h-[45vh] overflow-y-auto">
+          <OptionChips
+            items={optionItems}
+            values={buyOption}
+            onChange={handleOptionChange}
+          />
+        </div>
+
+        <div className="h-px w-full bg-gray-100" />
+
+        <div className="flex w-full items-center justify-between">
+          <span className="text-[13.5px] text-gray-700">상품금액</span>
+          <span className="text-[17px] font-extrabold text-primary">
+            {selectedPrice.toLocaleString()}원
+          </span>
+        </div>
+
+        <div className="flex w-full gap-2.5">
+          <Button
+            variant="outline"
+            className="flex-1 h-[50px] text-[14.5px]"
+            onClick={handleAddToCart}
+            disabled={!isAllOptionsSelected || fetcher.state !== "idle"}
+          >
+            {fetcher.state !== "idle" ? "담는 중..." : "장바구니 담기"}
+          </Button>
+          <Button
+            className="flex-1 h-[50px] text-[14.5px]"
+            onClick={handlePurchase}
+            disabled={!isAllOptionsSelected}
+          >
+            구매하기
+          </Button>
+        </div>
       </BottomSheet>
 
       {/* 결제 모달 */}
