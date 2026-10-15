@@ -29,7 +29,7 @@ export default function InquiriesListPage() {
     <Content
       headerPorps={{ title: "문의 내역", useRight: false }}
       footer={
-        <Button className="w-full" asChild>
+        <Button variant="secondary" className="w-full" asChild>
           <Link to="/myPage/inquiries/new">문의하기</Link>
         </Button>
       }

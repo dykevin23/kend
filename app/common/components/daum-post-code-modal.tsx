@@ -22,7 +22,7 @@ export default function DaumPostCodeModal({
 
   return (
     <>
-      <Button type="button" className="rounded-2xl" onClick={() => setOpen(true)}>
+      <Button variant="secondary" type="button" className="rounded-2xl" onClick={() => setOpen(true)}>
         우편번호 찾기
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} title="우편 번호 찾기">

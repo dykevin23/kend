@@ -241,7 +241,6 @@ export default function ShoppingCartPage() {
       footer={
         cartItems.length > 0 && (
           <Button
-            variant="secondary"
             className="flex w-full h-12.5 px-7.5 justify-center items-center rounded-full"
             disabled={selectedIds.size === 0}
             onClick={handlePurchase}
@@ -396,7 +395,7 @@ export default function ShoppingCartPage() {
                 장바구니가 비어 있어요
               </span>
             </div>
-            <Button variant="secondary" asChild>
+            <Button asChild>
               <Link to="/stores">쇼핑하기</Link>
             </Button>
           </div>

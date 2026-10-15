@@ -585,6 +585,7 @@ export default function ProductPage() {
         {isAllOptionsSelected && (
           <div className="flex w-full h-18 py-4 justify-center items-center gap-1.5 shrink-0">
             <Button
+              variant="secondary"
               className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
               onClick={handleAddToCart}
               disabled={fetcher.state !== "idle"}
@@ -592,7 +593,6 @@ export default function ProductPage() {
               {fetcher.state !== "idle" ? "담는 중..." : "장바구니"}
             </Button>
             <Button
-              variant="secondary"
               className="flex w-full h-12 px-7.5 justify-center items-center gap-2.5 flex-gsb"
               onClick={handlePurchase}
             >
@@ -722,7 +722,6 @@ function ProductFooter({ product, isLiked, purchaseBlock, onBuyClick }: ProductF
       </button>
       {/* 구매하기 버튼 — 구매불가 상태면 안내 문구로 대체하고 클릭 차단 */}
       <Button
-        variant="secondary"
         disabled={!!purchaseBlock}
         className="flex h-12.5 px-10 justify-center items-center rounded-full text-base font-bold disabled:opacity-50"
         onClick={onBuyClick}

@@ -280,7 +280,7 @@ export default function GrowthChart({
               {/* 최신 측정값 라벨 */}
               {latestRecord && (
                 <div className="flex justify-end w-full px-4 pb-4">
-                  <div className="flex items-center gap-1 px-2 py-1 bg-secondary text-white rounded text-xs">
+                  <div className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded text-xs">
                     <span>
                       {new Date(latestRecord.measuredAt).getMonth() + 1}월
                     </span>

@@ -49,10 +49,10 @@ export default function ChildrenOverviewLayout() {
                   key={child.id}
                   className={({ isActive }) =>
                     cn(
-                      buttonVariants(),
+                      buttonVariants({ variant: "secondary" }),
                       "flex h-8 px-3 justify-center items-center gap-2.5 rounded-full whitespace-nowrap",
                       isActive
-                        ? "bg-secondary text-white"
+                        ? "bg-primary text-white"
                         : "bg-muted-foreground/10 text-black"
                     )
                   }
@@ -74,7 +74,7 @@ export default function ChildrenOverviewLayout() {
             <Link
               to="/children/submit"
               className={cn(
-                buttonVariants({ variant: "secondary" }),
+                buttonVariants(),
                 "rounded-full"
               )}
             >

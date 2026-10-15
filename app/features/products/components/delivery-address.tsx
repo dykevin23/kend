@@ -93,7 +93,7 @@ export default function DeliveryAddress({
               <span className="text-base font-bold leading-4 tracking-[-0.4px]">
                 {address.label}
               </span>
-              {address.isDefault && <Badge>기본 배송 주소지</Badge>}
+              {address.isDefault && <Badge variant="secondary">기본 배송 주소지</Badge>}
             </div>
             <div className="flex items-center gap-2.5">
               <span className="text-sm leading-3.5 tracking-[-0.4px]">
@@ -140,7 +140,6 @@ export default function DeliveryAddress({
               등록된 배송 주소가 없습니다.
             </span>
             <Button
-              variant="secondary"
               onClick={() => setAddressAddModalOpen(true)}
             >
               배송 주소 추가

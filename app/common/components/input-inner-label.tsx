@@ -27,7 +27,7 @@ export default function InputInnerLabel({
         "flex flex-col self-stretch px-4 py-3 gap-2 relative",
         "border",
         "transition-all duration-200",
-        isFocused ? "border-accent z-10" : "border-secondary z-0",
+        isFocused ? "border-accent z-10" : "border-primary z-0",
         className
       )}
     >

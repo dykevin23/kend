@@ -181,7 +181,7 @@ export default function ChildrenPage() {
                   : "조금 느린 편이에요"}
               </span>
             </div>
-            <Badge variant="secondary">
+            <Badge>
               100명 중 {Math.round(100 - growthPercentile + 1)}등
             </Badge>
           </div>
@@ -193,7 +193,7 @@ export default function ChildrenPage() {
               className="flex justify-center"
               style={{ marginLeft: `${growthPercentile - 50}%` }}
             >
-              <div className="px-3 py-1 bg-secondary text-white text-xs rounded-full">
+              <div className="px-3 py-1 bg-primary text-white text-xs rounded-full">
                 {child.nickname}
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function ChildrenPage() {
               />
               {/* 포인트 */}
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-secondary rounded-full border-2 border-white shadow"
+                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full border-2 border-white shadow"
                 style={{ left: `${growthPercentile}%`, marginLeft: "-6px" }}
               />
             </div>
@@ -299,7 +299,6 @@ export default function ChildrenPage() {
       {/* 플로팅 버튼 */}
       <Button
         type="button"
-        variant="secondary"
         onClick={() => setIsGrowthSheetOpen(true)}
         className={cn(
           "fixed bottom-24 right-4 z-40",

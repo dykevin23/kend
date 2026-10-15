@@ -24,15 +24,14 @@ import { useAuthListener } from "./hooks/useAuthListener";
 import { getCartCount } from "./features/carts/queries";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
-    href: "https://fonts.gstatic.com",
+    href: "https://cdn.jsdelivr.net",
     crossOrigin: "anonymous",
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css",
   },
 ];
 
@@ -140,7 +139,7 @@ function GlobalLoadingBar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-gray-200">
-      <div className="h-full bg-secondary animate-progress" />
+      <div className="h-full bg-primary animate-progress" />
     </div>
   );
 }
@@ -199,7 +198,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         </a>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-2.5 rounded-full bg-secondary text-secondary-foreground text-sm"
+          className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm"
         >
           다시 시도
         </button>

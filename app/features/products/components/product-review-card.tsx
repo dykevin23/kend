@@ -60,7 +60,7 @@ export default function ProductReviewCard({
 
         {sellerReply && (
           <div className="flex p-2.5 flex-col items-start gap-1 self-stretch ml-4 rounded-md bg-muted/10">
-            <span className="text-xs font-bold text-secondary">판매자 답변</span>
+            <span className="text-xs font-bold text-primary">판매자 답변</span>
             <span className="text-xs leading-[150%] tracking-[-0.4px] whitespace-pre-line">
               {sellerReply}
             </span>

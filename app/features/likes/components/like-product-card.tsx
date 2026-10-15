@@ -56,7 +56,6 @@ export default function LikeProductCard({ item }: LikeProductCardProps) {
             {seller && (
               <div className="flex h-3.5 px-2.5 items-start gap-1 shrink-0">
                 <Badge
-                  variant="secondary"
                   className={cn(
                     "flex h-3.5 px-2 justify-center items-center gap-2.5",
                     "text-center text-[10px] leading-[100%] tracking-[-0.4px] font-normal"

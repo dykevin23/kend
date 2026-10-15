@@ -4,41 +4,82 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR",
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
   --font-arimo: "Arimo Hebrew Subset Italic";
-  --font-pretendard: "Pretendard";
+  --font-pretendard: "Pretendard Variable", Pretendard;
+
+  /* 브랜드 스케일 (디자인 리뉴얼 시안 기준) */
+  --color-navy-50: #f2f5f9;
+  --color-navy-100: #e7edf4;
+  --color-navy-500: #4a709c;
+  --color-navy-600: #2a5480;
+  --color-navy-700: #1a3f66; /* Main */
+  --color-navy-800: #123354;
+  --color-navy-900: #0b2138;
+
+  /* Tailwind 기본 orange를 브랜드 오렌지로 덮어씀 (기본 orange 사용처 없음) */
+  --color-orange-100: #ffead3;
+  --color-orange-400: #ffa653;
+  --color-orange-500: #ff8a1f; /* Main */
+  --color-orange-600: #e06b00;
+
+  /* gray 클래스를 시안 Neutral(Ink/Line)로 덮어씀 — 기존 gray-* 사용처가 그대로 시안 톤이 됨 */
+  --color-gray-50: #f5f6f8; /* BG */
+  --color-gray-100: #f0f1f4; /* Line 100 */
+  --color-gray-200: #e6e8ec; /* Line 200 */
+  --color-gray-300: #cdd0d6;
+  --color-gray-400: #9da2ab;
+  --color-gray-500: #7c818c; /* Ink 500 */
+  --color-gray-600: #5f6570;
+  --color-gray-700: #454b56; /* Ink 700 */
+  --color-gray-800: #2d3139;
+  --color-gray-900: #181b20; /* Ink 900 */
+  --color-gray-950: #0e1014;
+
+  --color-star: #ffb020;
+
+  /* 카드 20 · 썸네일 16 · 버튼은 rounded-full */
+  --radius-card: 20px;
+  --radius-thumb: 16px;
+
+  /* 보더 대신 은은한 그림자로 elevation 표현 */
+  --shadow-card-sm: 0 1px 3px rgba(15, 33, 56, 0.06), 0 1px 2px rgba(15, 33, 56, 0.04);
+  --shadow-card-md: 0 8px 20px rgba(15, 33, 56, 0.1);
+  --shadow-card-lg: 0 16px 32px rgba(15, 33, 56, 0.16);
+  --shadow-cta: 0 8px 16px rgba(26, 63, 102, 0.28);
 }
 
-/* 
-  primary: 메인 주 색상
-  secondary: 보조 색상
+/*
+  primary: 메인 주 색상 (네이비)
+  secondary: 보조 버튼 — 연한 네이비 배경 + 네이비 글자
   muted: 비활성(회색)
-  accent: 보조 강조색상
+  accent: 포인트 강조색상 (오렌지)
   destructive: 경고
  */
 
 @layer base {
   :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(240 10% 3.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(240 10% 3.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(240 10% 3.9%);
-    --primary: hsla(38, 100%, 91%, 1);
-    --primary-foreground: hsl(209 64% 24%);
-    --secondary: hsl(209 64% 24%);
-    --secondary-foreground: hsla(38, 100%, 91%, 1);
-    --muted: hsla(224, 5%, 54%, 1);
-    --muted-foreground: hsl(240 3.8% 46.1%);
-    --accent: hsla(30, 100%, 56%, 1);
-    --accent-foreground: hsl(240 5.9% 10%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(240 5.9% 90%);
-    --input: hsl(240 5.9% 90%);
-    --ring: hsl(209 64% 24%);
+    --background: #ffffff;
+    --foreground: #181b20;
+    --card: #ffffff;
+    --card-foreground: #181b20;
+    --popover: #ffffff;
+    --popover-foreground: #181b20;
+    --primary: #1a3f66;
+    --primary-foreground: #ffffff;
+    --secondary: #f2f5f9;
+    --secondary-foreground: #1a3f66;
+    --muted: #7c818c;
+    --muted-foreground: #7c818c;
+    --accent: #ff8a1f;
+    --accent-foreground: #ffffff;
+    --destructive: #e5484d;
+    --destructive-foreground: #ffffff;
+    --border: #e6e8ec;
+    --input: #e6e8ec;
+    --ring: #1a3f66;
     --radius: 0.75rem;
     --chart-1: hsl(12 76% 61%);
     --chart-2: hsl(173 58% 39%);

@@ -224,7 +224,7 @@ export default function SubmitChildPage() {
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
-                  variant={isToday ? "secondary" : "ghost"}
+                  variant={isToday ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setMeasuredAt(format(new Date(), "yyyy-MM-dd"))}
                   className="rounded-full"
@@ -282,7 +282,6 @@ export default function SubmitChildPage() {
         <div className="p-4 pb-8">
           <Button
             type="submit"
-            variant="secondary"
             disabled={isSubmitting}
             className="w-full py-6 rounded-full"
           >
@@ -320,7 +319,7 @@ function GrowthInput({
           className={cn(
             "h-12 pr-12 rounded-xl text-right",
             "border-muted/30",
-            "focus-visible:border-secondary focus-visible:ring-0"
+            "focus-visible:border-primary focus-visible:ring-0"
           )}
         />
         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">

@@ -92,7 +92,6 @@ export default function ReturnRequestDialog({
 
           <Button
             className="w-full py-6 rounded-full"
-            variant="secondary"
             disabled={!reason || isSubmitting}
             onClick={handleSubmit}
           >

@@ -54,7 +54,7 @@ const ProductInformationSection = forwardRef<
               className={cn(
                 "flex items-center justify-center gap-1 w-full mx-4 py-3",
                 "bg-white border border-muted/30 rounded-lg",
-                "text-sm font-medium text-secondary",
+                "text-sm font-medium text-primary",
                 "hover:bg-gray-50 active:bg-gray-100 transition-colors"
               )}
             >

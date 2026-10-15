@@ -56,7 +56,7 @@ export default function NotificationsPage() {
               type="button"
               onClick={() => toggle(s.key)}
               className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                s.enabled ? "bg-secondary" : "bg-muted/30"
+                s.enabled ? "bg-primary" : "bg-muted/30"
               }`}
               aria-pressed={s.enabled}
               aria-label={`${s.label} 토글`}

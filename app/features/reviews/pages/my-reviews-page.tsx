@@ -94,7 +94,7 @@ export default function MyReviewsPage() {
               )}
               {review.sellerReply && (
                 <div className="flex flex-col gap-1 px-2.5 py-2 ml-4 rounded-md bg-muted/10">
-                  <span className="text-xs font-bold text-secondary">판매자 답변</span>
+                  <span className="text-xs font-bold text-primary">판매자 답변</span>
                   <span className="text-xs leading-[150%] whitespace-pre-line">
                     {review.sellerReply}
                   </span>

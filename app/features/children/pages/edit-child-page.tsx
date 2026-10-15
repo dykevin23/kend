@@ -255,7 +255,6 @@ export default function EditChildPage() {
             type="submit"
             name="intent"
             value="update"
-            variant="secondary"
             disabled={isSubmitting}
             className="w-full py-6 rounded-full"
           >

@@ -88,7 +88,7 @@ export default function CartProductCard({
                   </span>
                 </div>
                 {optionText && (
-                  <div className="flex h-8 px-2.5 items-center gap-1 self-stretch rounded-xs bg-secondary/10">
+                  <div className="flex h-8 px-2.5 items-center gap-1 self-stretch rounded-xs bg-primary/10">
                     <span className="text-center text-xs leading-[140%] tracking-[-0.4px]">
                       {optionText}
                     </span>

@@ -216,7 +216,6 @@ export default function AddressAddModal({
         <Button
           type="submit"
           form="address-form"
-          variant="secondary"
           className="flex w-full h-12.5 rounded-full"
           disabled={isSubmitting}
         >

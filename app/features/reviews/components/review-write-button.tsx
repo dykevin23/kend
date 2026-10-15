@@ -154,6 +154,7 @@ export default function ReviewWriteButton({
         onClose={handleClose}
         footer={
           <Button
+            variant="secondary"
             type="submit"
             form="review-write-form"
             className="w-full"

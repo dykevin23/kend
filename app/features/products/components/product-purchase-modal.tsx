@@ -333,7 +333,6 @@ export default function ProductPurchaseModal({
       onClose={onClose}
       footer={
         <Button
-          variant="secondary"
           className="flex w-full h-12.5 rounded-full"
           onClick={handleSubmitOrder}
           disabled={
@@ -565,7 +564,7 @@ function OrderItemCard({ item }: { item: OrderItem }) {
       {/* 옵션 및 수량 */}
       {optionText && (
         <div className="flex w-full px-4 items-center">
-          <div className="flex w-full h-8 pl-2.5 items-center gap-1 self-stretch rounded-xs bg-secondary/10">
+          <div className="flex w-full h-8 pl-2.5 items-center gap-1 self-stretch rounded-xs bg-primary/10">
             <span className="text-xs leading-4 tracking-[-0.4px]">
               {optionText}
             </span>

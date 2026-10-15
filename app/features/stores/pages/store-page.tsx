@@ -117,11 +117,11 @@ export default function StorePage() {
           disabled={likeFetcher.state !== "idle"}
           className={cn(
             "w-full gap-1.5 hover:bg-transparent hover:text-inherit",
-            optimisticIsLiked && "border-secondary text-secondary"
+            optimisticIsLiked && "border-primary text-primary"
           )}
         >
           <Heart
-            className={cn("size-4", optimisticIsLiked && "fill-secondary")}
+            className={cn("size-4", optimisticIsLiked && "fill-primary")}
           />
           {optimisticIsLiked ? "찜한 스토어" : "스토어 찜하기"}
         </Button>

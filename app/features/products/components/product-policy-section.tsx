@@ -33,7 +33,7 @@ export default function ProductPolicySection() {
             <span>단순변심은 구매자 부담, 하자·오배송·파손·분실은 판매자 부담</span>
           </div>
         </div>
-        <Link to="/myPage/refund-policy" className="text-sm text-secondary underline w-fit">
+        <Link to="/myPage/refund-policy" className="text-sm text-primary underline w-fit">
           교환·반품·환불 정책 자세히 보기
         </Link>
       </div>

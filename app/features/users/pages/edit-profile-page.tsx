@@ -201,7 +201,6 @@ export default function EditProfilePage() {
       headerPorps={{ title: "프로필 수정", useRight: false }}
       footer={
         <Button
-          variant="secondary"
           className="flex w-full h-12.5 rounded-full"
           onClick={handleSubmit}
           disabled={isSubmitting || !nickname.trim()}

@@ -109,7 +109,6 @@ export default function AddressManageModal({
         footer={
           <Button
             type="button"
-            variant="secondary"
             className="flex w-full h-12.5 rounded-full"
             onClick={() => setAddModalOpen(true)}
           >

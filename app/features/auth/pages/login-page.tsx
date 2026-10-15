@@ -58,7 +58,7 @@ export default function LoginPage() {
     actionData?.error ?? (urlError ? errorMessages[urlError] : undefined);
   return (
     <div
-      className="flex flex-col min-h-screen bg-primary/50"
+      className="flex flex-col min-h-screen bg-orange-100/50"
       style={{
         paddingTop: "max(3.125rem, var(--safe-area-inset-top))",
         paddingBottom: "max(0px, var(--safe-area-inset-bottom))",
@@ -67,10 +67,10 @@ export default function LoginPage() {
       {/* LOGO start */}
       <div className="flex w-full flex-col items-center gap-4 px-6">
         <div className="flex flex-col justify-center items-center gap-1 self-stretch">
-          <span className="text-center font-arimo text-[64px] font-bold italic leading-[100%] text-secondary">
+          <span className="text-center font-arimo text-[64px] font-bold italic leading-[100%] text-primary">
             KEND
           </span>
-          <span className="text-center font-arimo text-base italic font-bold leading-[18px] text-secondary">
+          <span className="text-center font-arimo text-base italic font-bold leading-[18px] text-primary">
             Kids are an ENDuser
           </span>
         </div>
@@ -82,7 +82,7 @@ export default function LoginPage() {
           {/* 로그인 타이틀 & 가입하기 링크 */}
           <div className="flex flex-col items-start gap-6 self-stretch">
             <div className="flex flex-col justify-center items-center gap-2 self-stretch">
-              <span className="text-center text-xl leading-[130%] tracking-[-0.4px] text-secondary self-stretch">
+              <span className="text-center text-xl leading-[130%] tracking-[-0.4px] text-primary self-stretch">
                 로그인 하기
               </span>
               <div className="flex justify-center gap-2 self-stretch">
@@ -90,7 +90,7 @@ export default function LoginPage() {
                   아직 회원이 아니신가요?
                 </span>
                 <Link to="/auth/join">
-                  <span className="text-base leading-[140%] tracking-[-0.4px] text-secondary underline">
+                  <span className="text-base leading-[140%] tracking-[-0.4px] text-primary underline">
                     가입하기
                   </span>
                 </Link>
@@ -127,7 +127,6 @@ export default function LoginPage() {
               <div className="flex flex-col items-center gap-6 self-stretch">
                 <Button
                   type="submit"
-                  variant="secondary"
                   className={cn(
                     "w-full h-14 py-2 px-4 flex justify-center items-center rounded-full",
                     "text-base font-normal leading-[100%] tracking-[-0.4px]"
@@ -137,7 +136,7 @@ export default function LoginPage() {
                 </Button>
                 <div className="flex items-center justify-center">
                   <Link to="/auth/find-password">
-                    <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-secondary">
+                    <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-primary">
                       비밀번호 재설정
                     </span>
                   </Link>
@@ -152,12 +151,12 @@ export default function LoginPage() {
           <SocialButtons />
           <div className="flex items-center gap-6">
             <Link to="/terms">
-              <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-secondary">
+              <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-primary">
                 이용약관
               </span>
             </Link>
             <Link to="/privacy">
-              <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-secondary">
+              <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-primary">
                 개인정보처리방침
               </span>
             </Link>

@@ -23,8 +23,8 @@ export default function SupportPage() {
           href={`mailto:${SUPPORT_EMAIL}`}
           className="flex items-center gap-3 py-4 px-4 rounded-lg border border-muted/20 active:bg-muted/5"
         >
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary/10">
-            <Mail className="w-5 h-5 text-secondary" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+            <Mail className="w-5 h-5 text-primary" />
           </div>
           <div className="flex flex-col gap-0.5 flex-1">
             <span className="text-xs text-muted">이메일 문의</span>

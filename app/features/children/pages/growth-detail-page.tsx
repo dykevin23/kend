@@ -191,7 +191,7 @@ export default function GrowthDetailPage() {
               className={cn(
                 "flex-1 py-2 px-3 rounded-full text-sm font-medium transition-colors",
                 selectedType === type
-                  ? "bg-secondary text-white"
+                  ? "bg-primary text-white"
                   : "bg-muted/10 text-muted-foreground"
               )}
             >
@@ -286,7 +286,7 @@ export default function GrowthDetailPage() {
 
           {/* 추가하기 입력 폼 */}
           {isAddingRecord && (
-            <div className="mt-4 p-4 bg-white rounded-xl border border-secondary">
+            <div className="mt-4 p-4 bg-white rounded-xl border border-primary">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-medium">
                   {GROWTH_LABELS[selectedType].label} 추가
@@ -320,7 +320,7 @@ export default function GrowthDetailPage() {
                   <div className="flex items-center gap-2">
                     <Button
                       type="button"
-                      variant={isToday ? "secondary" : "ghost"}
+                      variant={isToday ? "default" : "ghost"}
                       size="sm"
                       onClick={() =>
                         setMeasuredAt(format(new Date(), "yyyy-MM-dd"))
@@ -354,7 +354,7 @@ export default function GrowthDetailPage() {
                       className={cn(
                         "h-12 pr-12 rounded-xl text-right",
                         "border-muted/30",
-                        "focus-visible:border-secondary focus-visible:ring-0"
+                        "focus-visible:border-primary focus-visible:ring-0"
                       )}
                       autoFocus
                     />
@@ -367,7 +367,6 @@ export default function GrowthDetailPage() {
                 {/* 저장 버튼 */}
                 <Button
                   type="submit"
-                  variant="secondary"
                   disabled={isSubmitting}
                   className="w-full py-5 rounded-full"
                 >
@@ -387,7 +386,7 @@ export default function GrowthDetailPage() {
                 "border border-dashed border-muted-foreground/30",
                 "text-muted-foreground",
                 "flex items-center justify-center gap-2",
-                "hover:border-secondary hover:text-secondary transition-colors"
+                "hover:border-primary hover:text-primary transition-colors"
               )}
             >
               <Plus size={18} />

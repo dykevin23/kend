@@ -43,21 +43,21 @@ export default function FindPasswordPage() {
 
   return (
     <div
-      className="flex flex-col min-h-screen bg-primary/50"
+      className="flex flex-col min-h-screen bg-orange-100/50"
       style={{
         paddingTop: "max(3.125rem, var(--safe-area-inset-top))",
         paddingBottom: "max(1.5rem, var(--safe-area-inset-bottom))",
       }}
     >
       <div className="flex w-full flex-col items-center gap-4 px-6">
-        <span className="text-center font-arimo text-[40px] font-bold italic leading-[100%] text-secondary">
+        <span className="text-center font-arimo text-[40px] font-bold italic leading-[100%] text-primary">
           KEND
         </span>
       </div>
 
       <div className="flex w-full flex-col items-start gap-8 pt-10 px-6 flex-1">
         <div className="flex flex-col gap-2 self-stretch">
-          <span className="text-xl leading-[130%] tracking-[-0.4px] text-secondary text-center">
+          <span className="text-xl leading-[130%] tracking-[-0.4px] text-primary text-center">
             비밀번호 재설정
           </span>
           <span className="text-sm leading-[140%] text-center text-muted-foreground">
@@ -75,7 +75,6 @@ export default function FindPasswordPage() {
             </div>
             <Link to="/auth/login">
               <Button
-                variant="secondary"
                 className="w-full h-14 rounded-full text-base"
               >
                 로그인하러 가기
@@ -99,7 +98,6 @@ export default function FindPasswordPage() {
             )}
             <Button
               type="submit"
-              variant="secondary"
               disabled={submitting}
               className={cn(
                 "w-full h-14 rounded-full text-base",

@@ -9,10 +9,10 @@ export default function IntroPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <div className="flex flex-col items-center gap-1 pt-16 pb-10 px-6">
-        <span className="text-center font-arimo text-[48px] font-bold italic leading-[100%] text-secondary">
+        <span className="text-center font-arimo text-[48px] font-bold italic leading-[100%] text-primary">
           KEND
         </span>
-        <span className="text-center font-arimo text-sm italic font-bold leading-[18px] text-secondary">
+        <span className="text-center font-arimo text-sm italic font-bold leading-[18px] text-primary">
           Kids are an ENDuser
         </span>
       </div>
@@ -48,7 +48,7 @@ export default function IntroPage() {
         {ANDROID_APK_URL ? (
           <a
             href={ANDROID_APK_URL}
-            className="w-full max-w-xs py-3 rounded-lg bg-secondary text-white text-center font-medium"
+            className="w-full max-w-xs py-3 rounded-lg bg-primary text-white text-center font-medium"
           >
             안드로이드 테스트 버전 다운로드 (APK)
           </a>

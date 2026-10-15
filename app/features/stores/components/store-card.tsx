@@ -82,9 +82,8 @@ export const StoreInfo = ({
 
       <div className="flex h-12 justify-between items-center flex-gsb">
         <Badge
-          variant="secondary"
           className={cn(
-            "bg-secondary/10 text-secondary",
+            "bg-primary/10 text-primary",
             "flex h-6 px-2 rounded-md",
             "text-xs leading-3"
           )}

@@ -64,7 +64,7 @@ function QuickMenuCard({ icon, label, count, href }: QuickMenuItem) {
       </div>
       <span className="text-xs text-gray-600">{label}</span>
       {count !== undefined && (
-        <span className="text-sm font-semibold text-secondary">{count}</span>
+        <span className="text-sm font-semibold text-primary">{count}</span>
       )}
     </Link>
   );
@@ -398,6 +398,7 @@ export default function MyPage() {
         {/* 로그아웃 / 회원탈퇴 */}
         <div className="px-4 py-6 flex flex-col gap-3">
           <Button
+            variant="secondary"
             onClick={handleLogout}
             className="w-full py-3 rounded-lg"
           >

@@ -228,6 +228,7 @@ export default function InquiryNewPage() {
 
         <div className="px-4 pb-6">
           <Button
+            variant="secondary"
             type="submit"
             className="w-full"
             disabled={

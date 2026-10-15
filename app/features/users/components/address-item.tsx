@@ -29,7 +29,7 @@ export default function AddressItem({
     <div
       className={`flex items-start justify-between p-4 rounded-lg border transition-colors ${
         isSelected
-          ? "border-secondary bg-secondary/5"
+          ? "border-primary bg-primary/5"
           : "border-muted/30 hover:border-muted/50"
       } ${selectable ? "cursor-pointer" : ""}`}
       onClick={handleClick}
@@ -39,7 +39,7 @@ export default function AddressItem({
           <span className="text-base font-bold leading-4 tracking-[-0.4px]">
             {address.label}
           </span>
-          {address.isDefault && <Badge>기본</Badge>}
+          {address.isDefault && <Badge variant="secondary">기본</Badge>}
         </div>
         <div className="flex items-center gap-1">
           <span className="text-sm leading-3.5 tracking-[-0.4px]">
