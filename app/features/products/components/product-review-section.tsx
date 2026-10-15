@@ -10,13 +10,13 @@ interface ProductReviewSectionProps {
 const ProductReviewSection = forwardRef<HTMLDivElement, ProductReviewSectionProps>(
   ({ reviews }, ref) => {
     return (
-      <div ref={ref} className="flex w-full p-4 flex-col items-start gap-2.5">
-        <div className="flex p-4 items-center gap-2 self-stretch border-b-1 border-b-muted-foreground/10">
+      <div ref={ref} className="flex w-full px-5 py-5 flex-col items-start gap-2.5">
+        <div className="flex py-1 items-center gap-2 self-stretch">
           <div className="flex items-center gap-1 flex-gsb">
-            <span className="text-lg font-bold leading-[100%] tracking-[-0.4px]">
+            <span className="text-[15px] font-extrabold text-gray-900">
               리뷰
             </span>
-            <span className="text-base leading-[100%] tracking-[-0.4px] text-muted/50">
+            <span className="text-[15px] text-gray-400">
               ({reviews.length.toLocaleString()})
             </span>
           </div>

@@ -57,20 +57,14 @@ export default function RecommendProducts({
   if (filtered.length === 0) return null;
 
   return (
-    <div className="flex w-full px-4 flex-col items-start">
-      <div className="flex w-full justify-between items-center">
-        <div className="flex h-6 shrink-0">
-          <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-            추천 상품
-          </span>
-        </div>
-      </div>
-      <div className="flex pt-1 flex-col items-start overflow-x-auto max-w-full overflow-y-hidden">
-        <div className="flex items-center gap-0.5">
-          {filtered.map((product) => (
-            <RecommendProduct key={product.id} product={product} />
-          ))}
-        </div>
+    <div className="flex w-full flex-col gap-3.5 px-5 pt-5 pb-3">
+      <span className="text-[15px] font-extrabold text-gray-900">
+        이런 상품은 어때요
+      </span>
+      <div className="flex gap-2.5 overflow-x-auto">
+        {filtered.map((product) => (
+          <RecommendProduct key={product.id} product={product} />
+        ))}
       </div>
     </div>
   );
@@ -78,40 +72,34 @@ export default function RecommendProducts({
 
 function RecommendProduct({ product }: { product: RandomProduct }) {
   return (
-    <Link to={`/products/${product.productCode}`} prefetch="intent">
-      <div className="flex w-27.5 flex-col items-center gap-0.25">
-        <div className="flex w-full h-33.5 pb-0.25 flex-col justify-center items-center">
-          {product.mainImage ? (
-            <img
-              src={product.mainImage}
-              alt={product.name}
-              className="h-33.5 w-full object-cover rounded-md"
-            />
-          ) : (
-            <div className="h-33.5 w-full bg-gray-200 rounded-md flex items-center justify-center">
-              <span className="text-xs text-muted">No Image</span>
-            </div>
-          )}
+    <Link
+      to={`/products/${product.productCode}`}
+      prefetch="intent"
+      className="flex w-28 shrink-0 flex-col gap-1.5"
+    >
+      {product.mainImage ? (
+        <img
+          src={product.mainImage}
+          alt={product.name}
+          className="size-28 object-cover rounded-[14px] bg-gray-100"
+        />
+      ) : (
+        <div className="size-28 bg-gray-100 rounded-[14px] flex items-center justify-center">
+          <span className="text-xs text-gray-400">No Image</span>
         </div>
-        <div className="flex px-0.5 items-center self-stretch">
-          <span className="text-[10px] font-bold leading-[140%] tracking-[-0.8px] flex-gsb line-clamp-1">
-            {product.name}
+      )}
+      <span className="text-xs font-semibold text-gray-900 line-clamp-1">
+        {product.name}
+      </span>
+      <div className="flex items-baseline gap-1">
+        {product.discountRate > 0 && (
+          <span className="text-xs font-extrabold text-orange-600">
+            {product.discountRate}%
           </span>
-        </div>
-        <div className="flex px-0.5 items-center gap-0.5 self-stretch">
-          {product.discountRate > 0 && (
-            <div className="flex justify-center items-center gap-2.5">
-              <span className="text-sm font-bold leading-[100%] tracking-[-0.4px] text-accent">
-                {product.discountRate}%
-              </span>
-            </div>
-          )}
-          <div className="flex justify-center items-center gap-2.5 flex-gsb">
-            <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
-              {formatCurrency(product.salePrice)}
-            </span>
-          </div>
-        </div>
+        )}
+        <span className="text-[12.5px] font-extrabold text-gray-900">
+          {formatCurrency(product.salePrice)}원
+        </span>
       </div>
     </Link>
   );

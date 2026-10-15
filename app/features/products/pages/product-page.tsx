@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronRight, Heart, Star } from "lucide-react";
 import {
+  Link,
   redirect,
   useLoaderData,
   useFetcher,
@@ -10,13 +12,16 @@ import {
 import type { Route } from "./+types/product-page";
 import BottomSheet from "~/common/components/bottom-sheet";
 import Content from "~/common/components/content";
+import FloatingHeader, {
+  floatingIconButtonClass,
+} from "~/common/components/floating-header";
 import { SelectAccordion } from "~/common/components/select-accordion";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import Divider from "~/common/components/divider";
 import { makeSSRClient } from "~/supa-client";
-import { getProductByCode } from "../queries";
+import { getProductByCode, type ProductDetail } from "../queries";
 import { getProductRatingSummary, getProductReviews } from "~/features/reviews/queries";
 import {
   Carousel,
@@ -417,15 +422,19 @@ export default function ProductPage() {
   return (
     <>
       <Content
+        hideHeader
         footer={
           <ProductFooter
-            product={product}
-            isLiked={isLiked}
+            salePrice={product.salePrice}
             purchaseBlock={purchaseBlock}
             onBuyClick={handleBuyClick}
           />
         }
       >
+        <FloatingHeader
+          right={<ProductLikeButton productId={product.id} isLiked={isLiked} />}
+        />
+
         {/* 상품 이미지 캐러셀 */}
         {product.images.length > 0 ? (
           <div className="relative">
@@ -443,62 +452,78 @@ export default function ProductPage() {
               </CarouselContent>
             </Carousel>
             {slideCount > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                {Array.from({ length: slideCount }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "size-2 rounded-full transition-colors",
-                      i === currentSlide ? "bg-white" : "bg-white/40"
-                    )}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-[5px]">
+                  {Array.from({ length: slideCount }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-1 rounded-full transition-all duration-300",
+                        i === currentSlide ? "w-4 bg-white" : "w-1 bg-white/50"
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className="absolute right-3.5 bottom-3.5 px-[9px] py-[3px] rounded-full bg-navy-900/50 text-[11px] font-bold text-white">
+                  {currentSlide + 1} / {slideCount}
+                </span>
+              </>
             )}
           </div>
         ) : (
-          <div className="w-full aspect-square bg-gray-400" />
+          <div className="w-full aspect-square bg-gray-100" />
         )}
 
         {/* 상품 기본 정보 */}
-        <div className="flex pt-3 px-4 pb-2 items-center justify-between gap-2 self-stretch border-b-1 border-b-muted/30">
-          <span className="text-xl font-bold leading-7.5 tracking-[-0.4px]">
+        <div className="flex flex-col px-5 pt-[18px] pb-[18px] bg-white">
+          {product.seller && (
+            <Link
+              to={`/stores/${product.seller.sellerCode}`}
+              prefetch="intent"
+              className="flex items-center gap-1 mb-3 w-fit text-[12.5px] font-bold text-gray-700"
+            >
+              {product.seller.name}
+              <ChevronRight className="size-3.5 text-gray-400" strokeWidth={2.2} />
+            </Link>
+          )}
+
+          <span className="text-[19px] font-extrabold leading-[1.4] text-gray-900">
             {product.name}
           </span>
-          <div className="flex items-center gap-1 shrink-0">
-            <div className="flex items-center gap-0.5">
-              <div className="flex h-3.5 pl-0.5 justify-end items-center aspect-square">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="14"
-                  viewBox="0 0 12 14"
-                  fill="none"
-                >
-                  <path
-                    d="M6.01246 4.21171C6.387 3.27798 6.57427 2.81111 6.87853 2.7464C6.95853 2.72939 7.04121 2.72939 7.12121 2.7464C7.42547 2.81111 7.61274 3.27798 7.98728 4.21171C8.20028 4.74271 8.30678 5.0082 8.50605 5.18878C8.56194 5.23944 8.62262 5.28455 8.68722 5.32348C8.91754 5.4623 9.20506 5.48805 9.7801 5.53955C10.7535 5.62673 11.2403 5.67032 11.3889 5.94784C11.4197 6.00531 11.4406 6.06754 11.4508 6.13194C11.5001 6.44287 11.1423 6.76841 10.4267 7.41948L10.2279 7.60028C9.89337 7.90466 9.72608 8.05686 9.62932 8.24679C9.57128 8.36073 9.53236 8.48343 9.51413 8.60999C9.48373 8.82098 9.53271 9.04176 9.63069 9.48334L9.66569 9.64111C9.84139 10.433 9.92924 10.8289 9.81957 11.0236C9.72107 11.1984 9.53963 11.3103 9.33919 11.3199C9.11606 11.3305 8.80165 11.0743 8.17283 10.5619C7.75854 10.2244 7.55139 10.0556 7.32144 9.98963C7.11129 9.92937 6.88845 9.92937 6.6783 9.98963C6.44835 10.0556 6.2412 10.2244 5.82691 10.5619C5.19809 11.0743 4.88368 11.3305 4.66055 11.3199C4.46011 11.3103 4.27867 11.1984 4.18017 11.0236C4.0705 10.8289 4.15835 10.433 4.33405 9.64111L4.36905 9.48334C4.46703 9.04176 4.51601 8.82098 4.48561 8.60999C4.46738 8.48343 4.42846 8.36073 4.37042 8.24679C4.27366 8.05686 4.10638 7.90467 3.77181 7.60028L3.57308 7.41948C2.85746 6.76841 2.49964 6.44287 2.54892 6.13194C2.55912 6.06754 2.58005 6.00531 2.61084 5.94784C2.75947 5.67032 3.24619 5.62673 4.21964 5.53955C4.79468 5.48805 5.0822 5.4623 5.31252 5.32348C5.37712 5.28455 5.4378 5.23944 5.49369 5.18878C5.69297 5.0082 5.79946 4.74271 6.01246 4.21171Z"
-                    fill="#EBABF8"
-                  />
-                </svg>
-              </div>
-              <span className="text-xs leading-3 text-muted">
+
+          {ratingSummary.count > 0 && (
+            <div className="flex items-center gap-[5px] mt-2">
+              <Star className="size-3.5 fill-star text-star" strokeWidth={0} />
+              <span className="text-[13px] font-bold text-gray-900">
                 {ratingSummary.average}
               </span>
+              <span className="text-[12.5px] text-gray-500">
+                리뷰 {ratingSummary.count.toLocaleString()}
+              </span>
             </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="2"
-              height="2"
-              viewBox="0 0 2 2"
-              fill="none"
-            >
-              <circle cx="1" cy="1" r="1" fill="#BCC2CF" />
-            </svg>
-            <span className="text-xs leading-3 text-muted">
-              리뷰 ({ratingSummary.count.toLocaleString()})
+          )}
+
+          <div className="flex items-baseline gap-2 mt-3.5">
+            {product.discountRate > 0 && (
+              <span className="text-[19px] font-extrabold text-orange-600">
+                {product.discountRate}%
+              </span>
+            )}
+            <span className="text-[23px] font-extrabold text-gray-900">
+              {product.salePrice.toLocaleString()}원
             </span>
+            {product.discountRate > 0 &&
+              product.regularPrice !== product.salePrice && (
+                <span className="text-sm text-gray-400 line-through">
+                  {product.regularPrice.toLocaleString()}원
+                </span>
+              )}
           </div>
+
+          <DeliveryChip delivery={product.delivery} />
         </div>
+
+        <div className="h-2 bg-gray-50" />
 
         {/* 탭 네비게이션 */}
         <div className="flex w-full flex-col items-start gap-2.5 shrink-0">
@@ -506,31 +531,26 @@ export default function ProductPage() {
             <Tab
               title="정보"
               isActive={activeTab === "information"}
-              className={{ "text-muted": activeTab !== "information" }}
               onClick={handleTabClick("information")}
             />
             <Tab
               title="사이즈"
               isActive={activeTab === "size"}
-              className={{ "text-muted": activeTab !== "size" }}
               onClick={handleTabClick("size")}
             />
             <Tab
-              title={`리뷰(${reviews.length.toLocaleString()})`}
+              title={`리뷰 ${reviews.length.toLocaleString()}`}
               isActive={activeTab === "review"}
-              className={{ "text-muted": activeTab !== "review" }}
               onClick={handleTabClick("review")}
             />
             <Tab
               title="코디"
               isActive={activeTab === "coordination"}
-              className={{ "text-muted": activeTab !== "coordination" }}
               onClick={handleTabClick("coordination")}
             />
             <Tab
               title="문의"
               isActive={activeTab === "inquiry"}
-              className={{ "text-muted": activeTab !== "inquiry" }}
               onClick={handleTabClick("inquiry")}
             />
           </Tabs>
@@ -622,7 +642,7 @@ export default function ProductPage() {
             "fixed right-4 z-40",
             "w-10 h-10 rounded-full",
             "flex items-center justify-center",
-            "bg-white border border-muted/30 shadow-md",
+            "bg-white text-gray-700 shadow-card-md",
           )}
           style={{ bottom: "calc(5rem + var(--safe-area-inset-bottom, 0px))" }}
         >
@@ -637,18 +657,35 @@ export default function ProductPage() {
 
 // 하단 Footer 컴포넌트
 interface ProductFooterProps {
-  product: {
-    id: string;
-    discountRate: number;
-    regularPrice: number;
-    salePrice: number;
-  };
-  isLiked: boolean;
+  salePrice: number;
   purchaseBlock: PurchaseBlockReason | null;
   onBuyClick: () => void;
 }
 
-function ProductFooter({ product, isLiked, purchaseBlock, onBuyClick }: ProductFooterProps) {
+function ProductFooter({ salePrice, purchaseBlock, onBuyClick }: ProductFooterProps) {
+  // 구매불가 상태면 안내 문구로 대체하고 클릭 차단
+  return (
+    <Button
+      size="lg"
+      disabled={!!purchaseBlock}
+      className="w-full"
+      onClick={onBuyClick}
+    >
+      {purchaseBlock
+        ? purchaseBlock.label
+        : `구매하기 · ${salePrice.toLocaleString()}원`}
+    </Button>
+  );
+}
+
+// 히어로 이미지 위 찜 버튼
+function ProductLikeButton({
+  productId,
+  isLiked,
+}: {
+  productId: string;
+  isLiked: boolean;
+}) {
   const likeFetcher = useFetcher();
 
   // optimistic UI: 요청 중이면 반전된 상태 표시
@@ -659,75 +696,52 @@ function ProductFooter({ product, isLiked, purchaseBlock, onBuyClick }: ProductF
 
   const handleLikeClick = () => {
     likeFetcher.submit(
-      { intent: "toggleLike", productId: product.id },
+      { intent: "toggleLike", productId },
       { method: "POST" }
     );
   };
 
-  const hasDiscount = product.discountRate > 0 && product.regularPrice !== product.salePrice;
+  return (
+    <button
+      type="button"
+      onClick={handleLikeClick}
+      disabled={likeFetcher.state !== "idle"}
+      className={floatingIconButtonClass}
+      aria-label={optimisticIsLiked ? "찜 해제" : "찜하기"}
+      aria-pressed={optimisticIsLiked}
+    >
+      <Heart
+        className={cn(
+          "size-[19px]",
+          optimisticIsLiked && "fill-accent text-accent"
+        )}
+        strokeWidth={optimisticIsLiked ? 0 : 1.8}
+      />
+    </button>
+  );
+}
+
+// 배송 정책 칩 — 판매자 정책이 무료/조건부 무료일 때만 노출
+// (유료배송은 플랫폼 프로모션으로 결제 시 무료가 될 수 있어 상세에선 표시하지 않음)
+function DeliveryChip({ delivery }: { delivery: ProductDetail["delivery"] }) {
+  if (!delivery) return null;
+
+  let label: string | null = null;
+  if (delivery.shippingFeeType === "FREE") {
+    label = "무료배송";
+  } else if (
+    delivery.shippingFeeType === "CONDITIONAL" &&
+    delivery.freeShippingCondition !== null
+  ) {
+    label = `${delivery.freeShippingCondition.toLocaleString()}원 이상 무료배송`;
+  }
+  if (!label) return null;
 
   return (
-    <>
-      <div className="flex flex-col justify-center items-start gap-1 flex-gsb">
-        {hasDiscount && (
-          <div
-            className={cn(
-              "flex h-3.5 gap-1 self-stretch",
-              "text-sm leading-3.5 tracking-[-0.4px]"
-            )}
-          >
-            <span>{product.discountRate}%</span>
-            <span className="text-muted line-through">
-              {product.regularPrice.toLocaleString()}
-            </span>
-          </div>
-        )}
-        <div className="flex h-5 flex-col justify-center items-start gap-1 self-stretch">
-          <span className="text-xl font-bold leading-4 tracking-[-0.4px]">
-            {product.salePrice.toLocaleString()}원
-          </span>
-        </div>
-      </div>
-      {/* 좋아요 버튼 */}
-      <button
-        type="button"
-        onClick={handleLikeClick}
-        disabled={likeFetcher.state !== "idle"}
-        className={cn(
-          "flex size-12 justify-center items-center shrink-0 rounded-full border transition-all",
-          optimisticIsLiked
-            ? "border-accent bg-accent/10"
-            : "border-muted/30 bg-white hover:bg-muted/5"
-        )}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          className="aspect-square shrink-0"
-        >
-          {optimisticIsLiked ? (
-            <path
-              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              fill="#EBABF8"
-            />
-          ) : (
-            <path
-              d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"
-              fill="#1E1E1E"
-            />
-          )}
-        </svg>
-      </button>
-      {/* 구매하기 버튼 — 구매불가 상태면 안내 문구로 대체하고 클릭 차단 */}
-      <Button
-        disabled={!!purchaseBlock}
-        className="flex h-12.5 px-10 justify-center items-center rounded-full text-base font-bold disabled:opacity-50"
-        onClick={onBuyClick}
-      >
-        {purchaseBlock ? purchaseBlock.label : "구매하기"}
-      </Button>
-    </>
+    <div className="flex gap-1.5 mt-3">
+      <span className="px-2.5 py-[5px] rounded-full bg-navy-50 text-[11.5px] font-bold text-primary">
+        {label}
+      </span>
+    </div>
   );
 }
