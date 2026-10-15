@@ -13,12 +13,11 @@ import { Button } from "~/common/components/ui/button";
 import { Checkbox } from "~/common/components/ui/checkbox";
 import { Label } from "~/common/components/ui/label";
 import CartProductCard from "../compoents/cart-product-card";
-import Divider from "~/common/components/divider";
 import RecommendProducts from "~/features/products/components/recommend-products";
 import ProductPurchaseModal from "~/features/products/components/product-purchase-modal";
 import { makeSSRClient } from "~/supa-client";
 import { actionErrorResponse } from "~/lib/error-handler";
-import { getCartItems } from "../queries";
+import { getCartItems, type CartItem } from "../queries";
 import {
   removeFromCart,
   removeMultipleFromCart,
@@ -235,17 +234,35 @@ export default function ShoppingCartPage() {
     setIsPurchaseModalOpen(true);
   };
 
+  // 화면 표시용 판매자별 묶음 (장바구니에 담긴 순서 유지)
+  const sellerGroups = useMemo(() => {
+    const groups = new Map<string, { name: string; items: CartItem[] }>();
+    cartItems.forEach((item) => {
+      const key = item.seller?.id ?? "unknown";
+      const group = groups.get(key);
+      if (group) group.items.push(item);
+      else groups.set(key, { name: item.seller?.name ?? "판매자", items: [item] });
+    });
+    return Array.from(groups.entries());
+  }, [cartItems]);
+
+  const shippingFee = totalPrice - totalProductPrice;
+
   return (
     <Content
       headerPorps={{ title: "장바구니", useRight: false }}
+      className="bg-gray-50"
       footer={
         cartItems.length > 0 && (
           <Button
-            className="flex w-full h-12.5 px-7.5 justify-center items-center rounded-full"
+            size="lg"
+            className="w-full"
             disabled={selectedIds.size === 0}
             onClick={handlePurchase}
           >
-            결제하기
+            {selectedIds.size > 0
+              ? `${totalPrice.toLocaleString()}원 결제하기`
+              : "결제하기"}
           </Button>
         )
       }
@@ -255,15 +272,15 @@ export default function ShoppingCartPage() {
         <div
           className={
             paymentBanner.tone === "error"
-              ? "flex items-center gap-3 px-4 py-3 bg-red-50 border-b border-red-200"
-              : "flex items-center gap-3 px-4 py-3 bg-muted/10 border-b border-muted/20"
+              ? "flex items-center gap-3 px-5 py-3 bg-red-50"
+              : "flex items-center gap-3 px-5 py-3 bg-white"
           }
         >
           <span
             className={
               paymentBanner.tone === "error"
                 ? "text-sm text-red-800"
-                : "text-sm text-muted-foreground"
+                : "text-sm text-gray-700"
             }
           >
             {paymentBanner.text}
@@ -272,7 +289,7 @@ export default function ShoppingCartPage() {
             className={
               paymentBanner.tone === "error"
                 ? "ml-auto text-red-600 text-xs shrink-0"
-                : "ml-auto text-muted text-xs shrink-0"
+                : "ml-auto text-gray-500 text-xs shrink-0"
             }
             onClick={() => setPaymentBanner(null)}
           >
@@ -283,127 +300,93 @@ export default function ShoppingCartPage() {
 
       {cartItems.length > 0 ? (
         <>
-          <div className="flex w-full p-4 items-center gap-2 border-b-1 border-b-muted/30">
-            <div className="flex justify-end items-center gap-1.5">
+          <div className="flex items-center justify-between px-5 py-[13px] bg-white">
+            <div className="flex items-center gap-2">
               <Checkbox
-                className="size-6"
+                className="size-5"
                 id="all"
                 checked={isAllSelected}
                 onCheckedChange={handleCheckAll}
               />
-              <Label htmlFor="all" className="text-base leading-4 text-black">
-                전체선택
+              <Label htmlFor="all" className="text-[13.5px] font-bold text-gray-900">
+                전체선택 ({selectedIds.size}/{purchasableCartItems.length})
               </Label>
             </div>
-            <div className="flex justify-end items-center flex-gsb">
-              <button
-                className="text-xs leading-3 hover:underline disabled:opacity-50"
-                onClick={handleRemoveSelected}
-                disabled={selectedIds.size === 0 || isUpdating}
-              >
-                상품삭제
-              </button>
-            </div>
+            <button
+              className="text-[13px] font-semibold text-gray-500 disabled:opacity-50"
+              onClick={handleRemoveSelected}
+              disabled={selectedIds.size === 0 || isUpdating}
+            >
+              선택삭제
+            </button>
           </div>
 
-          {cartItems.map((item) => (
-            <div key={item.id}>
-              <CartProductCard
-                item={item}
-                checked={selectedIds.has(item.id)}
-                onCheckChange={(checked) =>
-                  handleCheckItem(item.id, checked as boolean)
-                }
-                onQuantityChange={(quantity) =>
-                  handleQuantityChange(item.id, quantity)
-                }
-                onRemove={() => handleRemove(item.id)}
-                isUpdating={isUpdating}
-              />
-              <Divider />
-            </div>
-          ))}
+          <div className="flex flex-col gap-[18px] px-5 py-4">
+            {sellerGroups.map(([sellerId, group]) => (
+              <div key={sellerId} className="flex flex-col gap-2.5">
+                <span className="text-[13.5px] font-extrabold text-gray-900">
+                  {group.name}
+                </span>
+                {group.items.map((item) => (
+                  <CartProductCard
+                    key={item.id}
+                    item={item}
+                    checked={selectedIds.has(item.id)}
+                    onCheckChange={(checked) =>
+                      handleCheckItem(item.id, checked as boolean)
+                    }
+                    onQuantityChange={(quantity) =>
+                      handleQuantityChange(item.id, quantity)
+                    }
+                    onRemove={() => handleRemove(item.id)}
+                    isUpdating={isUpdating}
+                  />
+                ))}
+              </div>
+            ))}
 
-          <div className="flex w-full py-4.5 px-4 flex-col items-start gap-5">
-            <div className="flex px-4 items-center gap-2.5 self-stretch">
-              <span className="text-base font-bold leading-[100%] tracking-[-0.4px]">
-                결제 예상 금액
-              </span>
-              <div className="flex justify-end items-center gap-2.5 flex-gsb self-stretch">
-                <span className="text-sm font-bold leading-[100%] tracking-[-0.4px]">
+            <div className="flex flex-col gap-2.5 p-[18px] bg-white rounded-card shadow-card-sm">
+              <div className="flex justify-between text-[13px]">
+                <span className="text-gray-700">상품금액</span>
+                <span className="font-semibold text-gray-900">
+                  {totalProductPrice.toLocaleString()}원
+                </span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="text-gray-700">배송비</span>
+                <span className="font-semibold text-gray-900">
+                  {shippingFee > 0 ? `${shippingFee.toLocaleString()}원` : "무료"}
+                </span>
+              </div>
+              <div className="h-px my-0.5 bg-gray-100" />
+              <div className="flex justify-between items-center">
+                <span className="text-[14.5px] font-extrabold text-gray-900">
+                  총 결제금액
+                </span>
+                <span className="text-[19px] font-extrabold text-primary">
                   {totalPrice.toLocaleString()}원
                 </span>
               </div>
-            </div>
-
-            <div className="flex flex-col justify-center items-start gap-2.5 self-stretch">
-              <div className="flex items-center gap-1 self-stretch">
-                <div className="flex px-4 items-center gap-1 self-stretch">
-                  <span className="text-sm leading-[140%] tracking-[-0.4px]">
-                    상품 금액
-                  </span>
-                </div>
-                <div className="flex px-4 justify-end items-center gap-1 flex-gsb self-stretch">
-                  <span className="text-sm leading-[140%] tracking-[-0.4px]">
-                    {totalProductPrice.toLocaleString()}원
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 self-stretch">
-                <div className="flex px-4 items-center gap-1 self-stretch">
-                  <span className="text-sm leading-[140%] tracking-[-0.4px]">
-                    배송비
-                  </span>
-                </div>
-                <div className="flex px-4 justify-end items-center gap-1 flex-gsb self-stretch">
-                  <span className="text-sm leading-[140%] tracking-[-0.4px]">
-                    {(totalPrice - totalProductPrice).toLocaleString()}원
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center items-center gap-1 self-stretch">
-              <div className="flex px-4 items-center gap-1 self-stretch">
-                <span className="text-sm leading-[140%] tracking-[-0.4px]">
-                  쿠폰 및 포인트는 결제 시 사용 가능합니다.
-                </span>
-              </div>
-            </div>
-          </div>
-          <Divider />
-
-          <div className="flex w-full py-4.5 px-4 flex-col items-start gap-5">
-            <div className="flex px-4 items-center gap-2.5 self-stretch">
-              <span className="text-base font-bold leading-[100%] tracking-[-0.4px]">
-                총 결제 금액
+              <span className="text-xs text-gray-500">
+                쿠폰 및 포인트는 결제 시 사용 가능합니다.
               </span>
-              <div className="flex justify-end items-center gap-2.5 flex-gsb self-stretch">
-                <span className="text-lg font-bold leading-[100%] tracking-[-0.4px] text-accent">
-                  {totalPrice.toLocaleString()}원
-                </span>
-              </div>
             </div>
           </div>
-          <Divider />
         </>
       ) : (
-        /* 장바구니 비어있을경우 start */
-        <div className="flex flex-col w-full p-4 items-start gap-5">
-          <div className="flex flex-col w-full h-48 justify-center items-center gap-4 rounded-md border-1 border-muted/30">
-            <div className="flex justify-center items-center self-stretch">
-              <span className="flex-gsb text-center text-base font-bold leading-5 tracking-[-0.4px]">
-                장바구니가 비어 있어요
-              </span>
-            </div>
+        <div className="px-5 py-4">
+          <div className="flex flex-col h-48 justify-center items-center gap-4 bg-white rounded-card shadow-card-sm">
+            <span className="text-[15px] font-bold text-gray-900">
+              장바구니가 비어 있어요
+            </span>
             <Button asChild>
               <Link to="/stores">쇼핑하기</Link>
             </Button>
           </div>
         </div>
-        /* 장바구니 비어있을경우 end */
       )}
 
-      <div className="flex pt-4 flex-col items-start gap-1">
+      <div className="bg-white">
         <RecommendProducts excludeIds={cartItems.map((item) => item.product.id)} />
       </div>
 
