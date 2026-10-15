@@ -37,37 +37,37 @@ export default function StoresPage() {
       : stores.filter((store) => store.domainId === activeTab);
 
   return (
-    <Content headerPorps={{ title: "스토어" }}>
-      <div className="pb-20">
-      <Banner images={bannerImages} />
-
-      <div className="flex flex-col w-full items-start gap-6 pt-5">
-        <Tabs>
+    <Content headerPorps={{ title: "스토어" }} className="bg-gray-50">
+      <Tabs scrollable className="sticky top-0 z-10">
+        <Tab
+          title="전체"
+          isActive={activeTab === "all"}
+          onClick={handleClickTab("all")}
+        />
+        {domains.map((domain) => (
           <Tab
-            title="전체"
-            isActive={activeTab === "all"}
-            onClick={handleClickTab("all")}
+            key={domain.id}
+            title={domain.name}
+            isActive={activeTab === domain.id}
+            onClick={handleClickTab(domain.id)}
           />
-          {domains.map((domain) => (
-            <Tab
-              key={domain.id}
-              title={domain.name}
-              isActive={activeTab === domain.id}
-              onClick={handleClickTab(domain.id)}
-            />
-          ))}
-        </Tabs>
+        ))}
+      </Tabs>
 
-        {filteredStores.length === 0 ? (
-          <div className="flex w-full py-10 justify-center items-center">
-            <span className="text-muted">등록된 스토어가 없습니다.</span>
-          </div>
-        ) : (
-          filteredStores.map((store) => (
-            <StoreCard key={store.id} store={store} />
-          ))
-        )}
-      </div>
+      <div className="flex flex-col gap-[18px] pt-[18px] pb-24">
+        <Banner images={bannerImages} />
+
+        <div className="flex flex-col gap-[18px] px-5">
+          {filteredStores.length === 0 ? (
+            <div className="flex w-full py-10 justify-center items-center">
+              <span className="text-sm text-gray-500">등록된 스토어가 없습니다.</span>
+            </div>
+          ) : (
+            filteredStores.map((store) => (
+              <StoreCard key={store.id} store={store} />
+            ))
+          )}
+        </div>
       </div>
     </Content>
   );

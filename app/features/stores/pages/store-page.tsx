@@ -4,6 +4,7 @@ import { useLoaderData, useFetcher, useRevalidator } from "react-router";
 import type { Route } from "./+types/store-page";
 import Banner from "~/common/components/banner";
 import Content from "~/common/components/content";
+import FloatingHeader from "~/common/components/floating-header";
 import { Tab, Tabs } from "~/common/components/tabs";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -17,7 +18,6 @@ import {
 } from "../queries";
 import { isStoreLiked } from "~/features/likes/queries";
 import { toggleStoreLike } from "~/features/likes/mutations";
-import { StoreInfo } from "../components/store-card";
 import ProductCard from "~/features/products/components/product-card";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
@@ -98,58 +98,66 @@ export default function StorePage() {
       : products.filter((product) => product.mainCategory === activeTab);
 
   return (
-    <Content>
-      <Banner images={bannerImages} />
+    <Content hideHeader className="bg-white">
+      <FloatingHeader />
+      <Banner images={bannerImages} variant="hero" />
 
-      <div className="flex flex-col px-4 items-start shrink-0 self-stretch py-2.5 border-b border-muted/30">
-        <div className="flex flex-col pr-4 items-start shrink-0 self-stretch">
-          <StoreInfo
-            name={store.name}
-            profileImage={store.profileImage}
-            hashtags={store.hashtags}
-            likeCount={store.likeCount}
-          />
+      <div className="flex flex-col px-5 pb-4 bg-white">
+        <div className="flex items-end gap-3.5 -mt-8 relative">
+          <StoreLogo name={store.name} profileImage={store.profileImage} />
+          <div className="flex flex-1 justify-end pb-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleLikeClick}
+              disabled={likeFetcher.state !== "idle"}
+              className={cn(
+                "h-9 px-4 text-[13px] gap-1",
+                optimisticIsLiked &&
+                  "bg-primary text-primary-foreground hover:bg-primary active:bg-primary"
+              )}
+            >
+              <Heart
+                className={cn("size-4", optimisticIsLiked && "fill-current")}
+              />
+              {optimisticIsLiked ? "찜한 스토어" : "스토어 찜하기"}
+            </Button>
+          </div>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleLikeClick}
-          disabled={likeFetcher.state !== "idle"}
-          className={cn(
-            "w-full gap-1.5 hover:bg-transparent hover:text-inherit",
-            optimisticIsLiked && "border-primary text-primary"
-          )}
-        >
-          <Heart
-            className={cn("size-4", optimisticIsLiked && "fill-primary")}
-          />
-          {optimisticIsLiked ? "찜한 스토어" : "스토어 찜하기"}
-        </Button>
+        <span className="mt-3 text-[19px] font-extrabold text-gray-900">
+          {store.name}
+        </span>
+        {store.hashtags && (
+          <span className="mt-1.5 text-[13px] leading-normal text-gray-500">
+            {store.hashtags}
+          </span>
+        )}
       </div>
 
-      <div className="flex flex-col w-full items-start gap-6 pt-5">
-        <Tabs>
+      <Tabs scrollable className="sticky top-0 z-10">
+        <Tab
+          title="전체"
+          isActive={activeTab === "all"}
+          onClick={handleClickTab("all")}
+        />
+        {mainCategories.map((category) => (
           <Tab
-            title="전체"
-            isActive={activeTab === "all"}
-            onClick={handleClickTab("all")}
+            key={category.id}
+            title={category.name}
+            isActive={activeTab === category.id}
+            onClick={handleClickTab(category.id)}
           />
-          {mainCategories.map((category) => (
-            <Tab
-              key={category.id}
-              title={category.name}
-              isActive={activeTab === category.id}
-              onClick={handleClickTab(category.id)}
-            />
-          ))}
-        </Tabs>
+        ))}
+      </Tabs>
 
+      <div className="min-h-[50vh] px-5 pt-4 pb-24 bg-gray-50">
         {filteredProducts.length === 0 ? (
           <div className="flex w-full py-10 justify-center items-center">
-            <span className="text-muted">등록된 상품이 없습니다.</span>
+            <span className="text-sm text-gray-500">등록된 상품이 없습니다.</span>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-1 px-1 w-full box-border">
+          <div className="grid grid-cols-3 gap-x-2.5 gap-y-4">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -157,5 +165,30 @@ export default function StorePage() {
         )}
       </div>
     </Content>
+  );
+}
+
+function StoreLogo({
+  name,
+  profileImage,
+}: {
+  name: string;
+  profileImage: string | null;
+}) {
+  const [imageError, setImageError] = useState(false);
+  const className =
+    "size-16 shrink-0 rounded-full border-[3px] border-white shadow-[0_4px_10px_rgba(15,33,56,0.15)]";
+
+  return profileImage && !imageError ? (
+    <img
+      src={profileImage}
+      alt={name}
+      className={cn(className, "object-contain bg-gray-100")}
+      onError={() => setImageError(true)}
+    />
+  ) : (
+    <div className={cn(className, "flex items-center justify-center bg-navy-100")}>
+      <span className="text-lg font-bold text-primary">{name.charAt(0)}</span>
+    </div>
   );
 }
