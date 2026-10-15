@@ -1,19 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  ChevronRight,
-  Package,
-  MessageSquare,
-  Bell,
-  CircleHelp,
-  MessageCircleQuestion,
-  Headphones,
-  FileText,
-  ShieldCheck,
-  RotateCcw,
-  MapPin,
-  User,
-  LogOut,
-} from "lucide-react";
+import { ChevronRight, User } from "lucide-react";
 import { Link, useLoaderData, useNavigate, useFetcher } from "react-router";
 import CompanyFooter from "~/common/components/company-footer";
 import { createClient } from "@supabase/supabase-js";
@@ -29,10 +15,9 @@ import { useAlert } from "~/hooks/useAlert";
 import type { Route } from "./+types/my-page";
 
 /**
- * 빠른 메뉴 아이템 타입
+ * 통계(빠른 메뉴) 아이템 타입
  */
 interface QuickMenuItem {
-  icon: React.ReactNode;
   label: string;
   count?: number;
   href: string;
@@ -44,75 +29,49 @@ interface QuickMenuItem {
 interface MenuGroup {
   title: string;
   items: {
-    icon: React.ReactNode;
     label: string;
     href: string;
   }[];
 }
 
 /**
- * 빠른 메뉴 아이템 컴포넌트
+ * 통계 카드의 한 칸 — 숫자 + 라벨
  */
-function QuickMenuCard({ icon, label, count, href }: QuickMenuItem) {
+function QuickMenuCard({ label, count, href }: QuickMenuItem) {
   return (
     <Link
       to={href}
-      className="flex flex-col items-center justify-center gap-1 flex-1"
+      className="flex flex-1 flex-col items-center gap-1 py-4"
     >
-      <div className="flex items-center justify-center w-10 h-10 text-gray-600">
-        {icon}
-      </div>
-      <span className="text-xs text-gray-600">{label}</span>
-      {count !== undefined && (
-        <span className="text-sm font-semibold text-primary">{count}</span>
-      )}
+      <span className="text-[17px] font-extrabold text-gray-900">
+        {count ?? 0}
+      </span>
+      <span className="text-xs text-gray-500">{label}</span>
     </Link>
   );
 }
 
 /**
- * 메뉴 리스트 아이템 컴포넌트
- */
-function MenuItem({
-  icon,
-  label,
-  href,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  href: string;
-}) {
-  return (
-    <Link
-      to={href}
-      className="flex items-center justify-between py-3.5 px-4 hover:bg-gray-50 active:bg-gray-100"
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-gray-500">{icon}</span>
-        <span className="text-sm text-gray-900">{label}</span>
-      </div>
-      <ChevronRight className="w-4 h-4 text-gray-400" />
-    </Link>
-  );
-}
-
-/**
- * 메뉴 그룹 컴포넌트
+ * 메뉴 그룹 — 섹션 라벨 + 흰 카드 안의 구분선 행
  */
 function MenuSection({ title, items }: MenuGroup) {
   return (
     <div className="flex flex-col">
-      <div className="px-4 py-2">
-        <span className="text-xs text-gray-400 font-medium">{title}</span>
-      </div>
-      <div className="flex flex-col">
+      <span className="mb-1.5 text-xs font-extrabold tracking-[0.4px] text-gray-500">
+        {title}
+      </span>
+      <div className="flex flex-col px-4 py-1 bg-white rounded-card shadow-card-sm divide-y divide-gray-100">
         {items.map((item, index) => (
-          <MenuItem
+          <Link
             key={index}
-            icon={item.icon}
-            label={item.label}
-            href={item.href}
-          />
+            to={item.href}
+            className="flex items-center gap-3 px-1 py-3.5"
+          >
+            <span className="flex-1 text-sm font-semibold text-gray-900">
+              {item.label}
+            </span>
+            <ChevronRight className="size-4 text-gray-400" strokeWidth={2.2} />
+          </Link>
         ))}
       </div>
     </div>
@@ -254,14 +213,12 @@ export default function MyPage() {
   // 빠른 메뉴 아이템 - 실제 컨텐츠는 추후 결정
   const quickMenuItems: QuickMenuItem[] = [
     {
-      icon: <Package className="w-6 h-6" />,
-      label: "주문/배송",
+      label: "주문내역",
       count: orderCount,
       href: "/orders",
     },
     {
-      icon: <MessageSquare className="w-6 h-6" />,
-      label: "리뷰",
+      label: "내 리뷰",
       count: reviewCount,
       href: "/myPage/reviews",
     },
@@ -273,12 +230,10 @@ export default function MyPage() {
       title: "쇼핑",
       items: [
         {
-          icon: <Package className="w-5 h-5" />,
           label: "최근 본 상품",
           href: "/myPage/recent-products",
         },
         {
-          icon: <MapPin className="w-5 h-5" />,
           label: "배송지 관리",
           href: "/myPage/addresses",
         },
@@ -288,37 +243,30 @@ export default function MyPage() {
       title: "고객센터",
       items: [
         {
-          icon: <Bell className="w-5 h-5" />,
           label: "알림 설정",
           href: "/myPage/notifications",
         },
         {
-          icon: <CircleHelp className="w-5 h-5" />,
           label: "공지사항 및 FAQ",
           href: "/myPage/notices",
         },
         {
-          icon: <MessageCircleQuestion className="w-5 h-5" />,
           label: "문의 내역",
           href: "/myPage/inquiries",
         },
         {
-          icon: <Headphones className="w-5 h-5" />,
           label: "고객지원",
           href: "/myPage/support",
         },
         {
-          icon: <FileText className="w-5 h-5" />,
           label: "이용 약관",
           href: "/myPage/terms",
         },
         {
-          icon: <ShieldCheck className="w-5 h-5" />,
           label: "개인정보 처리 방침",
           href: "/myPage/privacy",
         },
         {
-          icon: <RotateCcw className="w-5 h-5" />,
           label: "교환·반품·환불 정책",
           href: "/myPage/refund-policy",
         },
@@ -327,59 +275,43 @@ export default function MyPage() {
   ];
 
   return (
-    <Content headerPorps={{ title: "마이 페이지" }}>
-      <div className="flex flex-col w-full pb-20">
-        {/* 프로필 영역 */}
-        <div className="flex flex-col items-center py-6 px-4">
-          {/* 아바타 */}
-          <div
-            className={cn(
-              "w-20 h-20 rounded-full overflow-hidden",
-              "bg-gray-200 flex items-center justify-center"
-            )}
-          >
-            {imageSrc ? (
-              <img
-                src={imageSrc}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="w-10 h-10 text-gray-400" />
-            )}
+    <Content headerPorps={{ title: "마이페이지" }} className="bg-gray-50">
+      <div className="flex flex-col w-full gap-5 px-5 pt-3 pb-20">
+        {/* 프로필 카드 */}
+        <div className="flex flex-col gap-3.5">
+          <div className="flex items-center gap-3.5 p-5 bg-white rounded-card shadow-card-sm">
+            <div className="flex size-[60px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy-100">
+              {imageSrc ? (
+                <img src={imageSrc} alt="" className="size-full object-cover" />
+              ) : (
+                <User className="size-7 text-navy-500" />
+              )}
+            </div>
+            <div className="flex flex-1 min-w-0 flex-col gap-1">
+              <span className="text-[16.5px] font-extrabold text-gray-900 truncate">
+                {profile?.nickname ?? "게스트"} 님
+              </span>
+              {profile?.introduction && (
+                <span className="text-[12.5px] text-gray-500 truncate">
+                  {profile.introduction}
+                </span>
+              )}
+            </div>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="h-[34px] px-3.5 text-xs"
+            >
+              <Link to="/myPage/profile/edit">프로필 수정</Link>
+            </Button>
           </div>
 
-          {/* 닉네임 */}
-          <h2 className="mt-3 text-lg font-semibold text-gray-900">
-            {profile?.nickname ?? "게스트"}
-          </h2>
-
-          {/* 소개 */}
-          {profile?.introduction && (
-            <p className="mt-1 text-sm text-gray-500">{profile.introduction}</p>
-          )}
-
-          {/* 프로필 수정 버튼 */}
-          <Link
-            to="/myPage/profile/edit"
-            className={cn(
-              "mt-4 w-full max-w-xs py-2.5 px-4",
-              "border border-gray-300 rounded-full",
-              "text-sm text-gray-700 text-center",
-              "hover:bg-gray-50 active:bg-gray-100"
-            )}
-          >
-            프로필 수정하기
-          </Link>
-        </div>
-
-        {/* 빠른 메뉴 영역 */}
-        <div className="bg-gray-100 py-5 px-4">
-          <div className="flex items-start justify-start gap-4">
+          {/* 통계 카드 */}
+          <div className="flex bg-white rounded-card shadow-card-sm divide-x divide-gray-200 [&>*]:my-3.5 [&>*]:py-0.5">
             {quickMenuItems.map((item, index) => (
               <QuickMenuCard
                 key={index}
-                icon={item.icon}
                 label={item.label}
                 count={item.count}
                 href={item.href}
@@ -388,34 +320,33 @@ export default function MyPage() {
           </div>
         </div>
 
-        {/* 메뉴 그룹 영역 */}
-        <div className="flex flex-col divide-y divide-gray-100">
-          {menuGroups.map((group, index) => (
-            <MenuSection key={index} title={group.title} items={group.items} />
-          ))}
-        </div>
+        {/* 메뉴 그룹 */}
+        {menuGroups.map((group, index) => (
+          <MenuSection key={index} title={group.title} items={group.items} />
+        ))}
 
         {/* 로그아웃 / 회원탈퇴 */}
-        <div className="px-4 py-6 flex flex-col gap-3">
-          <Button
-            variant="secondary"
-            onClick={handleLogout}
-            className="w-full py-3 rounded-lg"
-          >
-            <LogOut className="w-4 h-4" />
-            로그아웃
-          </Button>
+        <div className="flex justify-center items-center gap-3.5">
           <button
+            type="button"
+            onClick={handleLogout}
+            className="text-[12.5px] font-semibold text-gray-500"
+          >
+            로그아웃
+          </button>
+          <span className="text-gray-200">|</span>
+          <button
+            type="button"
             onClick={handleDeleteAccount}
             disabled={fetcher.state !== "idle"}
-            className="text-sm text-gray-400 underline"
+            className="text-[12.5px] font-semibold text-gray-400"
           >
             {fetcher.state !== "idle" ? "처리 중..." : "회원탈퇴"}
           </button>
         </div>
-
-        <CompanyFooter />
       </div>
+
+      <CompanyFooter />
     </Content>
   );
 }
