@@ -93,11 +93,15 @@ export default function ProductPurchaseModal({
   );
 
   // 전체 결제 금액 계산
-  const totalAmount = useMemo(() => {
-    const productAmount = sellerGroups.reduce((sum, g) => sum + g.subtotal, 0);
-    const shippingFee = sellerGroups.reduce((sum, g) => sum + g.shippingFee, 0);
-    return productAmount + shippingFee;
-  }, [sellerGroups]);
+  const productAmount = useMemo(
+    () => sellerGroups.reduce((sum, g) => sum + g.subtotal, 0),
+    [sellerGroups]
+  );
+  const shippingAmount = useMemo(
+    () => sellerGroups.reduce((sum, g) => sum + g.shippingFee, 0),
+    [sellerGroups]
+  );
+  const totalAmount = productAmount + shippingAmount;
 
   // 금액이 유효한지 (NaN/음수/0 방어 — `<= 0`만으로는 NaN을 못 거른다)
   const isAmountValid = Number.isFinite(totalAmount) && totalAmount > 0;
@@ -331,9 +335,11 @@ export default function ProductPurchaseModal({
       open={open}
       title="결제"
       onClose={onClose}
+      bodyClassName="bg-gray-50"
       footer={
         <Button
-          className="flex w-full h-12.5 rounded-full"
+          size="lg"
+          className="w-full"
           onClick={handleSubmitOrder}
           disabled={
             PAYMENT_COMING_SOON ||
@@ -354,228 +360,180 @@ export default function ProductPurchaseModal({
         </Button>
       }
     >
-      <DeliveryAddress
-        address={selectedAddress}
-        onAddressChange={setSelectedAddress}
-        deliveryMessageOption={deliveryMessageOption}
-        onDeliveryMessageOptionChange={setDeliveryMessageOption}
-        customDeliveryMessage={customDeliveryMessage}
-        onCustomDeliveryMessageChange={setCustomDeliveryMessage}
-      />
+      <div className="flex flex-col gap-3.5 px-5 pt-4 pb-5">
+        <DeliveryAddress
+          address={selectedAddress}
+          onAddressChange={setSelectedAddress}
+          deliveryMessageOption={deliveryMessageOption}
+          onDeliveryMessageOptionChange={setDeliveryMessageOption}
+          customDeliveryMessage={customDeliveryMessage}
+          onCustomDeliveryMessageChange={setCustomDeliveryMessage}
+        />
 
-      <div className="flex w-full flex-col pt-5.5 pb-4 px-4 items-start gap-5 bg-white">
-        {/* 주문 상품 헤더 */}
-        <div className="flex px-4 items-center gap-2.5 self-stretch">
-          <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
-            주문 상품
+        {/* 주문 상품 */}
+        <div className="flex flex-col gap-3 p-4 bg-white rounded-card shadow-card-sm">
+          <span className="text-[14.5px] font-extrabold text-gray-900">
+            주문 상품 · {totalItemCount}개
           </span>
-          <div className="flex items-center gap-2 self-stretch">
-            <span className="text-sm text-muted">{totalItemCount}개</span>
-          </div>
-        </div>
-
-        {/* 판매자별 상품 그룹 */}
-        {sellerGroups.map((group, groupIndex) => (
-          <SellerGroupCard key={group.seller?.id ?? groupIndex} group={group} />
-        ))}
-
-        {/* 안내 문구 */}
-        <div className="flex px-4 w-full justify-center">
-          <span className="text-xs leading-4 tracking-[-0.4px] text-muted/60 text-center">
+          {sellerGroups.map((group, groupIndex) => (
+            <SellerGroupCard
+              key={group.seller?.id ?? groupIndex}
+              group={group}
+              isFirst={groupIndex === 0}
+            />
+          ))}
+          <span className="text-[11.5px] leading-normal text-gray-400">
             *판매자 배송 상품을 여러개 구매한 경우, 구매한 상품은 함께 배송될
-            수 있으며 늦발송이 늦어질수 있습니다.
+            수 있으며 발송이 늦어질 수 있습니다.
           </span>
         </div>
-      </div>
 
-      {/* 결제 수단 섹션 */}
-      <div className="flex w-full flex-col py-5 px-4 items-start gap-4 bg-white border-t-4 border-t-muted/10">
-        <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
-          결제 수단
-        </span>
-        {PAYMENT_COMING_SOON ? (
-          <div className="flex w-full flex-col items-center justify-center gap-2 py-10 px-4 rounded-lg bg-muted/5">
-            <span className="text-base font-bold leading-5 tracking-[-0.4px]">
-              서비스 준비 중입니다
-            </span>
-            <span className="text-sm text-muted text-center leading-5">
-              결제 기능은 곧 제공될 예정입니다.
-              <br />
-              조금만 기다려주세요.
+        {/* 결제 수단 — 목록은 토스 결제위젯이 렌더링 */}
+        <div className="flex flex-col gap-1 py-4 bg-white rounded-card shadow-card-sm overflow-hidden">
+          <span className="px-4 text-[14.5px] font-extrabold text-gray-900">
+            결제 수단
+          </span>
+          {PAYMENT_COMING_SOON ? (
+            <div className="flex flex-col items-center gap-2 py-10 px-4">
+              <span className="text-[15px] font-bold text-gray-900">
+                서비스 준비 중입니다
+              </span>
+              <span className="text-sm text-gray-500 text-center leading-5">
+                결제 기능은 곧 제공될 예정입니다.
+                <br />
+                조금만 기다려주세요.
+              </span>
+            </div>
+          ) : (
+            <>
+              <div id="toss-payment-method" className="w-full" />
+              <div id="toss-agreement" className="w-full" />
+              {widgetError ? (
+                <div className="flex flex-col items-center gap-3 py-8 px-4">
+                  <span className="text-sm text-gray-500 text-center leading-5">
+                    {widgetError}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 px-5"
+                    onClick={handleRetryWidget}
+                  >
+                    다시 시도
+                  </Button>
+                </div>
+              ) : (
+                !isWidgetReady && (
+                  <div className="flex h-32 items-center justify-center">
+                    <span className="text-sm text-gray-500">
+                      결제 수단을 불러오는 중...
+                    </span>
+                  </div>
+                )
+              )}
+            </>
+          )}
+        </div>
+
+        {/* 금액 요약 — 최종 결제금액은 결제 요청 금액(totalAmount)과 동일 */}
+        <div className="flex flex-col gap-2.5 p-[18px] bg-white rounded-card shadow-card-sm">
+          <div className="flex justify-between text-[13px]">
+            <span className="text-gray-700">상품금액</span>
+            <span className="font-semibold text-gray-900">
+              {productAmount.toLocaleString()}원
             </span>
           </div>
-        ) : (
-          <>
-            <div id="toss-payment-method" className="w-full" />
-            <div id="toss-agreement" className="w-full" />
-            {widgetError ? (
-              <div className="flex w-full flex-col items-center justify-center gap-3 py-8 px-4 rounded-lg bg-muted/5">
-                <span className="text-sm text-muted text-center leading-5">
-                  {widgetError}
-                </span>
-                <Button
-                  variant="outline"
-                  className="h-9 rounded-full px-5"
-                  onClick={handleRetryWidget}
-                >
-                  다시 시도
-                </Button>
-              </div>
-            ) : (
-              !isWidgetReady && (
-                <div className="flex w-full h-32 items-center justify-center">
-                  <span className="text-sm text-muted">
-                    결제 수단을 불러오는 중...
-                  </span>
-                </div>
-              )
-            )}
-          </>
-        )}
+          <div className="flex justify-between text-[13px]">
+            <span className="text-gray-700">배송비</span>
+            <span className="font-semibold text-gray-900">
+              {shippingAmount > 0 ? `${shippingAmount.toLocaleString()}원` : "무료"}
+            </span>
+          </div>
+          <div className="h-px my-0.5 bg-gray-100" />
+          <div className="flex justify-between items-center">
+            <span className="text-[14.5px] font-extrabold text-gray-900">
+              최종 결제금액
+            </span>
+            <span className="text-[19px] font-extrabold text-primary">
+              {totalAmount.toLocaleString()}원
+            </span>
+          </div>
+        </div>
       </div>
     </Modal>
   );
 }
 
 /**
- * 판매자별 상품 그룹 카드
+ * 판매자별 상품 그룹 — 판매자명·배송비 + 상품 행
  */
-function SellerGroupCard({ group }: { group: SellerOrderGroup }) {
+function SellerGroupCard({
+  group,
+  isFirst,
+}: {
+  group: SellerOrderGroup;
+  isFirst: boolean;
+}) {
   return (
-    <div className="flex flex-col items-center self-stretch rounded-lg border-1 border-muted/30">
-      {/* 판매자 헤더 */}
-      <div className="flex w-full pt-2.5 px-4 items-center gap-1 border-b-1 border-b-muted/30">
-        <span className="text-base font-bold leading-4 tracking-[-0.4px]">
+    <div
+      className={
+        isFirst ? "flex flex-col gap-2.5" : "flex flex-col gap-2.5 pt-3 border-t border-gray-100"
+      }
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[12.5px] font-bold text-gray-500">
           {group.seller?.name ?? "판매자 정보 없음"}
         </span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="2"
-          height="24"
-          viewBox="0 0 2 24"
-          fill="none"
-        >
-          <path
-            d="M1 18.5L1 4.5"
-            stroke="#939393"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <div className="flex gap-2 items-center self-stretch">
-          <span className="text-muted">{group.itemCount}개</span>
-        </div>
-        <div className="flex h-7 justify-end items-center gap-2 flex-gsb">
-          <span className="text-muted">
-            배송비{" "}
-            <span className="text-black">
-              {group.shippingFee > 0
-                ? `${group.shippingFee.toLocaleString()}원`
-                : "무료"}
-            </span>
+        <span className="text-xs text-gray-500">
+          배송비{" "}
+          <span className="font-semibold text-gray-900">
+            {group.shippingFee > 0
+              ? `${group.shippingFee.toLocaleString()}원`
+              : "무료"}
           </span>
-        </div>
+        </span>
       </div>
-
-      {/* 상품 목록 */}
       {group.items.map((item, index) => (
         <OrderItemCard key={`${item.skuId}-${index}`} item={item} />
       ))}
-
-      {/* 금액 정보 */}
-      <div className="flex w-full px-4 flex-col py-2.5 justify-center items-start gap-2.5">
-        <div className="flex w-full h-3.5 items-center justify-between">
-          <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-            결제 금액
-          </span>
-          <div className="flex-gsb text-right">
-            <span className="text-sm font-bold leading-3.5 tracking-[-0.4px]">
-              {group.subtotal.toLocaleString()}원
-            </span>
-          </div>
-        </div>
-        {/* TODO: 쿠폰 할인 로직 연동 시 활성화 */}
-        {/* <div className="flex w-full h-3.5 items-center justify-between">
-          <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-            쿠폰 할인
-          </span>
-          <div className="flex-gsb text-right">
-            <span className="text-sm font-bold leading-3.5 tracking-[-0.4px] text-accent">
-              -1,000원
-            </span>
-          </div>
-        </div> */}
-      </div>
-
-      {/* 최종 금액 */}
-      <div className="px-4 pb-4 flex flex-col w-full justify-center items-start">
-        <div className="flex w-full h-3 items-center border-t-1 border-t-muted/30"></div>
-        <div className="flex w-full h-3 items-center">
-          <span className="text-sm font-bold leading-3 tracking-[-0.4px]">
-            최종 결제 금액
-          </span>
-          <span className="text-right flex-gsb text-base font-bold leading-4 tracking-[-0.4px]">
-            {group.subtotal.toLocaleString()}원
-          </span>
-        </div>
-      </div>
     </div>
   );
 }
 
 /**
- * 개별 주문 상품 카드
+ * 개별 주문 상품 행
  */
 function OrderItemCard({ item }: { item: OrderItem }) {
   // 옵션 문자열 생성
   const optionText = item.sku.options
     ? Object.values(item.sku.options).join(" / ")
-    : "";
+    : "옵션 없음";
 
   return (
-    <div className="flex w-full flex-col gap-2.5 py-2.5">
-      {/* 상품 정보 */}
-      <div className="flex w-full px-4 items-center gap-2.5">
-        <div className="flex size-19 justify-center items-center shrink-0 rounded-md overflow-hidden bg-muted/10">
-          {item.product.mainImage ? (
-            <img
-              src={item.product.mainImage}
-              alt={item.product.name}
-              className="size-full object-cover"
-            />
-          ) : (
-            <div className="size-full bg-muted/20" />
-          )}
-        </div>
-        <div className="flex flex-col items-start gap-2 flex-gsb self-stretch">
-          <div className="flex items-center self-stretch">
-            <span className="text-xs leading-3.5 tracking-[-0.4px] line-clamp-2">
-              {item.product.name}
-            </span>
-          </div>
-          <div className="flex items-center self-stretch">
-            <span className="text-xs leading-3 tracking-[-0.4px] text-muted">
-              판매자 확인 후 3영업일 이내 발송 예정
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 옵션 및 수량 */}
-      {optionText && (
-        <div className="flex w-full px-4 items-center">
-          <div className="flex w-full h-8 pl-2.5 items-center gap-1 self-stretch rounded-xs bg-primary/10">
-            <span className="text-xs leading-4 tracking-[-0.4px]">
-              {optionText}
-            </span>
-            <div className="flex py-0.25 px-5 flex-col justify-center items-end flex-gsb">
-              <span className="text-xs leading-3 tracking-[-0.4px]">
-                {item.quantity}개
-              </span>
-            </div>
-          </div>
-        </div>
+    <div className="flex gap-2.5">
+      {item.product.mainImage ? (
+        <img
+          src={item.product.mainImage}
+          alt={item.product.name}
+          className="size-14 shrink-0 rounded-xl object-cover bg-gray-100"
+        />
+      ) : (
+        <div className="size-14 shrink-0 rounded-xl bg-gray-100" />
       )}
+      <div className="flex flex-1 min-w-0 flex-col gap-[3px]">
+        <span className="text-[13px] font-semibold text-gray-900 truncate">
+          {item.product.name}
+        </span>
+        <span className="text-[11.5px] text-gray-500">
+          {optionText} / {item.quantity}개
+        </span>
+        <span className="text-[11.5px] text-gray-400">
+          판매자 확인 후 3영업일 이내 발송 예정
+        </span>
+      </div>
+      <span className="shrink-0 text-[13.5px] font-extrabold text-gray-900">
+        {(item.sku.salePrice * item.quantity).toLocaleString()}원
+      </span>
     </div>
   );
 }

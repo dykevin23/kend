@@ -2,9 +2,8 @@ import { Button } from "~/common/components/ui/button";
 import AddressAddModal from "~/features/users/components/address-add-modal";
 import AddressManageModal from "~/features/users/components/address-manage-modal";
 import { useState } from "react";
-import { cn } from "~/lib/utils";
 import { Badge } from "~/common/components/ui/badge";
-import { Dot } from "lucide-react";
+import { MapPin } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -59,56 +58,38 @@ export default function DeliveryAddress({
 
   return (
     <>
-      <div className="flex w-full p-4 flex-col items-start gap-2.5 shrink-0 bg-white border-b-4 border-b-muted/10">
-        <div
-          className={cn(
-            "flex h-12 p-4 items-center gap-2 shrink-0 self-stretch",
-            { "justify-between": address }
-          )}
-        >
-          <span className="text-lg font-bold leading-4.5 tracking-[-0.4px]">
-            배송 주소
-          </span>
+      <div className="flex w-full flex-col gap-2.5 p-4 bg-white rounded-card shadow-card-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-[14.5px] font-extrabold text-gray-900">배송지</span>
           {address && (
-            <div
-              className="flex justify-end items-center cursor-pointer"
+            <button
+              type="button"
+              className="text-[12.5px] font-bold text-primary"
               onClick={() => setAddressManageModalOpen(true)}
             >
-              <span className="text-xs leading-4">배송 주소 변경</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-              >
-                <path d="M6 4L10 8L6 12" stroke="#163E64" />
-              </svg>
-            </div>
+              변경
+            </button>
           )}
         </div>
         {address ? (
-          <div className="flex py-5 px-4 flex-col items-start gap-4 self-stretch rounded-lg border-1 border-muted/10">
-            <div className="flex items-center gap-2.5">
-              <span className="text-base font-bold leading-4 tracking-[-0.4px]">
-                {address.label}
-              </span>
-              {address.isDefault && <Badge variant="secondary">기본 배송 주소지</Badge>}
+          <>
+            <div className="flex items-start gap-2">
+              <MapPin className="size-4 mt-0.5 shrink-0 text-primary" strokeWidth={2} />
+              <div className="flex flex-col gap-[3px] min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[13.5px] font-bold text-gray-900">
+                    {address.recipientName}
+                  </span>
+                  <span className="text-xs text-gray-500">{address.recipientPhone}</span>
+                  {address.isDefault && <Badge variant="secondary">기본</Badge>}
+                </div>
+                <span className="text-[13px] leading-normal text-gray-700">
+                  {address.label && `[${address.label}] `}
+                  {fullAddress}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm leading-3.5 tracking-[-0.4px]">
-                {address.recipientName}
-              </span>
-              <Dot className="size-4" />
-              <span className="text-sm leading-3.5 tracking-[-0.4px]">
-                {address.recipientPhone}
-              </span>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm leading-3.5 tracking-[-0.4px]">
-                {fullAddress}
-              </span>
-            </div>
+            <div className="h-px my-0.5 bg-gray-100" />
             <Select
               value={deliveryMessageOption}
               onValueChange={onDeliveryMessageOptionChange}
@@ -133,15 +114,11 @@ export default function DeliveryAddress({
                 maxLength={50}
               />
             )}
-          </div>
+          </>
         ) : (
-          <div className="flex flex-col h-30 px-4 justify-center items-center gap-5 shrink-0 self-stretch rounded-md border border-muted/30">
-            <span className="text-sm leading-3.5 tracking-[-0.4px]">
-              등록된 배송 주소가 없습니다.
-            </span>
-            <Button
-              onClick={() => setAddressAddModalOpen(true)}
-            >
+          <div className="flex flex-col items-center gap-4 py-6">
+            <span className="text-sm text-gray-500">등록된 배송 주소가 없습니다.</span>
+            <Button onClick={() => setAddressAddModalOpen(true)}>
               배송 주소 추가
             </Button>
           </div>
