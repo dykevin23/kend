@@ -1,5 +1,5 @@
+import { useImageError } from "~/hooks/useImageError";
 import { Heart } from "lucide-react";
-import { useState } from "react";
 import { Link } from "react-router";
 import type { StoreWithProducts } from "../queries";
 
@@ -59,7 +59,7 @@ export const StoreInfo = ({
   hashtags,
   likeCount,
 }: StoreInfoProps) => {
-  const [imageError, setImageError] = useState(false);
+  const { imageError, imageRef, onError } = useImageError();
 
   return (
     <div className="flex items-center gap-3">
@@ -69,7 +69,8 @@ export const StoreInfo = ({
           src={profileImage}
           alt={name}
           className="size-[46px] shrink-0 rounded-full object-contain bg-gray-100"
-          onError={() => setImageError(true)}
+          ref={imageRef}
+          onError={onError}
         />
       ) : (
         <div className="size-[46px] shrink-0 rounded-full bg-navy-100 flex items-center justify-center">
@@ -84,12 +85,15 @@ export const StoreInfo = ({
         <span className="text-xs text-gray-500 truncate">{hashtags ?? ""}</span>
       </div>
 
-      <div className="flex shrink-0 flex-col items-center gap-0.5">
-        <Heart className="size-[18px] fill-accent text-accent" strokeWidth={0} />
-        <span className="text-[10.5px] font-bold text-gray-500">
-          {likeCount.toLocaleString()}
-        </span>
-      </div>
+      {/* 찜 수 — 집계 구현 전(0 고정)에는 숨김 */}
+      {likeCount > 0 && (
+        <div className="flex shrink-0 flex-col items-center gap-0.5">
+          <Heart className="size-[18px] fill-accent text-accent" strokeWidth={0} />
+          <span className="text-[10.5px] font-bold text-gray-500">
+            {likeCount.toLocaleString()}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

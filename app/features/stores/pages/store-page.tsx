@@ -1,3 +1,4 @@
+import { useImageError } from "~/hooks/useImageError";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { useLoaderData, useFetcher, useRevalidator } from "react-router";
@@ -99,7 +100,7 @@ export default function StorePage() {
 
   return (
     <Content hideHeader className="bg-white">
-      <FloatingHeader />
+      <FloatingHeader heroRatio={9 / 16} />
       <Banner images={bannerImages} variant="hero" />
 
       <div className="flex flex-col px-5 pb-4 bg-white">
@@ -135,7 +136,7 @@ export default function StorePage() {
         )}
       </div>
 
-      <Tabs scrollable className="sticky top-0 z-10">
+      <Tabs scrollable className="sticky top-[62px] z-10">
         <Tab
           title="전체"
           isActive={activeTab === "all"}
@@ -175,7 +176,7 @@ function StoreLogo({
   name: string;
   profileImage: string | null;
 }) {
-  const [imageError, setImageError] = useState(false);
+  const { imageError, imageRef, onError } = useImageError();
   const className =
     "size-16 shrink-0 rounded-full border-[3px] border-white shadow-[0_4px_10px_rgba(15,33,56,0.15)]";
 
@@ -184,7 +185,8 @@ function StoreLogo({
       src={profileImage}
       alt={name}
       className={cn(className, "object-contain bg-gray-100")}
-      onError={() => setImageError(true)}
+      ref={imageRef}
+          onError={onError}
     />
   ) : (
     <div className={cn(className, "flex items-center justify-center bg-navy-100")}>

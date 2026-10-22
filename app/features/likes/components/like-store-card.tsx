@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useImageError } from "~/hooks/useImageError";
 import { X } from "lucide-react";
 import { Link, useFetcher } from "react-router";
 import type { LikedStore } from "../queries";
@@ -9,7 +9,7 @@ interface LikeStoreCardProps {
 
 export default function LikeStoreCard({ item }: LikeStoreCardProps) {
   const { store } = item;
-  const [imageError, setImageError] = useState(false);
+  const { imageError, imageRef, onError } = useImageError();
   const fetcher = useFetcher();
 
   const isRemoving = fetcher.state !== "idle";
@@ -33,7 +33,8 @@ export default function LikeStoreCard({ item }: LikeStoreCardProps) {
             src={store.profileImage}
             alt={store.name}
             className="size-[52px] shrink-0 rounded-full object-contain bg-gray-100"
-            onError={() => setImageError(true)}
+            ref={imageRef}
+          onError={onError}
           />
         ) : (
           <div className="size-[52px] shrink-0 rounded-full bg-navy-100 flex items-center justify-center">

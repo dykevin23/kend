@@ -437,7 +437,10 @@ export default function ProductPage() {
         }
       >
         <FloatingHeader
-          right={<ProductLikeButton productId={product.id} isLiked={isLiked} />}
+          heroRatio={1}
+          right={(solid) => (
+            <ProductLikeButton productId={product.id} isLiked={isLiked} solid={solid} />
+          )}
         />
 
         {/* 상품 이미지 캐러셀 */}
@@ -727,9 +730,11 @@ function ProductFooter({ salePrice, purchaseBlock, onBuyClick }: ProductFooterPr
 function ProductLikeButton({
   productId,
   isLiked,
+  solid,
 }: {
   productId: string;
   isLiked: boolean;
+  solid: boolean;
 }) {
   const likeFetcher = useFetcher();
 
@@ -751,7 +756,10 @@ function ProductLikeButton({
       type="button"
       onClick={handleLikeClick}
       disabled={likeFetcher.state !== "idle"}
-      className={floatingIconButtonClass}
+      className={cn(
+        floatingIconButtonClass,
+        solid && "bg-transparent text-gray-900 backdrop-blur-none"
+      )}
       aria-label={optimisticIsLiked ? "찜 해제" : "찜하기"}
       aria-pressed={optimisticIsLiked}
     >
