@@ -7,53 +7,50 @@ interface ChildCardProps {
   profileImageUrl?: string | null;
 }
 
+// 생후 개월 수 — 24개월 이상은 "N세" (성장 그래프 축 표기와 동일 규칙)
+function formatAge(dateStr: string) {
+  const birth = new Date(dateStr);
+  const now = new Date();
+  let months =
+    (now.getFullYear() - birth.getFullYear()) * 12 +
+    (now.getMonth() - birth.getMonth());
+  if (now.getDate() < birth.getDate()) months -= 1;
+  months = Math.max(0, months);
+  return months < 24 ? `생후 ${months}개월` : `${Math.floor(months / 12)}세`;
+}
+
 export default function ChildCard({ child, profileImageUrl }: ChildCardProps) {
-  // 생년월일 포맷팅
-  const formatBirthDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}. ${month}. ${day}`;
-  };
-
   return (
-    <div className="flex w-full p-4 items-center gap-2">
-      <div className="flex items-center gap-2 flex-1 self-stretch">
-        {/* 프로필 이미지 */}
-        <div className="size-12 aspect-square rounded-full bg-muted overflow-hidden">
-          {profileImageUrl ? (
-            <img
-              src={profileImageUrl}
-              alt={child.nickname}
-              className="w-full h-full object-cover"
-            />
-          ) : null}
-        </div>
+    <div className="flex w-full items-center gap-2.5 px-5 pt-4 pb-1.5">
+      {/* 프로필 이미지 */}
+      <div className="size-[38px] shrink-0 rounded-full bg-navy-100 overflow-hidden">
+        {profileImageUrl ? (
+          <img
+            src={profileImageUrl}
+            alt={child.nickname}
+            className="size-full object-cover"
+          />
+        ) : null}
+      </div>
 
-        {/* 자녀 정보 */}
-        <div className="flex flex-col justify-center items-start gap-2 flex-1">
-          <div className="flex justify-between items-center self-stretch">
-            <span className="text-base font-bold leading-[100%] tracking-[-0.4px]">
-              {child.nickname}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {child.name && (
-              <span className="text-sm leading-[100%] tracking-[-0.4px] text-muted-foreground">
-                {child.name}
-              </span>
-            )}
-            <span className="text-sm leading-[100%] tracking-[-0.4px] text-muted-foreground">
-              {formatBirthDate(child.birthDate)}
-            </span>
-          </div>
-        </div>
+      {/* 자녀 정보 */}
+      <div className="flex flex-1 min-w-0 items-baseline gap-1.5">
+        <span className="text-lg font-extrabold text-gray-900 truncate">
+          {child.nickname}
+        </span>
+        <span className="shrink-0 text-[13px] font-semibold text-gray-500">
+          · {formatAge(child.birthDate)}
+        </span>
       </div>
 
       {/* 설정 아이콘 */}
-      <Link to={`/children/${child.code}/edit`} prefetch="intent">
-        <Settings size={24} className="text-muted-foreground" />
+      <Link
+        to={`/children/${child.code}/edit`}
+        prefetch="intent"
+        className="flex size-9 items-center justify-center text-gray-400"
+        aria-label="자녀 정보 수정"
+      >
+        <Settings className="size-5" strokeWidth={1.8} />
       </Link>
     </div>
   );

@@ -159,140 +159,137 @@ export default function ChildrenPage() {
     return heightPercentileHistory[heightPercentileHistory.length - 1].percentile;
   }, [heightPercentileHistory]);
 
+  const [chartType, setChartType] = useState<ChartType>("height");
+  const percentileLabel = Math.max(1, Math.min(100, Math.round(100 - growthPercentile + 1)));
+
   return (
     <div className="pb-16">
       {/* 자녀 카드 */}
       <ChildCard child={child} profileImageUrl={storageImageUrl} />
 
-      {/* 성장 요약 카드 */}
-      <div className="flex w-full px-4 flex-col justify-center items-center gap-2.5">
-        <div className="flex w-full py-4 flex-col items-start gap-4 rounded-2xl bg-white border border-muted-foreground/30">
-          {/* 상단 텍스트 + 배지 */}
-          <div className="flex px-4 items-center gap-6 self-stretch">
-            <div className="flex flex-col justify-center items-start gap-2 flex-1">
-              <span className="text-sm leading-[100%] text-muted">
+      <div className="flex flex-col gap-4 px-5 pt-4 pb-5">
+        {/* 성장 요약 카드 */}
+        <div className="flex flex-col gap-4 p-5 bg-white rounded-card shadow-card-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] text-gray-500">
                 {child.nickname}의 성장속도는
               </span>
-              <span className="text-base leading-[100%]">
+              <span className="text-[15px] font-extrabold text-gray-900">
                 {growthPercentile >= 70
-                  ? "또래 보다 빨라요!"
+                  ? "또래보다 빨라요"
                   : growthPercentile >= 30
-                  ? "또래와 비슷해요!"
+                  ? "또래와 비슷해요"
                   : "조금 느린 편이에요"}
               </span>
             </div>
-            <Badge>
-              100명 중 {Math.round(100 - growthPercentile + 1)}등
+            <Badge variant="discount" className="px-3 py-1.5 text-[12.5px]">
+              상위 {percentileLabel}%
             </Badge>
           </div>
 
-          {/* 슬라이더 영역 */}
-          <div className="flex flex-col items-center gap-2 self-stretch px-4">
-            {/* 자녀 이름 라벨 */}
-            <div
-              className="flex justify-center"
-              style={{ marginLeft: `${growthPercentile - 50}%` }}
-            >
-              <div className="px-3 py-1 bg-primary text-white text-xs rounded-full">
-                {child.nickname}
-              </div>
-            </div>
-
-            {/* 슬라이더 바 */}
-            <div className="relative w-full h-2 bg-gray-200 rounded-full">
-              {/* 진행 바 */}
+          {/* 백분위 바 */}
+          <div className="flex flex-col gap-1.5">
+            <div className="relative h-2.5 rounded-full bg-linear-to-r from-navy-100 via-navy-500 to-navy-800">
               <div
-                className="absolute top-0 left-0 h-full rounded-full"
-                style={{
-                  width: `${growthPercentile}%`,
-                  background: "linear-gradient(to right, #a3c4e4, #2d6a9f, #163756)",
-                }}
-              />
-              {/* 포인트 */}
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full border-2 border-white shadow"
-                style={{ left: `${growthPercentile}%`, marginLeft: "-6px" }}
+                className="absolute top-1/2 size-[18px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-primary bg-white shadow-[0_2px_6px_rgba(15,33,56,0.3)]"
+                style={{ left: `${Math.max(3, Math.min(97, growthPercentile))}%` }}
               />
             </div>
-
-            {/* 라벨 */}
-            <div className="flex justify-between w-full text-xs text-muted-foreground">
+            <div className="flex justify-between text-[11px] font-semibold text-gray-500">
               <span>하위</span>
-              <span>중위</span>
+              <span>또래 평균</span>
               <span>상위</span>
             </div>
           </div>
 
-          {/* 측정값 pills */}
-          <div className="flex p-4 flex-col items-start gap-2 self-stretch">
-            <div className="flex items-center gap-2 self-stretch">
-              <GrowthPill label="신장" value={latestRecord?.height} unit="cm" />
-              <GrowthPill
-                label="머리둘레"
-                value={latestRecord?.headCircumference}
-                unit="cm"
-              />
-            </div>
-            <div className="flex items-center gap-2 self-stretch">
-              <GrowthPill
-                label="발사이즈"
-                value={latestRecord?.footSize}
-                unit="mm"
-              />
-              <GrowthPill label="체중" value={latestRecord?.weight} unit="kg" />
-            </div>
+          {/* 측정값 */}
+          <div className="flex gap-2">
+            <GrowthPill label="신장" value={latestRecord?.height} unit="cm" />
+            <GrowthPill label="체중" value={latestRecord?.weight} unit="kg" />
+            <GrowthPill
+              label="머리둘레"
+              value={latestRecord?.headCircumference}
+              unit="cm"
+            />
+            <GrowthPill label="발사이즈" value={latestRecord?.footSize} unit="mm" />
           </div>
         </div>
-      </div>
 
-      {/* 성장 그래프 섹션 */}
-      <div className="flex w-full flex-col items-start pt-8 px-4 gap-4">
-        {/* 섹션 헤더 */}
-        <div className="flex items-center justify-between self-stretch">
-          <span className="text-xl leading-[100%] tracking-[-0.2px]">
-            성장 그래프
-          </span>
-          <Link
-            to={`/children/${child.code}/growth`}
-            className="flex items-center gap-1 text-sm"
-          >
-            <span>최신 정보 입력</span>
-            <ChevronRight size={16} />
-          </Link>
-        </div>
+        {/* 성장 그래프 카드 */}
+        <div className="flex flex-col gap-3.5 p-5 bg-white rounded-card shadow-card-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[15px] font-extrabold text-gray-900">
+              성장 그래프
+            </span>
+            <Link
+              to={`/children/${child.code}/growth`}
+              className="flex items-center gap-0.5 text-[12.5px] font-semibold text-gray-500"
+            >
+              최신 정보 입력
+              <ChevronRight className="size-3.5" strokeWidth={2.2} />
+            </Link>
+          </div>
 
-        {/* 그래프들 */}
-        <div className="flex flex-col items-start gap-6 self-stretch">
-          <GrowthChart
-            type="height"
-            childNickname={child.nickname}
-            records={heightRecords}
-            gender={gender}
-            birthDate={child.birthDate ?? undefined}
-            percentileHistory={heightPercentileHistory}
-          />
-          <GrowthChart
-            type="weight"
-            childNickname={child.nickname}
-            records={weightRecords}
-            gender={gender}
-            birthDate={child.birthDate ?? undefined}
-            percentileHistory={weightPercentileHistory}
-          />
-          <GrowthChart
-            type="footSize"
-            childNickname={child.nickname}
-            records={footSizeRecords}
-          />
-          <GrowthChart
-            type="headCircumference"
-            childNickname={child.nickname}
-            records={headCircumferenceRecords}
-            gender={gender}
-            birthDate={child.birthDate ?? undefined}
-            percentileHistory={headCircumferencePercentileHistory}
-            isLast
-          />
+          <div className="flex border-b border-gray-100">
+            {CHART_TABS.map((tab) => {
+              const active = chartType === tab.type;
+              return (
+                <button
+                  key={tab.type}
+                  type="button"
+                  onClick={() => setChartType(tab.type)}
+                  className={cn(
+                    "relative flex-1 pb-2.5 text-[13px]",
+                    active ? "font-extrabold text-primary" : "font-semibold text-gray-500"
+                  )}
+                >
+                  {tab.label}
+                  {active && (
+                    <span className="absolute inset-x-0 bottom-0 h-[2.5px] rounded-full bg-primary" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {chartType === "height" && (
+            <GrowthChart
+              type="height"
+              childNickname={child.nickname}
+              records={heightRecords}
+              gender={gender}
+              birthDate={child.birthDate ?? undefined}
+              percentileHistory={heightPercentileHistory}
+            />
+          )}
+          {chartType === "weight" && (
+            <GrowthChart
+              type="weight"
+              childNickname={child.nickname}
+              records={weightRecords}
+              gender={gender}
+              birthDate={child.birthDate ?? undefined}
+              percentileHistory={weightPercentileHistory}
+            />
+          )}
+          {chartType === "headCircumference" && (
+            <GrowthChart
+              type="headCircumference"
+              childNickname={child.nickname}
+              records={headCircumferenceRecords}
+              gender={gender}
+              birthDate={child.birthDate ?? undefined}
+              percentileHistory={headCircumferencePercentileHistory}
+            />
+          )}
+          {chartType === "footSize" && (
+            <GrowthChart
+              type="footSize"
+              childNickname={child.nickname}
+              records={footSizeRecords}
+            />
+          )}
         </div>
       </div>
 
@@ -300,14 +297,10 @@ export default function ChildrenPage() {
       <Button
         type="button"
         onClick={() => setIsGrowthSheetOpen(true)}
-        className={cn(
-          "fixed bottom-24 right-4 z-40",
-          "w-14 h-14 rounded-full",
-          "flex items-center justify-center",
-          "shadow-lg",
-        )}
+        className="fixed bottom-24 right-5 z-40 size-[54px] p-0 shadow-[0_10px_22px_rgba(26,63,102,0.4)]"
+        aria-label="성장 기록 추가"
       >
-        <Plus className="size-7" strokeWidth={2} />
+        <Plus className="size-6" strokeWidth={2.2} />
       </Button>
 
       {/* 성장 데이터 입력 바텀시트 */}
@@ -320,6 +313,15 @@ export default function ChildrenPage() {
     </div>
   );
 }
+
+type ChartType = "height" | "weight" | "headCircumference" | "footSize";
+
+const CHART_TABS: { type: ChartType; label: string }[] = [
+  { type: "height", label: "신장" },
+  { type: "weight", label: "체중" },
+  { type: "headCircumference", label: "머리둘레" },
+  { type: "footSize", label: "발사이즈" },
+];
 
 /**
  * 측정값 표시 Pill 컴포넌트
@@ -334,13 +336,11 @@ function GrowthPill({
   unit: string;
 }) {
   return (
-    <div className="flex h-8 px-3 justify-between items-center flex-1 rounded-full bg-muted/10">
-      <span className="text-sm leading-[100%] text-muted-foreground">
-        {label}
-      </span>
-      <span className="text-sm leading-[100%] text-muted-foreground">
+    <div className="flex flex-1 min-w-0 flex-col items-center gap-0.5 px-1 py-2 rounded-full bg-navy-50 text-primary">
+      <span className="text-[14.5px] font-extrabold truncate max-w-full">
         {value !== null && value !== undefined ? `${value}${unit}` : "-"}
       </span>
+      <span className="text-[10.5px] text-gray-500">{label}</span>
     </div>
   );
 }

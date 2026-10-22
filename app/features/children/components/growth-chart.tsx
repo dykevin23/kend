@@ -10,7 +10,6 @@ import {
   Area,
 } from "recharts";
 import type { GrowthRecordByType, GrowthPercentilePoint } from "../queries";
-import { cn } from "~/lib/utils";
 import {
   heightForAge,
   weightForAge,
@@ -28,7 +27,6 @@ interface GrowthChartProps {
   gender?: Gender;
   birthDate?: string;
   percentileHistory?: GrowthPercentilePoint[];
-  isLast?: boolean;
 }
 
 const MEASUREMENT_CONFIG: Record<
@@ -66,6 +64,16 @@ const MEASUREMENT_CONFIG: Record<
   },
 };
 
+// recharts는 SVG 속성으로 색을 넘겨 CSS 변수를 쓸 수 없어 app.css 토큰 값을 그대로 둔다
+const CHART_COLORS = {
+  line: "#1a3f66", // navy-700
+  area: "#4a709c", // navy-500
+  tick: "#9da2ab", // gray-400
+  grid: "#e6e8ec", // gray-200
+  gridMid: "#cdd0d6", // gray-300
+  latest: "#ff8a1f", // orange-500
+};
+
 function formatAgeLabel(ageMonths: number): string {
   if (ageMonths < 24) return `${ageMonths}개월`;
   const years = Math.floor(ageMonths / 12);
@@ -85,7 +93,6 @@ export default function GrowthChart({
   childNickname,
   records,
   percentileHistory,
-  isLast = false,
 }: GrowthChartProps) {
   const config = MEASUREMENT_CONFIG[type];
 
@@ -116,17 +123,8 @@ export default function GrowthChart({
   // 데이터가 없는 경우
   if (records.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 self-stretch">
-        <div className="flex items-center gap-2.5 self-stretch">
-          <span className="text-base leading-[100%] tracking-[-0.2px] text-muted-foreground">
-            {config.label}
-          </span>
-        </div>
-        <div className="flex w-full py-8 flex-col items-center gap-2.5 rounded-2xl bg-white border border-muted-foreground/30">
-          <p className="text-sm text-muted-foreground">
-            아직 기록된 데이터가 없습니다.
-          </p>
-        </div>
+      <div className="flex w-full py-10 justify-center">
+        <p className="text-sm text-gray-500">아직 기록된 데이터가 없습니다.</p>
       </div>
     );
   }
@@ -136,40 +134,25 @@ export default function GrowthChart({
   );
 
   return (
-    <div className="flex flex-col items-center gap-4 self-stretch">
-      {/* 섹션 라벨 */}
-      <div className="flex items-center gap-2.5 self-stretch">
-        <span className="text-base leading-[100%] tracking-[-0.2px] text-muted-foreground">
-          {config.label}
-        </span>
-      </div>
-
-      {/* 그래프 카드 */}
-      <div className={cn("flex w-full flex-col items-start gap-2.5", isLast ? "pb-2" : "pb-8 border-b border-b-muted-foreground/30")}>
-        <div className="flex w-full pt-6 flex-col items-start gap-6 rounded-2xl bg-white border border-muted-foreground/30">
-          {/* 제목 & 순위 텍스트 */}
-          <div className="flex flex-col items-start gap-6 self-stretch">
-            <div className="flex px-4 items-center gap-2.5 self-stretch">
-              <span className="text-base leading-[100%]">{config.title}</span>
-            </div>
-            <div className="flex px-4 flex-col justify-center items-start gap-2 self-stretch">
-              <span className="text-sm leading-[100%] text-muted-foreground">
-                {childNickname}의 {config.label === "신장" ? "키" : config.label}는
-              </span>
-              <span className="text-base leading-[100%]">
-                {rank !== null
-                  ? `친구들 100명 중 ${rank}등 이에요!`
-                  : type === "footSize"
-                  ? "발사이즈는 또래 비교가 제공되지 않아요"
-                  : "또래 비교 정보를 계산할 수 없어요"}
-              </span>
-            </div>
+    <div className="flex w-full flex-col gap-3">
+          {/* 또래 비교 문구 */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[13px] text-gray-500">
+              {childNickname}의 {config.label === "신장" ? "키" : config.label}는
+            </span>
+            <span className="text-sm font-bold text-gray-900">
+              {rank !== null
+                ? `친구들 100명 중 ${rank}등 이에요!`
+                : type === "footSize"
+                ? "발사이즈는 또래 비교가 제공되지 않아요"
+                : "또래 비교 정보를 계산할 수 없어요"}
+            </span>
           </div>
 
           {/* 그래프 */}
           <div className="flex flex-col items-start self-stretch">
             <div className="flex flex-col w-full justify-center items-center gap-4">
-              <div className="w-full h-48 px-2">
+              <div className="w-full h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   {percentileChartData ? (
                     /* ── 백분위 추이 차트 (DB 기반) ── */
@@ -182,8 +165,8 @@ export default function GrowthChart({
                           id={`pct-gradient-${type}`}
                           x1="0" y1="0" x2="0" y2="1"
                         >
-                          <stop offset="0%" stopColor="#2d6a9f" stopOpacity={0.3} />
-                          <stop offset="100%" stopColor="#2d6a9f" stopOpacity={0.02} />
+                          <stop offset="0%" stopColor={CHART_COLORS.area} stopOpacity={0.3} />
+                          <stop offset="100%" stopColor={CHART_COLORS.area} stopOpacity={0.02} />
                         </linearGradient>
                       </defs>
 
@@ -191,7 +174,7 @@ export default function GrowthChart({
                         dataKey="ageMonths"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 10, fill: "#9ca3af" }}
+                        tick={{ fontSize: 10, fill: CHART_COLORS.tick }}
                         tickFormatter={formatAgeLabel}
                         interval={xAxisInterval}
                       />
@@ -201,14 +184,14 @@ export default function GrowthChart({
                         tickFormatter={(v) => `${v}%`}
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 9, fill: "#9ca3af" }}
+                        tick={{ fontSize: 9, fill: CHART_COLORS.tick }}
                         width={28}
                       />
 
                       {/* 기준선: 25 / 50 / 75 */}
-                      <ReferenceLine y={75} stroke="#d1d5db" strokeDasharray="4 4" />
-                      <ReferenceLine y={50} stroke="#9ca3af" strokeDasharray="4 4" />
-                      <ReferenceLine y={25} stroke="#d1d5db" strokeDasharray="4 4" />
+                      <ReferenceLine y={75} stroke={CHART_COLORS.grid} strokeDasharray="4 4" />
+                      <ReferenceLine y={50} stroke={CHART_COLORS.gridMid} strokeDasharray="4 4" />
+                      <ReferenceLine y={25} stroke={CHART_COLORS.grid} strokeDasharray="4 4" />
 
                       {/* 백분위 영역 */}
                       <Area
@@ -224,8 +207,8 @@ export default function GrowthChart({
                       <Line
                         type="monotone"
                         dataKey="percentile"
-                        stroke="#163756"
-                        strokeWidth={2}
+                        stroke={CHART_COLORS.line}
+                        strokeWidth={3}
                         dot={false}
                         connectNulls
                         isAnimationActive={false}
@@ -238,10 +221,10 @@ export default function GrowthChart({
                           <ReferenceDot
                             x={last.ageMonths}
                             y={last.percentile}
-                            r={4}
-                            fill="#163756"
-                            stroke="white"
-                            strokeWidth={2}
+                            r={6}
+                            fill="white"
+                            stroke={CHART_COLORS.latest}
+                            strokeWidth={3.5}
                           />
                         );
                       })()}
@@ -259,16 +242,16 @@ export default function GrowthChart({
                         dataKey="month"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 10, fill: "#9ca3af" }}
+                        tick={{ fontSize: 10, fill: CHART_COLORS.tick }}
                         interval={xAxisInterval}
                       />
                       <YAxis hide />
                       <Line
                         type="monotone"
                         dataKey="childValue"
-                        stroke="#163756"
-                        strokeWidth={2}
-                        dot={{ fill: "#163756", strokeWidth: 0, r: 4 }}
+                        stroke={CHART_COLORS.line}
+                        strokeWidth={3}
+                        dot={{ fill: CHART_COLORS.line, strokeWidth: 0, r: 4 }}
                         connectNulls
                         isAnimationActive={false}
                       />
@@ -279,8 +262,8 @@ export default function GrowthChart({
 
               {/* 최신 측정값 라벨 */}
               {latestRecord && (
-                <div className="flex justify-end w-full px-4 pb-4">
-                  <div className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded text-xs">
+                <div className="flex justify-end w-full">
+                  <div className="flex items-center gap-1 px-2.5 py-1 bg-navy-50 text-primary rounded-full text-xs font-bold">
                     <span>
                       {new Date(latestRecord.measuredAt).getMonth() + 1}월
                     </span>
@@ -293,8 +276,6 @@ export default function GrowthChart({
               )}
             </div>
           </div>
-        </div>
-      </div>
     </div>
   );
 }

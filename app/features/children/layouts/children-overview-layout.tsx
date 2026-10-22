@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet, useLoaderData } from "react-router";
 import Content from "~/common/components/content";
-import { buttonVariants } from "~/common/components/ui/button";
+import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
 import { makeSSRClient } from "~/supa-client";
 import { getChildren } from "../queries";
@@ -30,56 +30,49 @@ export default function ChildrenOverviewLayout() {
   const { children } = useLoaderData<typeof loader>();
 
   return (
-    <Content headerPorps={{ title: "데이터" }}>
-      <div className="flex flex-col w-full h-full bg-muted/10 pb-20">
+    <Content headerPorps={{ title: "성장기록" }} className="bg-gray-50">
+      <div className="flex flex-col w-full min-h-full pb-20">
         {/* 자녀 선택 영역 */}
-        <div className="flex w-full py-4 pl-4 items-start gap-2">
+        <div className="flex w-full items-center gap-2 px-5 py-3 bg-white">
           {/* + 버튼 */}
-          <Link to="/children/submit">
-            <div className="flex h-8 px-3 justify-center items-center gap-2.5 rounded-full bg-muted-foreground/10">
-              <Plus size={16} />
-            </div>
+          <Link
+            to="/children/submit"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-navy-50 text-primary"
+            aria-label="자녀 추가"
+          >
+            <Plus className="size-4" strokeWidth={2.2} />
           </Link>
 
           {/* 자녀 탭 목록 */}
-          <div className="flex-1 overflow-x-auto">
-            <div className="flex pr-4 items-center gap-2">
-              {children.map((child) => (
-                <NavLink
-                  key={child.id}
-                  className={({ isActive }) =>
-                    cn(
-                      buttonVariants({ variant: "secondary" }),
-                      "flex h-8 px-3 justify-center items-center gap-2.5 rounded-full whitespace-nowrap",
-                      isActive
-                        ? "bg-primary text-white"
-                        : "bg-muted-foreground/10 text-black"
-                    )
-                  }
-                  to={`/children/${child.code}`}
-                >
-                  {child.nickname}
-                </NavLink>
-              ))}
-            </div>
+          <div className="flex flex-1 items-center gap-2 overflow-x-auto pr-1">
+            {children.map((child) => (
+              <NavLink
+                key={child.id}
+                className={({ isActive }) =>
+                  cn(
+                    "flex h-8 shrink-0 items-center px-3.5 rounded-full text-[13px] font-bold whitespace-nowrap",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-gray-100 text-gray-700"
+                  )
+                }
+                to={`/children/${child.code}`}
+              >
+                {child.nickname}
+              </NavLink>
+            ))}
           </div>
         </div>
 
         {/* 자녀가 없는 경우 */}
         {children.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 py-20 px-4">
-            <p className="text-muted-foreground text-center mb-4">
-              등록된 자녀가 없습니다.
-            </p>
-            <Link
-              to="/children/submit"
-              className={cn(
-                buttonVariants(),
-                "rounded-full"
-              )}
-            >
-              자녀 등록하기
-            </Link>
+          <div className="px-5 pt-4">
+            <div className="flex flex-col items-center gap-4 py-14 bg-white rounded-card shadow-card-sm">
+              <p className="text-sm text-gray-500">등록된 자녀가 없습니다.</p>
+              <Button asChild>
+                <Link to="/children/submit">자녀 등록하기</Link>
+              </Button>
+            </div>
           </div>
         ) : (
           <Outlet />
