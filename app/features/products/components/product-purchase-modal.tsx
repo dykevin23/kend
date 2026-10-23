@@ -388,11 +388,8 @@ export default function ProductPurchaseModal({
           </span>
         </div>
 
-        {/* 결제 수단 — 목록은 토스 결제위젯이 렌더링 */}
+        {/* 결제 수단 — 목록·제목("결제 방법")은 토스 결제위젯이 렌더링 */}
         <div className="flex flex-col gap-1 py-4 bg-white rounded-card shadow-card-sm overflow-hidden">
-          <span className="px-4 text-[14.5px] font-extrabold text-gray-900">
-            결제 수단
-          </span>
           {PAYMENT_COMING_SOON ? (
             <div className="flex flex-col items-center gap-2 py-10 px-4">
               <span className="text-[15px] font-bold text-gray-900">
