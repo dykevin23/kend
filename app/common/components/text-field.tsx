@@ -5,6 +5,8 @@ import { cn } from "~/lib/utils";
 
 type TextFieldProps = {
   label?: string;
+  /** 바깥 래퍼 여백 조정용 (기본 p-4) */
+  containerClassName?: string;
   multiline?: boolean;
   rows?: number;
 } & (
@@ -17,16 +19,22 @@ export default function TextField({
   multiline = false,
   rows = 4,
   className,
+  containerClassName,
   ...rest
 }: TextFieldProps) {
   return (
-    <div className="flex flex-col p-4 justify-center items-start gap-2 self-stretch">
+    <div
+      className={cn(
+        "flex flex-col p-4 justify-center items-start gap-2 self-stretch",
+        containerClassName
+      )}
+    >
       {label && (
         <Label
           htmlFor={rest.id}
           className={cn(
             "flex px-1 items-center gap-2.5 self-stretch",
-            "text-base leading-[100%]"
+            "text-[13.5px] font-bold leading-none text-gray-700"
           )}
         >
           {label}
@@ -38,9 +46,9 @@ export default function TextField({
           className={cn(
             "flex w-full px-4 py-3 items-start gap-2.5 self-stretch",
             "text-sm leading-[140%] resize-none",
-            "rounded-md border border-input bg-transparent shadow-xs",
-            "placeholder:text-muted-foreground",
-            "focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+            "rounded-xl border-[1.5px] border-gray-200 bg-white",
+            "placeholder:text-gray-400",
+            "focus-visible:outline-none focus-visible:border-primary",
             "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
@@ -49,8 +57,10 @@ export default function TextField({
       ) : (
         <Input
           className={cn(
-            "flex h-14 px-4 items-center gap-2.5 self-stretch",
-            "text-sm leading-[100%]",
+            "flex h-13 px-4 items-center gap-2.5 self-stretch",
+            "rounded-xl border-[1.5px] border-gray-200 bg-white shadow-none",
+            "text-[15px] leading-none placeholder:text-gray-400",
+            "focus-visible:border-primary focus-visible:ring-0",
             className
           )}
           {...(rest as InputHTMLAttributes<HTMLInputElement>)}

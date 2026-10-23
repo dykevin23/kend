@@ -1,12 +1,12 @@
 import { z } from "zod";
 import InputInnerLabel from "~/common/components/input-inner-label";
 import { Button } from "~/common/components/ui/button";
-import { cn } from "~/lib/utils";
 import SocialButtons from "../components/social-buttons";
 import { Form, Link, redirect, useActionData, useSearchParams } from "react-router";
 import { makeSSRClient } from "~/supa-client";
 import { actionErrorResponse } from "~/lib/error-handler";
 import type { Route } from "./+types/login-page";
+import AuthLayout, { AuthError } from "../components/auth-layout";
 
 const loginSchema = z.object({
   email: z.string().min(1, "이메일을 입력해주세요.").email("올바른 이메일 형식을 입력해주세요."),
@@ -57,112 +57,27 @@ export default function LoginPage() {
   const errorMessage =
     actionData?.error ?? (urlError ? errorMessages[urlError] : undefined);
   return (
-    <div
-      className="flex flex-col min-h-screen bg-orange-100/50"
-      style={{
-        paddingTop: "max(3.125rem, var(--safe-area-inset-top))",
-        paddingBottom: "max(0px, var(--safe-area-inset-bottom))",
-      }}
-    >
-      {/* LOGO start */}
-      <div className="flex w-full flex-col items-center gap-4 px-6">
-        <div className="flex flex-col justify-center items-center gap-1 self-stretch">
-          <span className="text-center font-arimo text-[64px] font-bold italic leading-[100%] text-primary">
-            KEND
-          </span>
-          <span className="text-center font-arimo text-base italic font-bold leading-[18px] text-primary">
-            Kids are an ENDuser
-          </span>
-        </div>
+    <AuthLayout title="로그인" bottom={<SocialButtons />}>
+      <Form method="post" className="flex flex-col gap-3">
+        <InputInnerLabel label="이메일 주소" name="email" type="email" />
+        <InputInnerLabel label="비밀번호" name="password" type="password" />
+
+        {errorMessage && <AuthError message={errorMessage} />}
+
+        <Button type="submit" size="lg" className="w-full mt-1">
+          로그인
+        </Button>
+      </Form>
+
+      <div className="flex items-center justify-center gap-3 text-[13px] font-semibold">
+        <Link to="/auth/find-password" className="text-gray-500">
+          비밀번호 재설정
+        </Link>
+        <span className="text-gray-300">|</span>
+        <Link to="/auth/join" className="text-primary">
+          회원가입
+        </Link>
       </div>
-      {/* LOGO end */}
-
-      <div className="flex w-full flex-col items-start gap-10 pt-10 flex-1">
-        <div className="flex px-6 flex-col items-center gap-8 self-stretch">
-          {/* 로그인 타이틀 & 가입하기 링크 */}
-          <div className="flex flex-col items-start gap-6 self-stretch">
-            <div className="flex flex-col justify-center items-center gap-2 self-stretch">
-              <span className="text-center text-xl leading-[130%] tracking-[-0.4px] text-primary self-stretch">
-                로그인 하기
-              </span>
-              <div className="flex justify-center gap-2 self-stretch">
-                <span className="text-center text-base leading-[140%] tracking-[-0.4px]">
-                  아직 회원이 아니신가요?
-                </span>
-                <Link to="/auth/join">
-                  <span className="text-base leading-[140%] tracking-[-0.4px] text-primary underline">
-                    가입하기
-                  </span>
-                </Link>
-              </div>
-            </div>
-
-            {/* 입력 필드 & 로그인 버튼 */}
-            <Form
-              method="post"
-              className="flex flex-col items-start gap-6 self-stretch"
-            >
-              <div className="flex flex-col items-start self-stretch rounded-2xl">
-                <InputInnerLabel
-                  label="이메일 주소"
-                  name="email"
-                  type="email"
-                  className="rounded-t-2xl rounded-b-none -mb-px"
-                />
-                <InputInnerLabel
-                  label="비밀번호"
-                  name="password"
-                  type="password"
-                  className="rounded-b-2xl rounded-t-none"
-                />
-              </div>
-
-              {errorMessage && (
-                <div className="flex w-full px-4 py-3 rounded-lg bg-red-100 border border-red-400">
-                  <span className="text-sm text-red-700">{errorMessage}</span>
-                </div>
-              )}
-
-              {/* 로그인 버튼 & 찾기 링크 */}
-              <div className="flex flex-col items-center gap-6 self-stretch">
-                <Button
-                  type="submit"
-                  className={cn(
-                    "w-full h-14 py-2 px-4 flex justify-center items-center rounded-full",
-                    "text-base font-normal leading-[100%] tracking-[-0.4px]"
-                  )}
-                >
-                  로그인
-                </Button>
-                <div className="flex items-center justify-center">
-                  <Link to="/auth/find-password">
-                    <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-primary">
-                      비밀번호 재설정
-                    </span>
-                  </Link>
-                </div>
-              </div>
-            </Form>
-          </div>
-        </div>
-
-        {/* 소셜 로그인 & 약관 */}
-        <div className="flex flex-col items-center gap-6 self-stretch mt-auto pb-6">
-          <SocialButtons />
-          <div className="flex items-center gap-6">
-            <Link to="/terms">
-              <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-primary">
-                이용약관
-              </span>
-            </Link>
-            <Link to="/privacy">
-              <span className="text-center text-sm leading-[140%] tracking-[-0.4px] text-primary">
-                개인정보처리방침
-              </span>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+    </AuthLayout>
   );
 }

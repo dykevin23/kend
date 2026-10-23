@@ -2,9 +2,9 @@ import { z } from "zod";
 import { Form, Link, redirect, useActionData, useLoaderData, useNavigation } from "react-router";
 import TextField from "~/common/components/text-field";
 import { Button } from "~/common/components/ui/button";
-import { cn } from "~/lib/utils";
 import { makeSSRClient } from "~/supa-client";
 import type { Route } from "./+types/reset-password-page";
+import AuthLayout, { AuthError, AuthNotice } from "../components/auth-layout";
 
 // 비밀번호 재설정 페이지 — 이메일 재설정 링크의 도착지.
 //
@@ -93,76 +93,41 @@ export default function ResetPasswordPage() {
   const submitting = navigation.state === "submitting";
 
   return (
-    <div
-      className="flex flex-col min-h-screen bg-orange-100/50"
-      style={{
-        paddingTop: "max(3.125rem, var(--safe-area-inset-top))",
-        paddingBottom: "max(1.5rem, var(--safe-area-inset-bottom))",
-      }}
-    >
-      <div className="flex w-full flex-col items-center gap-4 px-6">
-        <span className="text-center font-arimo text-[40px] font-bold italic leading-[100%] text-primary">
-          KEND
-        </span>
-      </div>
-
-      <div className="flex w-full flex-col items-start gap-8 pt-10 px-6 flex-1">
-        <div className="flex flex-col gap-2 self-stretch">
-          <span className="text-xl leading-[130%] tracking-[-0.4px] text-primary text-center">
-            비밀번호 재설정
-          </span>
-        </div>
-
-        {!valid ? (
-          <div className="flex flex-col gap-6 self-stretch">
-            <div className="flex flex-col gap-2 px-4 py-5 rounded-lg bg-white">
-              <span className="text-base leading-[150%]">
-                유효하지 않거나 만료된 링크예요. 재설정을 다시 요청해주세요.
-              </span>
-            </div>
-            <Link to="/auth/find-password">
-              <Button
-                className="w-full h-14 rounded-full text-base"
-              >
-                다시 요청하기
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <Form method="post" className="flex flex-col gap-6 self-stretch">
-            <TextField
-              label="새 비밀번호"
-              name="password"
-              type="password"
-              id="password"
-              placeholder="6자 이상"
-              required
-            />
-            <TextField
-              label="새 비밀번호 확인"
-              name="passwordConfirm"
-              type="password"
-              id="passwordConfirm"
-              required
-            />
-            {actionData?.error && (
-              <div className="flex w-full px-4 py-3 rounded-lg bg-red-100 border border-red-400">
-                <span className="text-sm text-red-700">{actionData.error}</span>
-              </div>
-            )}
-            <Button
-              type="submit"
-              disabled={submitting}
-              className={cn(
-                "w-full h-14 rounded-full text-base",
-                submitting && "opacity-60"
-              )}
-            >
-              {submitting ? "변경 중..." : "비밀번호 변경"}
-            </Button>
-          </Form>
-        )}
-      </div>
-    </div>
+    <AuthLayout title="비밀번호 재설정" logoSize="sm">
+      {!valid ? (
+        <>
+          <AuthNotice>
+            유효하지 않거나 만료된 링크예요. 재설정을 다시 요청해주세요.
+          </AuthNotice>
+          <Button asChild size="lg" className="w-full">
+            <Link to="/auth/find-password">다시 요청하기</Link>
+          </Button>
+        </>
+      ) : (
+        <Form method="post" className="flex flex-col gap-4">
+          <TextField
+            label="새 비밀번호"
+            name="password"
+            type="password"
+            id="password"
+            placeholder="6자 이상"
+            containerClassName="p-0"
+            required
+          />
+          <TextField
+            label="새 비밀번호 확인"
+            name="passwordConfirm"
+            type="password"
+            id="passwordConfirm"
+            containerClassName="p-0"
+            required
+          />
+          {actionData?.error && <AuthError message={actionData.error} />}
+          <Button type="submit" size="lg" disabled={submitting} className="w-full">
+            {submitting ? "변경 중..." : "비밀번호 변경"}
+          </Button>
+        </Form>
+      )}
+    </AuthLayout>
   );
 }

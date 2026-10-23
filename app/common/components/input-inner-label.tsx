@@ -25,19 +25,19 @@ export default function InputInnerLabel({
     <div
       className={cn(
         "flex flex-col self-stretch px-4 py-3 gap-2 relative",
-        "border",
-        "transition-all duration-200",
-        isFocused ? "border-accent z-10" : "border-primary z-0",
+        "rounded-xl border-[1.5px] bg-white",
+        "transition-colors duration-200",
+        isFocused ? "border-primary" : "border-gray-200",
         className
       )}
     >
       <label
         className={cn(
           "absolute left-4 pointer-events-none transition-all duration-200",
-          "tracking-[-0.4px] text-black/60",
+          "text-gray-500",
           isLabelFloating
-            ? "top-3 text-sm leading-[100%]"
-            : "top-1/2 -translate-y-1/2 text-base leading-[100%]"
+            ? "top-3 text-xs font-semibold leading-none"
+            : "top-1/2 -translate-y-1/2 text-[15px] leading-none"
         )}
       >
         {label}
@@ -60,7 +60,7 @@ export default function InputInnerLabel({
             props.onChange?.(e);
           }}
           className={cn(
-            "flex-1 text-base leading-[100%] tracking-[-0.4px] text-black outline-none bg-transparent",
+            "flex-1 text-[15px] leading-none text-gray-900 outline-none bg-transparent",
             "transition-opacity duration-200",
             isLabelFloating ? "opacity-100" : "opacity-0"
           )}
@@ -69,15 +69,16 @@ export default function InputInnerLabel({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
             className={cn(
               "shrink-0 transition-opacity duration-200",
               isLabelFloating ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
           >
             {showPassword ? (
-              <EyeOff className="size-6 text-black/60" />
+              <EyeOff className="size-5 text-gray-400" />
             ) : (
-              <Eye className="size-6 text-black/60" />
+              <Eye className="size-5 text-gray-400" />
             )}
           </button>
         )}
