@@ -1,5 +1,6 @@
 import { Settings } from "lucide-react";
 import { Link } from "react-router";
+import { useImageError } from "~/hooks/useImageError";
 import type { ChildDetail } from "../queries";
 
 interface ChildCardProps {
@@ -20,17 +21,25 @@ function formatAge(dateStr: string) {
 }
 
 export default function ChildCard({ child, profileImageUrl }: ChildCardProps) {
+  const { imageError, imageRef, onError } = useImageError();
+
   return (
     <div className="flex w-full items-center gap-2.5 px-5 pt-4 pb-1.5">
       {/* 프로필 이미지 */}
-      <div className="size-[38px] shrink-0 rounded-full bg-navy-100 overflow-hidden">
-        {profileImageUrl ? (
+      <div className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-navy-100 overflow-hidden">
+        {profileImageUrl && !imageError ? (
           <img
             src={profileImageUrl}
             alt={child.nickname}
             className="size-full object-cover"
+            ref={imageRef}
+            onError={onError}
           />
-        ) : null}
+        ) : (
+          <span className="text-sm font-bold text-primary">
+            {child.nickname.charAt(0)}
+          </span>
+        )}
       </div>
 
       {/* 자녀 정보 */}
