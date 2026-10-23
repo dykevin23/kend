@@ -13,7 +13,7 @@ interface AuthLayoutProps {
 }
 
 /**
- * 인증 화면 공통 틀 — 크림 배경 + KEND 로고 + 흰 카드 + 약관 링크.
+ * 인증 화면 공통 틀 — 크림 배경 + KEND 로고 + 폼 + 약관 링크.
  * 노치/홈바 여백(safe-area)도 여기서 처리한다.
  */
 export default function AuthLayout({
@@ -60,10 +60,8 @@ export default function AuthLayout({
           )}
         </div>
 
-        {/* 폼 카드 */}
-        <div className="flex flex-col gap-4 p-5 bg-white rounded-card shadow-card-sm">
-          {children}
-        </div>
+        {/* 폼 — 카드 없이 크림 바탕에 바로 (흰 카드는 크림과 톤이 겉돌아서) */}
+        <div className="flex flex-col gap-4">{children}</div>
 
         {/* 하단 영역 + 약관 */}
         <div className="flex flex-col items-center gap-6 mt-auto pt-4">
@@ -82,7 +80,7 @@ export default function AuthLayout({
 /** 폼 에러 메시지 박스 */
 export function AuthError({ message }: { message: string }) {
   return (
-    <div className="px-4 py-3 rounded-xl bg-red-50">
+    <div className="px-4 py-3 rounded-xl bg-white border border-red-200">
       <span className="text-[13px] text-destructive">{message}</span>
     </div>
   );
@@ -91,7 +89,7 @@ export function AuthError({ message }: { message: string }) {
 /** 안내 문구 박스 (메일 발송 완료, 만료된 링크 등) */
 export function AuthNotice({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-4 py-4 rounded-xl bg-navy-50">
+    <div className="px-4 py-4 rounded-xl bg-white">
       <span className="text-sm leading-[1.6] text-gray-700">{children}</span>
     </div>
   );
