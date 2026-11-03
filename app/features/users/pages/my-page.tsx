@@ -276,7 +276,7 @@ export default function MyPage() {
 
   return (
     <Content headerPorps={{ title: "마이페이지" }} className="bg-gray-50">
-      <div className="flex flex-col w-full gap-5 px-5 pt-3 pb-20">
+      <div className="flex flex-col w-full gap-5 px-5 pt-3 pb-6">
         {/* 프로필 카드 */}
         <div className="flex flex-col gap-3.5">
           <div className="flex items-center gap-3.5 p-5 bg-white rounded-card shadow-card-sm">
@@ -346,7 +346,10 @@ export default function MyPage() {
         </div>
       </div>
 
-      <CompanyFooter />
+      {/* 하단 탭바(fixed)에 가리지 않도록 여백은 푸터 아래에 둔다 — 탭바 높이 + 홈 인디케이터 */}
+      <div className="pb-[calc(4rem+var(--safe-area-inset-bottom))]">
+        <CompanyFooter />
+      </div>
     </Content>
   );
 }
