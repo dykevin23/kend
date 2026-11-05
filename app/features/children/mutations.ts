@@ -3,6 +3,7 @@ import type { Database } from "~/supa-client";
 import { getNextChildCode } from "./queries";
 
 type Client = SupabaseClient<Database>;
+type Tables = Database["public"]["Tables"];
 
 // ============================================================
 // 자녀 관련 mutations
@@ -68,7 +69,7 @@ interface UpdateChildInput {
 export const updateChild = async (client: Client, input: UpdateChildInput) => {
   const { childId, nickname, name, gender, birthDate, profileImageUrl } = input;
 
-  const updateData: Record<string, unknown> = {
+  const updateData: Tables["children"]["Update"] = {
     updated_at: new Date().toISOString(),
   };
 
@@ -220,7 +221,7 @@ export const updateGrowthRecord = async (
   const { recordId, measuredAt, height, weight, footSize, headCircumference } =
     input;
 
-  const updateData: Record<string, unknown> = {
+  const updateData: Tables["growth_records"]["Update"] = {
     updated_at: new Date().toISOString(),
   };
 

@@ -183,7 +183,7 @@ export const cancelOrderGroup = async (
 export const processApprovedReturns = async () => {
   const adminClient = createClient<Database>(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SECRET_KEY!
   );
 
   const { data: pendingItems, error } = await adminClient

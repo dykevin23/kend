@@ -31,7 +31,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return redirect("/auth/login?error=naver_profile_failed");
   }
 
-  const response = await createNaverUser(accessToken, userData);
+  const response = await createNaverUser(accessToken);
   const json = await response.json();
 
   if (!json.link) {
@@ -41,24 +41,18 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   return redirect(json.link);
 };
 
-interface NaverUserProps {
-  id: string;
-  nickname: string;
-  profile_image: string;
-  email: string;
-  name: string;
-}
-
-const createNaverUser = async (token: string, user: NaverUserProps) => {
+// 프로필은 함수가 토큰으로 직접 조회·검증하므로 토큰만 넘긴다.
+// 서버 전용 loader라 secret 키를 apikey 헤더로 보낸다 (새 API 키는 Bearer가 아니라 apikey 헤더)
+const createNaverUser = async (token: string) => {
   const result = await fetch(
     `${process.env.SUPABASE_URL}/functions/v1/create-naver-user`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        apikey: process.env.SUPABASE_SECRET_KEY!,
       },
-      body: JSON.stringify({ token, ...user }),
+      body: JSON.stringify({ token }),
     }
   );
 

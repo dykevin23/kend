@@ -122,7 +122,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
       // service_role 클라이언트로 사용자 삭제 (cascade로 하위 데이터 자동 삭제)
       const adminClient = createClient(
         process.env.SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+        process.env.SUPABASE_SECRET_KEY!
       );
       const { error } = await adminClient.auth.admin.deleteUser(user.id);
       if (error) throw error;

@@ -1,0 +1,7 @@
+# Supabase CLI 설정 — Edge Function 배포용으로만 사용 (로컬 Supabase 스택은 쓰지 않음)
+# 배포: supabase functions deploy <name> --project-ref <dev|prod ref>
+project_id = "kend"
+
+# 새 API 키(sb_secret_…)는 JWT가 아니므로 게이트웨이 JWT 검사를 끄고, 함수 코드에서 apikey를 직접 검사한다
+[functions.create-naver-user]
+verify_jwt = false
