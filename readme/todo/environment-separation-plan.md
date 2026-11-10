@@ -111,10 +111,13 @@ Vercel kend-seller  Production (master)      → seller.kend.co.kr     → Supab
 - [x] 확장 `pg_cron`, `pg_net` 활성화 — dev와 확장·스키마 일치
 - [x] **`create-naver-user` 보안 수정 + 새 키 전환** (2026-11-05, dev 배포 완료) — 예전 함수는 body의 email을 그대로 믿어 anon 키만으로 남의 계정 magic link 발급 가능했음. 이제 secret 키(`apikey` 헤더)만 호출 가능 + 네이버 토큰으로 프로필 직접 조회. 소스는 `supabase/functions/create-naver-user/`로 이동, `supabase/config.toml`에 `verify_jwt=false`. dev에서 공격 시나리오 5종 거부 확인 ✅ / **정상 네이버 로그인은 Preview에서 테스트 대기**
 - [x] kend 코드 새 키 전환 + supabase-js 2.118 / ssr 0.12 — dev에서 로그인·조회·회원탈퇴 확인 ✅ / 반품환불(secret 키) 경로는 F단계에서 확인
-- [ ] Edge Function prod 배포: `create-naver-user` (Secret `SITE_URL=https://kend.co.kr`), `sync-tracking` (seller `supabase/functions/sync-tracking` — 새 키 전환 후, Secret `SWEETTRACKER_API_KEY`)
-- [ ] dev 함수 시크릿 정리: 안 쓰게 된 `PROJECT_URL`, `SERVICE_ROLE_KEY` 삭제
-- [ ] Vault에 **prod secret 키** 등록 (`sync-tracking-status` 크론용 — seller 전환 방식에 맞춰 이름 결정)
-- [ ] pg_cron 6개 등록 — `sync-tracking-status` URL은 prod 주소로 교체. + `process-approved-returns` 신규 (`https://kend.co.kr/api/cron/process-returns` + `CRON_SECRET`)
+- [x] Edge Function prod 배포 (2026-11-09): `create-naver-user`, `sync-tracking` + 함수 시크릿 `SITE_URL=https://kend.co.kr`, `SWEETTRACKER_API_KEY` — 공격 시나리오 거부·secret 키 호출 200 확인 ✅
+- [x] prod Vault `secret_key`·`project_url` 등록 (사용자) — 값 해시 대조 ✅
+- [x] prod 크론 6개 등록 (2026-11-09) — DB함수 크론 5개는 dev 정의 복사, `sync-tracking-status`는 seller 마이그레이션 파일로. dev와 정의 diff 0 ✅, 크론 명령·DB함수 각 1회 실행 정상 ✅. `supabase_migrations.schema_migrations` 생성 + seller 마이그레이션 3건 기록 (이후 `supabase db push` 중복 방지)
+- [ ] `process-approved-returns` 크론 — 도메인 연결 + Vercel `CRON_SECRET` 후 (C·D단계)
+- [x] **seller 새 키 전환** (2026-11-09, seller `development` 브랜치 `89d2ccb`) — `sync-tracking` secret 키만 허용(기존엔 anon으로도 호출 가능) + `verify_jwt=false`, 크론 마이그레이션 `20261105000000_tracking_sync_cron_secret_key` (Vault `project_url`·`secret_key` 사용 → dev·prod 같은 SQL). dev: 함수 배포·크론 적용·크론 명령 실행 200 확인 ✅
+- [x] dev secret 키 교체 (2026-11-09) — Vault 확인 과정에서 키가 노출돼 새 키 발급 + 예전 키 삭제
+- [ ] dev 정리: 안 쓰게 된 함수 시크릿 `PROJECT_URL`·`SERVICE_ROLE_KEY`, Vault `service_role_key`(legacy) 삭제 — dev legacy 키 비활성화 때 함께
 
 ### C. 도메인 + prod 로그인 설정
 - [ ] Vercel kend Production에 `kend.co.kr` 연결, 가비아 DNS 설정 (SSL 발급 대기 고려해 일찍)

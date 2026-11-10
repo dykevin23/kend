@@ -51,10 +51,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token } = await req.json();
+    const { token, redirectTo } = await req.json();
     if (typeof token !== "string" || !token) {
       return json({ error: "token required" }, 400);
     }
+
+    // 로그인 링크가 돌아올 주소 — 호출한 kend 서버가 자기 주소를 넘긴다 (로컬·개발 서버·운영 각자).
+    // 없거나 형식이 이상하면 SITE_URL 기본값. 최종 허용 여부는 Supabase Auth의 Redirect URLs 목록이 판단
+    // (목록에 없으면 Supabase가 Site URL로 보낸다)
+    const callbackUrl =
+      typeof redirectTo === "string" && /^https?:\/\/[^/]+\/auth\/naver\/callback$/.test(redirectTo)
+        ? redirectTo
+        : `${Deno.env.get("SITE_URL")}/auth/naver/callback`;
 
     const profile = await fetchNaverProfile(token);
     if (!profile) {
@@ -91,9 +99,7 @@ Deno.serve(async (req) => {
       await supabase.auth.admin.generateLink({
         type: "magiclink",
         email,
-        options: {
-          redirectTo: `${Deno.env.get("SITE_URL")}/auth/naver/callback`,
-        },
+        options: { redirectTo: callbackUrl },
       });
 
     if (linkError) throw linkError;

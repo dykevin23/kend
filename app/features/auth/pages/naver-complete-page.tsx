@@ -42,6 +42,9 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 };
 
 // 프로필은 함수가 토큰으로 직접 조회·검증하므로 토큰만 넘긴다.
+// 로그인 링크가 돌아올 주소(redirectTo)는 지금 실행 중인 서버 기준으로 넘긴다 —
+// 같은 Supabase를 쓰는 로컬·개발 서버가 각자 자기 주소로 돌아오게 하기 위함
+// (예전엔 함수 시크릿 SITE_URL 하나뿐이라 로컬/앱 중 한쪽 로그인이 다른 주소로 튕겼음)
 // 서버 전용 loader라 secret 키를 apikey 헤더로 보낸다 (새 API 키는 Bearer가 아니라 apikey 헤더)
 const createNaverUser = async (token: string) => {
   const result = await fetch(
@@ -52,7 +55,10 @@ const createNaverUser = async (token: string) => {
         "Content-Type": "application/json",
         apikey: process.env.SUPABASE_SECRET_KEY!,
       },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({
+        token,
+        redirectTo: `${process.env.REDIRECT_LOGIN_URL}/auth/naver/callback`,
+      }),
     }
   );
 
