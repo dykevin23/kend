@@ -25,7 +25,7 @@ export const productViews = pgTable(
     product_id: uuid()
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
-    viewed_at: timestamp().notNull().defaultNow(),
+    viewed_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.user_id, table.product_id] })]
 );

@@ -37,8 +37,8 @@ export const profiles = pgTable("profiles", {
   introduction: text(),
   comment: text(),
   role: roles().default("customer").notNull(),
-  created_at: timestamp().notNull().defaultNow(),
-  updated_at: timestamp().notNull().defaultNow(),
+  created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
 /**
@@ -67,6 +67,6 @@ export const userAddresses = pgTable("user_addresses", {
   address: text().notNull(),
   address_detail: text(),
   is_default: boolean().notNull().default(false),
-  created_at: timestamp().notNull().defaultNow(),
-  updated_at: timestamp().notNull().defaultNow(),
+  created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });

@@ -34,8 +34,8 @@ export const carts = pgTable(
       .notNull()
       .references(() => productStockKeepings.id, { onDelete: "cascade" }),
     quantity: integer().notNull().default(1),
-    created_at: timestamp().notNull().defaultNow(),
-    updated_at: timestamp().notNull().defaultNow(),
+    created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [unique("carts_user_sku_unique").on(table.user_id, table.sku_id)]
 );

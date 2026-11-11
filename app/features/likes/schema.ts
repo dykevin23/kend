@@ -28,7 +28,7 @@ export const productLikes = pgTable(
     product_id: uuid()
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
-    created_at: timestamp().notNull().defaultNow(),
+    created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.user_id, table.product_id] })]
 );
@@ -50,7 +50,7 @@ export const storeLikes = pgTable(
     seller_id: uuid()
       .notNull()
       .references(() => adminSellers.id, { onDelete: "cascade" }),
-    created_at: timestamp().notNull().defaultNow(),
+    created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.user_id, table.seller_id] })]
 );
