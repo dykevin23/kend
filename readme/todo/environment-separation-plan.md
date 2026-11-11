@@ -120,21 +120,27 @@ Vercel kend-seller  Production (master)      → seller.kend.co.kr     → Supab
 - [ ] dev 정리: 안 쓰게 된 함수 시크릿 `PROJECT_URL`·`SERVICE_ROLE_KEY`, Vault `service_role_key`(legacy) 삭제 — dev legacy 키 비활성화 때 함께
 
 ### C. 도메인 + prod 로그인 설정
-- [ ] Vercel kend Production에 `kend.co.kr` 연결, 가비아 DNS 설정 (SSL 발급 대기 고려해 일찍)
-- [ ] prod Supabase Auth: Site URL `https://kend.co.kr`, Redirect URLs `https://kend.co.kr/**`
-- [ ] 소셜 로그인 콘솔에 prod 콜백 추가: Google, Kakao, Apple(Service ID 도메인·Return URL, `scripts/generate-apple-secret.cjs`로 시크릿), Naver
-- [ ] dev Supabase(지금 프로젝트): Site URL → `http://localhost:5173`, Redirect URLs에 localhost + development 브랜치 Preview URL
-- [ ] Vercel Preview **Deployment Protection** 확인 — 켜져 있으면 OAuth 콜백·WebView가 막힘
+- [x] 도메인 연결 (2026-11-10): Vercel `kend.co.kr`·`www.kend.co.kr` → kend, `seller.kend.co.kr` → kend-seller. 가비아 DNS A 레코드 3개(`@`·`www`·`seller` → `76.76.21.21`), SSL 발급 확인 ✅
+- [x] prod Supabase Auth: Site URL `https://kend.co.kr`, Redirect URLs `https://kend.co.kr/**` (사용자)
+- [x] 소셜 로그인 prod: Supabase Provider(Google·Kakao·Apple) 활성화 + 각 콘솔에 prod 콜백(`https://zweokwkresqbksjclxym.supabase.co/auth/v1/callback`) 추가 — authorize 단계 리디렉션 오류 없음 확인 ✅ (실제 로그인은 D5 이후)
+- [x] **Apple client secret 재발급** (2026-11-10, Key ID `3A2H88KC8T`, 만료 **2027-05-09** — 그 전에 재발급 필요). 4월 발급분은 180일 만료로 이미 만료 추정 → dev에도 같은 값 적용. Apple 토큰 엔드포인트로 유효성 확인 ✅
+- [x] 네이버: 로그인 링크 복귀 주소를 호출 서버 기준으로 변경(`a5c999b`) — 예전엔 함수 시크릿 `SITE_URL` 하나라 로컬/앱 중 한쪽이 다른 주소로 튕겼음. 네이버 콘솔 서비스 URL `https://kend.co.kr`, Callback: kend.co.kr / 개발 서버 / localhost:5173 / kend-seven(전환 후 삭제)
+- [x] dev Supabase Redirect URLs: `localhost:5173/**`, `kend-seven.vercel.app/**`, 개발 서버 `/**` (Site URL은 kend-seven 유지 → D6에서 변경)
+- [ ] Vercel Preview **Deployment Protection**: 현재 켜짐(Vercel Authentication) → kend는 개발 앱(WebView) 때문에 끄기, seller는 유지
 - [ ] 임시 코드 제거: `home-page.tsx`의 `?code=` 처리 (prod·dev 양쪽 소셜 로그인 확인 후)
+- [ ] 네이버 앱 상태 "개발 중"이면 출시 전 검수 요청
 
 ### D. 환경변수 전환 + 브랜치
-- [x] `development` 브랜치 생성 (2026-11-05, 아직 push 전)
-- [ ] Vercel kend **Production**: Supabase 6종 + `DATABASE_PASSWORD` → prod 값, `REDIRECT_LOGIN_URL=https://kend.co.kr`, **Toss 라이브 키**, `CRON_SECRET` 추가
-- [ ] Vercel kend **Preview**: Supabase → dev 값(지금 값 유지), `REDIRECT_LOGIN_URL` → development 브랜치 URL, Toss **테스트** 키·`KAKAO_REST_API_KEY`·`CRON_SECRET` 추가
-- [ ] 로컬 `.env`: dev 유지. prod 마이그레이션용 `.env.production`(gitignore) + 실행 스크립트 분리
-- [ ] `package.json` `db:typegen`의 하드코딩 project-id 정리
-- [ ] **kend-seller** (별도 승인): Vercel Production/Preview 동일 방식, `seller.kend.co.kr` 연결, `development` 브랜치
-- [ ] **kend-native** (별도 승인): `WEB_APP_URL`·`KEND_HOST` → `kend.co.kr`, 개발 빌드는 개발 서버를 보도록 분기 검토
+> ⚠️ `vercel env rm NAME <env>`는 여러 환경이 공유하는 변수면 **변수 전체**를 지운다 → 공유 변수는 지운 뒤 세 환경 값을 바로 다시 넣는다. `vercel env add NAME preview "" --value ... --yes`로 "모든 Preview 브랜치" 지정.
+
+- [x] `development` 브랜치 생성·push (kend, seller) — 개발 서버 `https://kend-git-development-dykevin23s-projects.vercel.app`, `https://kend-seller-git-development-dykevin23s-projects.vercel.app`
+- [x] Vercel **Preview** (2026-11-10): kend — dev 새 키 3종, `REDIRECT_LOGIN_URL`=개발 서버, Toss 테스트 키, `KAKAO_REST_API_KEY`, `CRON_SECRET` / seller — publishable 키 2종. 개발 서버 로그인(이메일·네이버·구글·카카오·애플) 사용자 확인 ✅
+- [x] Vercel **Production** (2026-11-11): kend — Supabase URL·키 prod, `REDIRECT_LOGIN_URL=https://kend.co.kr`, **Toss 라이브 위젯 키**(`live_gck_`/`live_gsk_`, 시크릿 키 인증 확인), prod 전용 `CRON_SECRET`(`.env.production`의 `PROD_CRON_SECRET`) / seller — Supabase URL·publishable 키 prod. Supabase URL은 환경별 분리
+- [x] 앱 런타임은 `DATABASE_URL`을 쓰지 않음 (`app/db.ts` 미사용) → Vercel에서 삭제 대상
+- [ ] master 머지 (kend, seller) → 운영이 prod DB·라이브 결제로 전환
+- [ ] 머지 후 Vercel 정리: 예전 이름 `SUPABASE_ANON_KEY`·`VITE_SUPABASE_ANON_KEY`·`SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`·`DATABASE_PASSWORD` 삭제 (seller도)
+- [ ] `package.json` `db:typegen`의 하드코딩 project-id 정리, prod 마이그레이션 실행 스크립트(`.env.production` 사용)
+- [ ] **kend-native** (승인됨, 착수 전 변경안 공유): 개발/운영 두 앱으로 분리 — 번들 ID `com.kend.app`(운영, App Store) / `com.kend.app.dev`(개발, 내부 배포), `app.config.js` + EAS 프로필별 `WEB_APP_URL`·`KEND_HOST` (운영 `kend.co.kr`, 개발 = 개발 서버)
 
 ### E. RLS
 - [ ] dev에서 전체 테이블(~33개) 정책 작성 → kend·seller 전 흐름 테스트 (전수점검 쿼리: [kend-error-handling-roadmap](kend-error-handling-roadmap.md) 1-5)
