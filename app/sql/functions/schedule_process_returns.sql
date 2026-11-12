@@ -7,14 +7,16 @@
 -- 기존 크론(expire_unshipped_orders 등)은 DB 내부 로직만으로 끝나 순수 plpgsql이었지만,
 -- 이번엔 외부(kend Node 서버) 호출이 필요해 이 프로젝트에서 처음으로 pg_net을 쓴다.
 --
--- ⚠️ 적용 전 아래 두 값을 실제 값으로 바꿔야 한다:
---   1. url            → kend가 배포된 공개 도메인 (예: https://kend.app/api/cron/process-returns)
---                        로컬/스테이징만 있고 프로덕션 도메인이 아직 없다면(P4-3 미완료),
---                        이 크론은 도메인이 확정되기 전까지 등록을 미뤄도 된다 — 라우트
---                        자체는 curl로 수동 호출해서 먼저 테스트 가능.
---   2. x-cron-secret  → kend .env의 CRON_SECRET 값과 반드시 동일해야 한다.
+-- 호출 주소와 비밀값은 Vault에서 읽는다 (SQL·cron.job에 평문으로 남기지 않고, 같은 SQL을
+-- 환경마다 그대로 쓰기 위함 — seller sync-tracking 크론과 같은 방식).
 --
--- Supabase SQL Editor에서 실행
+-- 사전 준비 (적용 전, 해당 프로젝트 SQL Editor에서 1회 — 비밀값이라 git에 넣지 않는다.
+-- vault.create_secret(값, 이름) 순서 주의):
+--   select vault.create_secret('<그 환경 kend 서버의 CRON_SECRET>', 'cron_secret');
+--   select vault.create_secret('https://kend.co.kr', 'kend_app_url');   -- 운영
+-- 개발(dev)은 개발 서버가 Vercel 배포 보호 뒤에 있어 등록하지 않는다 — 라우트는 curl로 수동 테스트.
+--
+-- 운영 적용: 2026-11 환경분리 (prod Vercel CRON_SECRET = .env.production의 PROD_CRON_SECRET)
 -- ============================================================
 
 CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
@@ -28,10 +30,11 @@ SELECT cron.schedule(
   '*/10 * * * *', -- 10분마다
   $$
   SELECT net.http_post(
-    url := 'https://REPLACE_WITH_KEND_DOMAIN/api/cron/process-returns',
+    url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'kend_app_url')
+           || '/api/cron/process-returns',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'x-cron-secret', 'REPLACE_WITH_CRON_SECRET'
+      'x-cron-secret', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'cron_secret')
     ),
     body := '{}'::jsonb
   );
