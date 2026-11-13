@@ -27,17 +27,20 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await client.auth.getUser();
 
   if (!user) {
-    return { profile: null, storageImageUrl: null };
+    return { profile: null, storageImageUrl: null, email: null };
   }
+
+  // 네이버에서 이메일 제공을 거부한 계정은 create-naver-user가 만든 임시 주소라 보여주지 않는다
+  const email = user.email?.endsWith("@naver-user.local") ? null : user.email ?? null;
 
   try {
     const profile = await getUserProfile(client, user.id);
     const storageImageUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/profiles/${user.id}`;
 
-    return { profile, storageImageUrl };
+    return { profile, storageImageUrl, email };
   } catch (error) {
     console.error("Failed to load profile:", error);
-    return { profile: null, storageImageUrl: null };
+    return { profile: null, storageImageUrl: null, email: null };
   }
 };
 
@@ -81,7 +84,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 };
 
 export default function EditProfilePage() {
-  const { profile, storageImageUrl } = useLoaderData<typeof loader>();
+  const { profile, storageImageUrl, email } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const { alert } = useAlert();
@@ -255,6 +258,28 @@ export default function EditProfilePage() {
             </button>
           </div>
         </div>
+
+        {/* 이름 · 로그인 계정 — 가입 시 받은 정보라 읽기 전용 ('Anonymous'는 이름 없는 가입의 기본값) */}
+        {profile.username && profile.username !== "Anonymous" && (
+          <TextField
+            id="username"
+            label="이름"
+            type="text"
+            value={profile.username}
+            readOnly
+            className="bg-gray-50 text-gray-500 focus-visible:border-gray-200"
+          />
+        )}
+        {email && (
+          <TextField
+            id="email"
+            label="로그인 계정"
+            type="email"
+            value={email}
+            readOnly
+            className="bg-gray-50 text-gray-500 focus-visible:border-gray-200"
+          />
+        )}
 
         {/* 닉네임 */}
         <TextField
