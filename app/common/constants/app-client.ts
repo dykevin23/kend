@@ -24,3 +24,23 @@ export function isAppRequest(request: Request): boolean {
  * 앱 첫 실행처럼 쿠키가 아직 없어 서버가 홈페이지를 그린 경우에도 화면에 보이기 전에 이동한다.
  */
 export const APP_CLIENT_SCRIPT = `(function(){try{if(!window.ReactNativeWebView)return;document.cookie="${APP_CLIENT_COOKIE}=${APP_CLIENT_VALUE}; path=/; max-age=31536000; secure; samesite=lax";if(location.pathname==="/")location.replace("/stores");}catch(e){}})();`;
+
+/**
+ * 로그인 없이 열리는 경로 — root loader(서버)와 useAuthListener(클라이언트)가 같이 쓴다.
+ * "/"(공개 홈페이지)는 startsWith로 넣으면 모든 경로가 공개되므로 isPublicPath에서 정확히 일치로만 본다.
+ */
+export const PUBLIC_PATH_PREFIXES = [
+  "/auth",
+  "/terms",
+  "/privacy",
+  "/refund-policy",
+  "/intro",
+  "/support",
+  "/myPage/terms",
+  "/myPage/privacy",
+  "/myPage/refund-policy",
+] as const;
+
+export function isPublicPath(pathname: string): boolean {
+  return pathname === "/" || PUBLIC_PATH_PREFIXES.some((p) => pathname.startsWith(p));
+}

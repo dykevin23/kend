@@ -22,7 +22,7 @@ import { Toaster } from "sonner";
 import { AlertProvider } from "./hooks/useAlert";
 import { useAuthListener } from "./hooks/useAuthListener";
 import { getCartCount } from "./features/carts/queries";
-import { APP_CLIENT_SCRIPT } from "./common/constants/app-client";
+import { APP_CLIENT_SCRIPT, isPublicPath } from "./common/constants/app-client";
 
 export const links: Route.LinksFunction = () => [
   {
@@ -86,19 +86,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } else {
     const url = new URL(request.url);
     const pathname = url.pathname;
-    const publicPaths = [
-      "/auth",
-      "/terms",
-      "/privacy",
-      "/refund-policy",
-      "/intro",
-      "/support",
-      "/myPage/terms",
-      "/myPage/privacy",
-      "/myPage/refund-policy",
-    ];
-    // "/"는 공개 홈페이지 — startsWith로 넣으면 모든 경로가 공개되므로 정확히 일치만
-    if (pathname !== "/" && !publicPaths.some((p) => pathname.startsWith(p))) {
+    if (!isPublicPath(pathname)) {
       return redirect("/auth/login", { headers });
     }
   }
