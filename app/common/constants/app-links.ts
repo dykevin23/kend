@@ -6,5 +6,5 @@
 export const APP_STORE_URL: string | null = null;
 export const PLAY_STORE_URL: string | null = null;
 
-export const SUPPORT_EMAIL = "dyk0203@naver.com";
+export const SUPPORT_EMAIL = "aidenotionsupport@gmail.com";
 export const SUPPORT_HOURS = "평일 10:00 - 18:00 (주말 및 공휴일 제외)";
