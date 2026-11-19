@@ -38,7 +38,7 @@ export async function action({ request }: Route.ActionArgs) {
     return actionErrorResponse(error);
   }
 
-  return redirect("/", {
+  return redirect("/stores", {
     headers,
   });
 }

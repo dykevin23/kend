@@ -20,7 +20,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     }
 
     // 세션 설정 후 홈으로 redirect
-    return redirect("/", { headers });
+    return redirect("/stores", { headers });
   }
 };
 

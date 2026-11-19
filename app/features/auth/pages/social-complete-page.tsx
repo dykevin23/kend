@@ -19,6 +19,6 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
     const { client, headers } = makeSSRClient(request);
     const { error } = await client.auth.exchangeCodeForSession(code);
     if (error) throw error;
-    return redirect("/", { headers });
+    return redirect("/stores", { headers });
   }
 };

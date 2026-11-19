@@ -64,6 +64,7 @@ export default [
   route("/privacy", "common/pages/privacy-page.tsx"),
   route("/refund-policy", "common/pages/refund-policy-page.tsx"),
   route("/intro", "common/pages/intro-page.tsx"),
+  route("/support", "common/pages/support-page.tsx"),
   ...prefix("auth", [
     route("/login", "features/auth/pages/login-page.tsx"),
     route("/join", "features/auth/pages/join-page.tsx"),

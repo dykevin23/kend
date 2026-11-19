@@ -22,6 +22,7 @@ import { Toaster } from "sonner";
 import { AlertProvider } from "./hooks/useAlert";
 import { useAuthListener } from "./hooks/useAuthListener";
 import { getCartCount } from "./features/carts/queries";
+import { APP_CLIENT_SCRIPT } from "./common/constants/app-client";
 
 export const links: Route.LinksFunction = () => [
   {
@@ -46,6 +47,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
         />
+        {/* 앱(WebView) 판별 쿠키 — 렌더 전에 실행돼야 해서 인라인 (app-client.ts 참고) */}
+        <script dangerouslySetInnerHTML={{ __html: APP_CLIENT_SCRIPT }} />
         <Meta />
         <Links />
       </head>
@@ -89,11 +92,13 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       "/privacy",
       "/refund-policy",
       "/intro",
+      "/support",
       "/myPage/terms",
       "/myPage/privacy",
       "/myPage/refund-policy",
     ];
-    if (!publicPaths.some((p) => pathname.startsWith(p))) {
+    // "/"는 공개 홈페이지 — startsWith로 넣으면 모든 경로가 공개되므로 정확히 일치만
+    if (pathname !== "/" && !publicPaths.some((p) => pathname.startsWith(p))) {
       return redirect("/auth/login", { headers });
     }
   }
