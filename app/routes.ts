@@ -48,6 +48,7 @@ export default [
     route("/privacy", "features/users/pages/privacy-page.tsx"),
     route("/refund-policy", "features/users/pages/refund-policy-page.tsx"),
   ]),
+  route("/notifications", "features/notifications/pages/notifications-page.tsx"),
   ...prefix("orders", [
     index("features/orders/pages/orders-page.tsx"),
     route("/action", "features/orders/pages/order-action.ts"),

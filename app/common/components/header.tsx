@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { cn } from "~/lib/utils";
 import CartIcon from "./cart-icon";
+import NotificationBell from "./notification-bell";
 
 export interface HeaderProps {
   title?: string;
@@ -34,6 +35,7 @@ export default function Header({ title, useRight = true }: HeaderProps) {
             <Link to="/search" className={headerIconButtonClass} aria-label="검색">
               <Search className="size-[22px]" strokeWidth={1.8} />
             </Link>
+            <NotificationBell />
             <CartIcon />
           </div>
         )}

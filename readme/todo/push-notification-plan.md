@@ -1,7 +1,7 @@
 # 앱 푸시 알림 계획 (주문·배송·문의)
 
 > **목표**: 마이페이지 "알림 설정"이 스위치만 있고 발송 기능이 없는 placeholder 상태(Apple 2.1/5.6 리젝 위험) → 실제로 동작하는 **앱 푸시**로 구현.
-> **상태**: 1단계(DB·트리거·send-push) dev 구현·테스트 완료 (2026-11-20) — 2단계(웹) 대기
+> **상태**: 1단계 dev 완료 · 2단계(웹) 구현됨 — 개발 서버 확인 대기 · 3단계(native) 대기 (2026-11-20)
 > **범위**: kend(웹) + kend-native(앱) + DB/Edge Function. seller 코드 변경 없음(상태 변경을 DB 트리거가 잡음).
 > 결정 배경: 알림톡은 비즈채널·대행사 계약·템플릿 심사·전화번호 수집이 필요해 복잡 → 앱 푸시 먼저(무료, Apple 4.2 네이티브 기능 근거). 알림톡·이메일은 이후 채널 추가로.
 
@@ -90,12 +90,34 @@
 - dev 테스트(11-20): 트리거 7종 롤백 테스트, 설정 끔 → skipped, 결제 포기 → 알림 없음, 가짜 토큰 → DeviceNotRegistered로 토큰 삭제·no_device, 인증 없는 호출 401
 - 남은 것: Expo receipt(최종 전달 결과) 확인은 미구현 — ticket 단계 오류만 처리
 
+## 구현 메모 (2단계 — 웹)
+
+- 화면: 알림함 `/notifications`(목록·읽음·모두 읽음, 90일), 알림 설정 `/myPage/notifications`(기기 권한 + 주문/문의 스위치 저장), 탭 헤더 종 아이콘(안 읽음 점), 마이페이지 메뉴 "알림", 결제 직후 주문목록의 "알림 받기" 카드(권한 미결정일 때만)
+- 토큰: 앱 실행 후 로그인 상태면 실행당 1회 재등록(팝업 없음, root), 로그아웃 직전 이 기기 토큰 해제(localStorage에 마지막 토큰 기억), 탈퇴는 FK cascade
+- RLS 테스트(11-20, dev, 롤백): 본인 알림만 조회·수정, 남의 설정 저장 차단, 계정 전환 시 토큰 소유자 이동, 일반 사용자 claim 차단
+
+### 웹 ↔ native 브릿지 규약 (3단계 native가 구현할 것)
+
+웹 → native: `postMessage({ type, requestId })` / native → 웹: `window.__kendNativeBridge.receive(JSON.stringify({ requestId, ...결과 }))` (기존 REQUEST_LOCATION과 같은 방식)
+
+| type | 응답 | 동작 |
+|------|------|------|
+| `GET_PUSH_STATUS` | `{ status, token?, platform }` | 권한 팝업 없이 현재 상태. `granted`면 Expo push token 포함 |
+| `REQUEST_PUSH_PERMISSION` | `{ status, token?, platform }` | `undetermined`면 OS 팝업 → 결과. 허용이면 토큰 포함 |
+| `OPEN_APP_SETTINGS` | `{ ok: true }` | `Linking.openSettings()` |
+
+- `status`: `granted` / `denied` / `undetermined`, `platform`: `ios` / `android`
+- 토큰: `Notifications.getExpoPushTokenAsync({ projectId })` (EAS projectId)
+- 알림 탭: `data.url`(앱 내 경로)을 WebView에서 열기 — 앱이 꺼져 있다 켜진 경우(`getLastNotificationResponseAsync`)도
+- 앱이 켜져 있을 때 받은 알림도 배너로 표시 (`setNotificationHandler`)
+- 이 type을 모르는 이전 빌드는 응답 없음 → 웹은 타임아웃으로 "지원 안 함" 처리(화면 요소 숨김)
+
 ## 5. 진행 순서 · 테스트
 
 | 단계 | 내용 | 확인 |
 |------|------|------|
 | 1 | DB 테이블·트리거 + Edge Function (dev) | ✅ dev 테스트 완료 (11-20) |
-| 2 | 웹: 브리지·토큰 등록·설정 화면·**알림함** (development) | 개발 서버 |
+| 2 | 웹: 브리지·토큰 등록·설정 화면·**알림함** (development) | 구현됨 — 개발 서버 화면 확인 대기 (푸시 수신은 3단계) |
 | 3 | native: expo-notifications + 탭 이동 → **Kend Dev 빌드** | Kend Dev로 실제 푸시 수신 (주문·발송·문의 답변) |
 | 4 | prod 적용(마이그레이션·함수) → master 머지 → **운영 앱 빌드** | 운영 앱 수신 확인 |
 

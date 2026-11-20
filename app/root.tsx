@@ -8,6 +8,7 @@ import {
   ScrollRestoration,
   useLocation,
   useNavigation,
+  useRouteLoaderData,
   type ShouldRevalidateFunction,
 } from "react-router";
 import { useEffect, useState } from "react";
@@ -22,6 +23,8 @@ import { Toaster } from "sonner";
 import { AlertProvider } from "./hooks/useAlert";
 import { useAuthListener } from "./hooks/useAuthListener";
 import { getCartCount } from "./features/carts/queries";
+import { getUnreadNotificationCount } from "./features/notifications/queries";
+import { syncPushToken } from "./features/notifications/push";
 import { APP_CLIENT_SCRIPT, isPublicPath } from "./common/constants/app-client";
 
 export const links: Route.LinksFunction = () => [
@@ -81,8 +84,11 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       return redirect("/auth/login?error=invalid_credentials", { headers });
     }
 
-    const cartCount = await getCartCount(client, user.id);
-    return { user, cartCount };
+    const [cartCount, unreadNotificationCount] = await Promise.all([
+      getCartCount(client, user.id),
+      getUnreadNotificationCount(client, user.id),
+    ]);
+    return { user, cartCount, unreadNotificationCount };
   } else {
     const url = new URL(request.url);
     const pathname = url.pathname;
@@ -90,7 +96,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       return redirect("/auth/login", { headers });
     }
   }
-  return { user: null, cartCount: 0 };
+  return { user: null, cartCount: 0, unreadNotificationCount: 0 };
 };
 
 // 뒤로가기(POP) 등 단순 경로 변경에서는 root loader 재실행 방지.
@@ -108,6 +114,8 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
   // 잠깐 떴다 사라지는 현상이 있어, 이 케이스만 revalidate를 건너뛴다.
   if (formData?.get("intent") === "create") return false;
   if (formMethod && formMethod !== "GET") return true;
+  // 알림함을 드나들 때는 안 읽은 알림 수(종 아이콘 점)를 새로 받는다
+  if (currentUrl.pathname === "/notifications" || nextUrl.pathname === "/notifications") return true;
   if (currentUrl.pathname !== nextUrl.pathname) return false;
   return defaultShouldRevalidate;
 };
@@ -139,6 +147,13 @@ function GlobalLoadingBar() {
 
 export default function App() {
   useAuthListener();
+  const rootData = useRouteLoaderData("root") as { user: { id: string } | null } | undefined;
+  const userId = rootData?.user?.id;
+
+  // 앱(WebView)에서 로그인 상태면 실행당 한 번 푸시 토큰 재등록 (권한 팝업 없음)
+  useEffect(() => {
+    if (userId) syncPushToken(userId);
+  }, [userId]);
   const { pathname } = useLocation();
   const showBottomNav =
     pathname === "/stores" ||

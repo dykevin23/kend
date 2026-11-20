@@ -12,6 +12,7 @@ import { getUserOrderCount } from "~/features/orders/queries";
 import { getUserReviewCount } from "~/features/reviews/queries";
 import { getUserProfile } from "../queries";
 import { useAlert } from "~/hooks/useAlert";
+import { unregisterPushToken } from "~/features/notifications/push";
 import type { Route } from "./+types/my-page";
 
 /**
@@ -174,6 +175,8 @@ export default function MyPage() {
   };
 
   const handleLogout = async () => {
+    // 세션이 살아 있을 때 이 기기 토큰을 해제해야 로그아웃 후 이 계정 알림이 오지 않는다
+    await unregisterPushToken();
     await browserClient.auth.signOut();
     navigate("/auth/login");
   };
@@ -242,6 +245,10 @@ export default function MyPage() {
     {
       title: "고객센터",
       items: [
+        {
+          label: "알림",
+          href: "/notifications",
+        },
         {
           label: "알림 설정",
           href: "/myPage/notifications",

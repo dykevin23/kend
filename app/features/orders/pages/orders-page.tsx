@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLoaderData, useSearchParams } from "react-router";
+import PushPromptCard from "~/features/notifications/components/push-prompt-card";
 import { Search, CheckCircle } from "lucide-react";
 import Content from "~/common/components/content";
 import { Input } from "~/common/components/ui/input";
@@ -51,6 +52,8 @@ export default function OrdersPage() {
     orderNumber: string;
     amount: number;
   } | null>(null);
+  // 결제 직후 진입이면 알림 권한 안내 카드 (배너와 달리 자동으로 숨기지 않음)
+  const [justPaid, setJustPaid] = useState(false);
 
   // 결제 성공 후 redirect로 넘어온 경우 메시지 표시
   useEffect(() => {
@@ -58,6 +61,7 @@ export default function OrdersPage() {
       const orderNumber = searchParams.get("orderNumber") ?? "";
       const amount = Number(searchParams.get("amount") ?? 0);
       setPaymentSuccess({ orderNumber, amount });
+      setJustPaid(true);
 
       // URL에서 결제 관련 파라미터 제거
       const newParams = new URLSearchParams(searchParams);
@@ -122,6 +126,8 @@ export default function OrdersPage() {
             </button>
           </div>
         )}
+
+        {justPaid && <PushPromptCard />}
 
         {/* 검색 영역 */}
         <div className="px-4 py-3 bg-white">
