@@ -246,6 +246,13 @@
       "when": 1794382439620,
       "tag": "0034_curly_vampiro",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795153543154,
+      "tag": "0035_condemned_lake",
+      "breakpoints": true
     }
   ]
 }

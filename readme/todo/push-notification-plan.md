@@ -1,7 +1,7 @@
 # 앱 푸시 알림 계획 (주문·배송·문의)
 
 > **목표**: 마이페이지 "알림 설정"이 스위치만 있고 발송 기능이 없는 placeholder 상태(Apple 2.1/5.6 리젝 위험) → 실제로 동작하는 **앱 푸시**로 구현.
-> **상태**: 계획 승인 (2026-11-19) — 결정 3건 확정(§4), 착수 대기
+> **상태**: 1단계(DB·트리거·send-push) dev 구현·테스트 완료 (2026-11-20) — 2단계(웹) 대기
 > **범위**: kend(웹) + kend-native(앱) + DB/Edge Function. seller 코드 변경 없음(상태 변경을 DB 트리거가 잡음).
 > 결정 배경: 알림톡은 비즈채널·대행사 계약·템플릿 심사·전화번호 수집이 필요해 복잡 → 앱 푸시 먼저(무료, Apple 4.2 네이티브 기능 근거). 알림톡·이메일은 이후 채널 추가로.
 
@@ -20,12 +20,15 @@
 
 | 알림 | 감지 (DB 트리거) | 이동할 화면 |
 |------|------------------|-------------|
-| 주문 완료 | `order_groups.status` → `paid` | 주문 상세 |
-| 상품 발송 | `deliveries.status` → `shipped` (판매자 송장 등록) | 주문 상세 |
-| 배송 완료 | `deliveries.status` → `delivered` (배송추적 크론) | 주문 상세 |
-| 주문 취소·환불 | `order_groups.status` → `cancelled` / `refunded` / `partially_refunded` | 주문 상세 |
-| 반품 완료 | `delivery_items.status` → `returned` | 주문 상세 |
-| 문의 답변 | `inquiries.status` `pending` → `answered` (seller) | 문의 상세 |
+| 주문 완료 `order_paid` | `order_groups.status` `payment_in_progress`/`payment_pending` → `paid` | 주문 상세 |
+| 주문 취소 `order_cancelled` | `order_groups.status` `paid`/`partially_refunded` → `cancelled` (구매자 취소·미확인 자동취소. 결제 포기 `failed`는 제외) | 주문 상세 |
+| 환불 완료 `order_refunded` | `order_groups.status` → `refunded`(전체) / `partially_refunded`(일부) | 주문 상세 |
+| 상품 발송 `order_shipped` | `deliveries.status` → `shipped` (판매자 송장 등록) | 주문 상세 |
+| 배송 완료 `order_delivered` | `deliveries.status` → `delivered` (배송추적 크론) | 주문 상세 |
+| 반품 승인 `return_approved` | `delivery_items.status` → `returned` (판매자 최종 승인, 환불은 이후 크론 → 환불 완료 알림 별도) | 주문 상세 |
+| 문의 답변 `inquiry_answered` | `inquiries.status` `pending` → `answered` (seller) | 문의 상세 |
+
+- 알려진 공백: 여러 판매자 주문 중 **일부 판매자만** 자동취소되는 경우(그룹은 `paid` 유지)는 그룹 단위 알림이 안 나감 — 필요 시 orders 단위 트리거 추가
 
 - **제외(2차)**: 혜택·이벤트(광고성) — 별도 수신 동의 기록·야간(21~08시) 제한·"(광고)" 표기 필요 → 동의 기록 작업과 함께.
 - 알림 설정 화면: "주문/배송 알림", "문의 답변 알림"만 노출. "활동 알림" 삭제, "혜택/이벤트"는 2차까지 숨김.
@@ -75,11 +78,23 @@
 2. **알림함 화면**: **이번에 만든다** (`read_at` 컬럼 포함)
 3. **Android**: iOS 완료 후 FCM 설정 추가
 
+## 구현 메모 (1단계)
+
+- 테이블: Drizzle `app/features/notifications/schema.ts` → 마이그레이션 0035 (RLS 켜짐, 본인 행만). `notifications`에 발송 관리용 `attempts`·`claimed_at` 추가
+- 트리거·함수·크론: `app/sql/triggers/notifications.sql` (환경마다 psql/SQL Editor로 실행, 재실행 안전)
+  - `register_push_token`/`unregister_push_token` RPC (기기 소유자 이전 때문에 SECURITY DEFINER)
+  - 알림 트리거는 전부 EXCEPTION으로 감쌈 — 알림 오류가 주문·취소를 실패시키지 않게
+  - `claim_pending_notifications` (SKIP LOCKED, service_role만) → 중복 발송 방지
+  - 크론 `retry-push-notifications` 5분: 멈춘 건 복구(3회), 24시간 지난 대기 건 failed
+- Edge Function `supabase/functions/send-push` (배포 `--use-api`, Docker 불필요)
+- dev 테스트(11-20): 트리거 7종 롤백 테스트, 설정 끔 → skipped, 결제 포기 → 알림 없음, 가짜 토큰 → DeviceNotRegistered로 토큰 삭제·no_device, 인증 없는 호출 401
+- 남은 것: Expo receipt(최종 전달 결과) 확인은 미구현 — ticket 단계 오류만 처리
+
 ## 5. 진행 순서 · 테스트
 
 | 단계 | 내용 | 확인 |
 |------|------|------|
-| 1 | DB 테이블·트리거 + Edge Function (dev) | SQL로 상태 변경 → `notifications` 생성·발송 기록 |
+| 1 | DB 테이블·트리거 + Edge Function (dev) | ✅ dev 테스트 완료 (11-20) |
 | 2 | 웹: 브리지·토큰 등록·설정 화면·**알림함** (development) | 개발 서버 |
 | 3 | native: expo-notifications + 탭 이동 → **Kend Dev 빌드** | Kend Dev로 실제 푸시 수신 (주문·발송·문의 답변) |
 | 4 | prod 적용(마이그레이션·함수) → master 머지 → **운영 앱 빌드** | 운영 앱 수신 확인 |

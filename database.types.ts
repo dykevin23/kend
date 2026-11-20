@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -686,6 +686,94 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          inquiry_updates: boolean
+          marketing: boolean
+          order_updates: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          inquiry_updates?: boolean
+          marketing?: boolean
+          order_updates?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          inquiry_updates?: boolean
+          marketing?: boolean
+          order_updates?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          attempts: number
+          body: string
+          claimed_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          push_status: Database["public"]["Enums"]["push_status"]
+          read_at: string | null
+          sent_at: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          claimed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          push_status?: Database["public"]["Enums"]["push_status"]
+          read_at?: string | null
+          sent_at?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          claimed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          push_status?: Database["public"]["Enums"]["push_status"]
+          read_at?: string | null
+          sent_at?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
       }
       order_groups: {
         Row: {
@@ -1530,6 +1618,41 @@ export type Database = {
         }
         Relationships: []
       }
+      push_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_profiles_profile_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       review_images: {
         Row: {
           created_at: string
@@ -1968,8 +2091,30 @@ export type Database = {
     Functions: {
       auto_confirm_purchase: { Args: never; Returns: number }
       calculate_monthly_settlements: { Args: never; Returns: undefined }
+      call_send_push: { Args: never; Returns: undefined }
+      claim_pending_notifications: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          body: string
+          id: string
+          title: string
+          url: string
+          user_id: string
+        }[]
+      }
       decrement_stock: {
         Args: { p_quantity: number; p_sku_id: string }
+        Returns: undefined
+      }
+      enqueue_notification: {
+        Args: {
+          p_body: string
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+          p_url: string
+          p_user_id: string
+        }
         Returns: undefined
       }
       expire_pending_orders: { Args: never; Returns: number }
@@ -1988,6 +2133,12 @@ export type Database = {
         Args: { p_quantity: number; p_sku_id: string }
         Returns: undefined
       }
+      register_push_token: {
+        Args: { p_platform: string; p_token: string }
+        Returns: undefined
+      }
+      retry_push_notifications: { Args: never; Returns: undefined }
+      unregister_push_token: { Args: { p_token: string }; Returns: undefined }
     }
     Enums: {
       admin_address_type: "SHIPPING" | "RETURN"
@@ -2030,6 +2181,14 @@ export type Database = {
       inquiry_status: "pending" | "answered"
       island_delivery_type: "AVAILABLE" | "UNAVAILABLE"
       notice_target: "ALL" | "SELLER" | "BUYER"
+      notification_type:
+        | "order_paid"
+        | "order_shipped"
+        | "order_delivered"
+        | "order_cancelled"
+        | "order_refunded"
+        | "return_approved"
+        | "inquiry_answered"
       order_group_status:
         | "payment_in_progress"
         | "payment_pending"
@@ -2051,6 +2210,13 @@ export type Database = {
         | "mobile_payment"
         | "easy_pay"
         | "virtual_account"
+      push_status:
+        | "pending"
+        | "sending"
+        | "sent"
+        | "failed"
+        | "skipped"
+        | "no_device"
       return_reason_type:
         | "CHANGE_OF_MIND"
         | "DEFECT"
@@ -2242,6 +2408,15 @@ export const Constants = {
       inquiry_status: ["pending", "answered"],
       island_delivery_type: ["AVAILABLE", "UNAVAILABLE"],
       notice_target: ["ALL", "SELLER", "BUYER"],
+      notification_type: [
+        "order_paid",
+        "order_shipped",
+        "order_delivered",
+        "order_cancelled",
+        "order_refunded",
+        "return_approved",
+        "inquiry_answered",
+      ],
       order_group_status: [
         "payment_in_progress",
         "payment_pending",
@@ -2265,6 +2440,14 @@ export const Constants = {
         "mobile_payment",
         "easy_pay",
         "virtual_account",
+      ],
+      push_status: [
+        "pending",
+        "sending",
+        "sent",
+        "failed",
+        "skipped",
+        "no_device",
       ],
       return_reason_type: [
         "CHANGE_OF_MIND",

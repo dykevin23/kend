@@ -5,3 +5,7 @@ project_id = "kend"
 # 새 API 키(sb_secret_…)는 JWT가 아니므로 게이트웨이 JWT 검사를 끄고, 함수 코드에서 apikey를 직접 검사한다
 [functions.create-naver-user]
 verify_jwt = false
+
+# 앱 푸시 발송 — DB(pg_net)가 secret 키를 apikey 헤더로 보내 호출
+[functions.send-push]
+verify_jwt = false
