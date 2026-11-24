@@ -104,7 +104,7 @@ export default function OrdersPage() {
       : [];
 
   return (
-    <Content headerPorps={{ title: "주문/배송", useRight: false }}>
+    <Content pullToRefresh headerPorps={{ title: "주문/배송", useRight: false }}>
       <div className="flex flex-col w-full bg-gray-50 min-h-full">
         {/* 결제 성공 배너 */}
         {paymentSuccess && (

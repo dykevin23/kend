@@ -37,7 +37,7 @@ export default function StoresPage() {
       : stores.filter((store) => store.domainId === activeTab);
 
   return (
-    <Content headerPorps={{ title: "스토어" }} className="bg-gray-50">
+    <Content pullToRefresh headerPorps={{ title: "스토어" }} className="bg-gray-50">
       <Tabs scrollable className="sticky top-0 z-10">
         <Tab
           title="전체"

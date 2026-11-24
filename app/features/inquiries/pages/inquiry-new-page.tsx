@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { redirect, useFetcher, useLoaderData, useNavigate } from "react-router";
+import { redirect, useFetcher, useLoaderData, useNavigate, useSearchParams } from "react-router";
 import { DateTime } from "luxon";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
@@ -78,8 +78,17 @@ export default function InquiryNewPage() {
   const fetcher = useFetcher<typeof action>();
   const navigate = useNavigate();
   const [category, setCategory] = useState<InquiryCategory | "">("");
-  const [orderGroupId, setOrderGroupId] = useState(NO_ORDER_VALUE);
-  const [orderItemId, setOrderItemId] = useState("");
+  const [searchParams] = useSearchParams();
+
+  // 주문 상세의 "문의하기"로 들어오면 그 주문·상품을 미리 선택 (?orderGroupId=&orderItemId=)
+  // 내 주문 목록에 있는 값일 때만 — 잘못된 값은 무시
+  const presetGroup = orderGroups.find((g) => g.id === searchParams.get("orderGroupId"));
+  const presetItemId = presetGroup?.items.find(
+    (item) => item.id === searchParams.get("orderItemId")
+  )?.id;
+
+  const [orderGroupId, setOrderGroupId] = useState(presetGroup?.id ?? NO_ORDER_VALUE);
+  const [orderItemId, setOrderItemId] = useState(presetItemId ?? "");
   const isSubmitting = fetcher.state !== "idle";
 
   const selectedGroup = orderGroups.find((group) => group.id === orderGroupId);

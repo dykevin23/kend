@@ -108,7 +108,8 @@ function DevicePermissionRow() {
   const handleClick = async () => {
     setBusy(true);
     try {
-      if (state.status === "denied") {
+      if (state.status !== "undetermined") {
+        // 허용 → 끄려면 / 거부 → 켜려면: iOS는 앱에서 바꿀 수 없어 설정 앱으로 보낸다
         await openAppSettingsFromNative();
       } else {
         const next = await enablePush();
@@ -129,24 +130,24 @@ function DevicePermissionRow() {
         <span className="text-base font-medium">기기 알림</span>
         <span className="text-xs text-muted leading-4">
           {granted
-            ? "이 기기에서 알림을 받고 있어요."
+            ? "이 기기에서 알림을 받고 있어요. 완전히 끄려면 기기 설정에서 끌 수 있어요."
             : state.status === "denied"
               ? "기기 설정에서 알림이 꺼져 있어요. 설정에서 KEND 알림을 허용해 주세요."
               : "알림을 켜면 주문·배송 소식을 바로 받아볼 수 있어요."}
         </span>
       </div>
-      {granted ? (
-        <span className="text-xs font-bold text-primary">켜짐</span>
-      ) : (
-        <button
-          type="button"
-          onClick={handleClick}
-          disabled={busy}
-          className="shrink-0 px-3 py-1.5 rounded-full bg-primary text-white text-xs font-bold disabled:opacity-50"
-        >
-          {state.status === "denied" ? "설정에서 켜기" : "알림 켜기"}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={busy}
+        className={
+          granted
+            ? "shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-gray-700 text-xs font-medium disabled:opacity-50"
+            : "shrink-0 px-3 py-1.5 rounded-full bg-primary text-white text-xs font-bold disabled:opacity-50"
+        }
+      >
+        {granted ? "기기 설정" : state.status === "denied" ? "설정에서 켜기" : "알림 켜기"}
+      </button>
     </div>
   );
 }
@@ -194,7 +195,7 @@ export default function NotificationSettingsPage() {
         ))}
         <div className="px-4 py-4">
           <span className="text-xs text-muted/60 leading-4">
-            *알림을 꺼도 받은 소식은 알림함에서 확인할 수 있어요.
+            *위 항목은 종류별로 끄고 켤 수 있어요. 알림을 꺼도 받은 소식은 알림함에서 확인할 수 있어요.
           </span>
         </div>
       </div>

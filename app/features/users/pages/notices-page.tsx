@@ -22,7 +22,7 @@ export default function NoticesPage({ loaderData }: Route.ComponentProps) {
   const { notices } = loaderData;
 
   return (
-    <Content headerPorps={{ title: "공지사항", useRight: false }}>
+    <Content pullToRefresh headerPorps={{ title: "공지사항", useRight: false }}>
       {notices.length > 0 ? (
         <Accordion type="single" collapsible className="w-full px-4">
           {notices.map((notice) => (

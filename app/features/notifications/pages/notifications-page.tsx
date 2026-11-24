@@ -94,7 +94,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <Content headerPorps={{ title: "알림", useRight: false }}>
+    <Content pullToRefresh headerPorps={{ title: "알림", useRight: false }}>
       <div className="flex flex-col w-full min-h-full bg-gray-50">
         <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-gray-100">
           <fetcher.Form method="post">

@@ -120,28 +120,56 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
   return defaultShouldRevalidate;
 };
 
+/**
+ * 화면 이동(로더 실행) 중 표시 — 이전 화면이 그대로 눌리는 문제 방지
+ * - 0.2초 미만: 표시 없음 (빠른 이동에서 번쩍임 방지)
+ * - 0.2초~: 상단 진행 막대 + 투명 막으로 터치 차단 + 살짝 흐리게
+ * - 1초~: 가운데 로딩 점
+ * fetcher(좋아요·장바구니 등 화면 안 동작)는 각 버튼이 자체 처리하므로 대상이 아니다.
+ */
 function GlobalLoadingBar() {
   const navigation = useNavigation();
-  const isLoading = navigation.state === "loading";
-  const [shouldShow, setShouldShow] = useState(false);
+  const isLoading = navigation.state !== "idle";
+  const [phase, setPhase] = useState<"none" | "block" | "spinner">("none");
 
-  // 짧은 전환(뒤로가기 등)에서 progress bar가 번쩍이는 걸 막기 위한 delay.
-  // 200ms 내 끝나는 로딩은 bar 표시 안 함.
   useEffect(() => {
     if (!isLoading) {
-      setShouldShow(false);
+      setPhase("none");
       return;
     }
-    const timer = setTimeout(() => setShouldShow(true), 200);
-    return () => clearTimeout(timer);
+    const blockTimer = setTimeout(() => setPhase("block"), 200);
+    const spinnerTimer = setTimeout(() => setPhase("spinner"), 1000);
+    return () => {
+      clearTimeout(blockTimer);
+      clearTimeout(spinnerTimer);
+    };
   }, [isLoading]);
 
-  if (!shouldShow) return null;
+  if (phase === "none") return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-gray-200">
-      <div className="h-full bg-primary animate-progress" />
-    </div>
+    <>
+      <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-gray-200">
+        <div className="h-full bg-primary animate-progress" />
+      </div>
+      <div
+        className="fixed inset-0 z-40 flex items-center justify-center bg-white/40 transition-opacity"
+        aria-busy="true"
+        aria-label="불러오는 중"
+      >
+        {phase === "spinner" && (
+          <div className="flex gap-1.5">
+            {[0, 120, 240].map((delay) => (
+              <span
+                key={delay}
+                className="size-2 rounded-full bg-accent animate-bounce"
+                style={{ animationDelay: `${delay}ms` }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 

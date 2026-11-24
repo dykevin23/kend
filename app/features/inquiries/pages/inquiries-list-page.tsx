@@ -27,6 +27,7 @@ export default function InquiriesListPage() {
 
   return (
     <Content
+      pullToRefresh
       headerPorps={{ title: "문의 내역", useRight: false }}
       footer={
         <Button variant="secondary" className="w-full" asChild>

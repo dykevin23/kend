@@ -147,36 +147,39 @@ export default function OrderDetailPage() {
                           </span>
                         </div>
                       )}
-                      {(canRequestReturn ||
-                        canConfirmPurchase ||
-                        canWriteReview ||
-                        hasReviewed) && (
-                        <div className="flex items-center gap-2 pb-3">
-                          {canRequestReturn && (
-                            <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
-                          )}
-                          {canConfirmPurchase && (
-                            <ConfirmPurchaseButton deliveryItemId={item.deliveryItemId!} />
-                          )}
-                          {canWriteReview && (
-                            <ReviewWriteButton
-                              productId={item.productId!}
-                              deliveryItemId={item.deliveryItemId!}
-                              productName={item.productName}
-                              mainImage={item.mainImage}
-                              options={item.options}
-                              salePrice={item.salePrice}
-                            />
-                          )}
-                          {hasReviewed && (
-                            <Button variant="outline" size="sm" className="text-xs" asChild>
-                              <Link to={`/myPage/reviews?reviewId=${matchedReview!.reviewId}`}>
-                                내가 쓴 리뷰 보기
-                              </Link>
-                            </Button>
-                          )}
-                        </div>
-                      )}
+                      {/* 상품별 액션 — 문의하기는 항상(주문·상품이 선택된 채로 문의 화면이 열림) */}
+                      <div className="flex flex-wrap items-center gap-2 pb-3">
+                        {canRequestReturn && (
+                          <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
+                        )}
+                        {canConfirmPurchase && (
+                          <ConfirmPurchaseButton deliveryItemId={item.deliveryItemId!} />
+                        )}
+                        {canWriteReview && (
+                          <ReviewWriteButton
+                            productId={item.productId!}
+                            deliveryItemId={item.deliveryItemId!}
+                            productName={item.productName}
+                            mainImage={item.mainImage}
+                            options={item.options}
+                            salePrice={item.salePrice}
+                          />
+                        )}
+                        {hasReviewed && (
+                          <Button variant="outline" size="sm" className="text-xs" asChild>
+                            <Link to={`/myPage/reviews?reviewId=${matchedReview!.reviewId}`}>
+                              내가 쓴 리뷰 보기
+                            </Link>
+                          </Button>
+                        )}
+                        <Button variant="outline" size="sm" className="text-xs" asChild>
+                          <Link
+                            to={`/myPage/inquiries/new?orderGroupId=${orderGroup.id}&orderItemId=${item.id}`}
+                          >
+                            문의하기
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
