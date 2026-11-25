@@ -48,16 +48,32 @@ function OrderTimeline({ order }: { order: Route.ComponentProps["loaderData"]["o
     { label: "배송완료", at: order.delivery?.deliveredAt ?? null },
   ].filter((step) => step.at !== null || step.label === "주문접수");
 
+  const doneSteps = steps.filter((step) => step.label !== "주문접수");
+  const isCancelled = order.status === "cancelled";
+
   return (
     <div className="flex flex-col gap-1.5 px-4 py-3 bg-gray-50 rounded-md">
-      {steps
-        .filter((step) => step.label !== "주문접수")
-        .map((step) => (
-          <div key={step.label} className="flex items-center justify-between text-xs">
-            <span className="text-gray-600">{step.label}</span>
-            <span className="text-gray-900">{formatDate(step.at)}</span>
+      {doneSteps.map((step) => (
+        <div key={step.label} className="flex items-center justify-between text-xs">
+          <span className="text-gray-600">{step.label}</span>
+          <span className="text-gray-900">{formatDate(step.at)}</span>
+        </div>
+      ))}
+      {/* 진행 시각이 하나도 없으면 빈 상자 대신 현재 상태를 보여준다.
+          취소 시각은 DB에 따로 저장되지 않아 상태로만 표시 */}
+      {isCancelled ? (
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-600">주문취소</span>
+          <span className="font-medium text-red-500">취소 완료</span>
+        </div>
+      ) : (
+        doneSteps.length === 0 && (
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-600">판매자확인</span>
+            <span className="text-gray-500">확인 대기 중</span>
           </div>
-        ))}
+        )
+      )}
       {order.delivery?.courier && order.delivery?.trackingNumber && (
         <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-200 mt-1">
           <span className="text-gray-600">송장번호</span>
