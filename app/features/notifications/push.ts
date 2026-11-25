@@ -15,6 +15,10 @@ import {
 
 const TOKEN_STORAGE_KEY = "kend_push_token";
 const SYNCED_SESSION_KEY = "kend_push_synced_user";
+// 첫 실행 자동 권한 요청을 이미 했는지 (iOS 팝업은 앱당 한 번만 뜨므로 기기에 기억)
+const ASKED_KEY = "kend_push_asked";
+// 로그인·결제 진행 중에는 팝업을 띄우지 않는다
+const NO_PROMPT_PATH = /^\/(auth|payments)(\/|$)/;
 
 const storage = {
   get(key: string, session = false): string | null {
@@ -51,17 +55,42 @@ async function registerToken(state: PushState): Promise<void> {
 }
 
 /**
- * 앱 실행 후 로그인 상태면 한 번: 이미 허용된 기기라면 토큰을 (재)등록한다. 권한 팝업은 띄우지 않는다.
- * (앱 재설치·토큰 변경·같은 기기 계정 전환을 따라가기 위함)
+ * 앱 실행 후 로그인 상태면 한 번:
+ * - 아직 한 번도 묻지 않은 기기면 iOS 권한 팝업을 띄운다 (첫 실행 1회 — 이후는 상황별 안내 카드)
+ * - 허용된 기기면 토큰을 (재)등록한다 (앱 재설치·토큰 변경·같은 기기 계정 전환 대응)
  */
 export async function syncPushToken(userId: string): Promise<void> {
   if (!isNativeApp()) return;
   if (storage.get(SYNCED_SESSION_KEY, true) === userId) return;
   try {
-    await registerToken(await getPushStateFromNative());
+    let state = await getPushStateFromNative();
+    if (
+      state.status === "undetermined" &&
+      !storage.get(ASKED_KEY) &&
+      !NO_PROMPT_PATH.test(window.location.pathname)
+    ) {
+      storage.set(ASKED_KEY, "1");
+      // 첫 화면이 다 뜬 뒤에 묻도록 잠깐 기다린다
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      state = await requestPushPermissionFromNative();
+    }
+    await registerToken(state);
     storage.set(SYNCED_SESSION_KEY, userId, true);
   } catch {
     /* 지원 안 하는 이전 빌드·일시 오류 — 다음 실행 때 다시 시도 */
+  }
+}
+
+/**
+ * 앱이 다시 화면에 나타날 때: 설정 앱에서 알림을 켜고 돌아온 경우 토큰을 등록한다 (팝업 없음).
+ * 실행당 1회인 syncPushToken만으로는 "설정에서 켜고 복귀"를 놓친다.
+ */
+export async function refreshPushToken(): Promise<void> {
+  if (!isNativeApp()) return;
+  try {
+    await registerToken(await getPushStateFromNative());
+  } catch {
+    /* 무시 */
   }
 }
 

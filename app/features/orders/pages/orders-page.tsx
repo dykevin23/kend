@@ -127,7 +127,12 @@ export default function OrdersPage() {
           </div>
         )}
 
-        {justPaid && <PushPromptCard />}
+        {justPaid && (
+          <PushPromptCard
+            title="배송 소식을 알림으로 받아보세요"
+            description="상품 발송, 배송 완료, 문의 답변을 바로 알려드려요."
+          />
+        )}
 
         {/* 검색 영역 */}
         <div className="px-4 py-3 bg-white">

@@ -24,7 +24,7 @@ import { AlertProvider } from "./hooks/useAlert";
 import { useAuthListener } from "./hooks/useAuthListener";
 import { getCartCount } from "./features/carts/queries";
 import { getUnreadNotificationCount } from "./features/notifications/queries";
-import { syncPushToken } from "./features/notifications/push";
+import { refreshPushToken, syncPushToken } from "./features/notifications/push";
 import { APP_CLIENT_SCRIPT, isPublicPath } from "./common/constants/app-client";
 
 export const links: Route.LinksFunction = () => [
@@ -178,9 +178,16 @@ export default function App() {
   const rootData = useRouteLoaderData("root") as { user: { id: string } | null } | undefined;
   const userId = rootData?.user?.id;
 
-  // 앱(WebView)에서 로그인 상태면 실행당 한 번 푸시 토큰 재등록 (권한 팝업 없음)
+  // 앱(WebView)에서 로그인 상태면: 실행당 한 번 토큰 재등록(+첫 실행이면 권한 팝업),
+  // 앱이 다시 화면에 나타날 때마다(설정 앱에서 알림 켜고 복귀 등) 토큰 재확인
   useEffect(() => {
-    if (userId) syncPushToken(userId);
+    if (!userId) return;
+    syncPushToken(userId);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refreshPushToken();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [userId]);
   const { pathname } = useLocation();
   const showBottomNav =

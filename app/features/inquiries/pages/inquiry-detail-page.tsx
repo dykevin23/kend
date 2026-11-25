@@ -1,4 +1,5 @@
 import { Link, redirect, useLoaderData } from "react-router";
+import PushPromptCard from "~/features/notifications/components/push-prompt-card";
 import { DateTime } from "luxon";
 import Content from "~/common/components/content";
 import { makeSSRClient } from "~/supa-client";
@@ -31,6 +32,15 @@ export default function InquiryDetailPage() {
   return (
     <Content headerPorps={{ title: "문의 상세", useRight: false }}>
       <div className="flex flex-col w-full bg-gray-50 min-h-full">
+        {/* 답변 대기 중인데 알림이 꺼져 있으면 안내 (켜져 있거나 브라우저면 안 보임) */}
+        {inquiry.status === "pending" && (
+          <div className="pb-3">
+            <PushPromptCard
+              title="답변이 등록되면 알려드릴게요"
+              description="알림을 켜면 판매자 답변을 바로 받아볼 수 있어요."
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-2 px-4 py-4 bg-white border-b border-gray-100">
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">
