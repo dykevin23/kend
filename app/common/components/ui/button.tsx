@@ -37,6 +37,13 @@ const buttonVariants = cva(
     },
     // CTA 그림자는 큰 채움 버튼에만 — 작은 버튼에 붙으면 무거워 보임
     compoundVariants: [
+      // 목록 안 작은 테두리 버튼은 여러 개 모이면 남색 굵은 테두리가 무거워 보여 연회색 1px로
+      {
+        variant: "outline",
+        size: ["xs", "sm"],
+        class:
+          "border border-gray-300 text-gray-800 hover:bg-gray-50 active:bg-gray-50",
+      },
       {
         variant: "default",
         size: ["default", "lg"],

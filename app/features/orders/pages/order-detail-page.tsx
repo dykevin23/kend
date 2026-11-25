@@ -1,5 +1,6 @@
 import { redirect, useLoaderData, Link } from "react-router";
 import { DateTime } from "luxon";
+import { ChevronRight } from "lucide-react";
 import Content from "~/common/components/content";
 import { Button } from "~/common/components/ui/button";
 import { makeSSRClient } from "~/supa-client";
@@ -105,8 +106,18 @@ export default function OrderDetailPage() {
 
           return (
             <div key={order.id} className="flex flex-col bg-white border-b border-gray-100 mt-2">
-              <div className="px-4 pt-4 pb-2">
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
                 <span className="text-sm font-bold">{order.sellerName}</span>
+                {/* 판매자 문의 — 문의 화면이 이 주문(상품 1개면 상품까지) 선택된 채로 열림 */}
+                <Link
+                  to={`/myPage/inquiries/new?orderGroupId=${orderGroup.id}${
+                    order.items.length === 1 ? `&orderItemId=${order.items[0].id}` : ""
+                  }`}
+                  className="flex items-center text-xs text-gray-500"
+                >
+                  문의하기
+                  <ChevronRight className="size-3.5" />
+                </Link>
               </div>
 
               <div className="px-4">
@@ -147,39 +158,36 @@ export default function OrderDetailPage() {
                           </span>
                         </div>
                       )}
-                      {/* 상품별 액션 — 문의하기는 항상(주문·상품이 선택된 채로 문의 화면이 열림) */}
-                      <div className="flex flex-wrap items-center gap-2 pb-3">
-                        {canRequestReturn && (
-                          <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
-                        )}
-                        {canConfirmPurchase && (
-                          <ConfirmPurchaseButton deliveryItemId={item.deliveryItemId!} />
-                        )}
-                        {canWriteReview && (
-                          <ReviewWriteButton
-                            productId={item.productId!}
-                            deliveryItemId={item.deliveryItemId!}
-                            productName={item.productName}
-                            mainImage={item.mainImage}
-                            options={item.options}
-                            salePrice={item.salePrice}
-                          />
-                        )}
-                        {hasReviewed && (
-                          <Button variant="outline" size="sm" className="text-xs" asChild>
-                            <Link to={`/myPage/reviews?reviewId=${matchedReview!.reviewId}`}>
-                              내가 쓴 리뷰 보기
-                            </Link>
-                          </Button>
-                        )}
-                        <Button variant="outline" size="sm" className="text-xs" asChild>
-                          <Link
-                            to={`/myPage/inquiries/new?orderGroupId=${orderGroup.id}&orderItemId=${item.id}`}
-                          >
-                            문의하기
-                          </Link>
-                        </Button>
-                      </div>
+                      {(canRequestReturn ||
+                        canConfirmPurchase ||
+                        canWriteReview ||
+                        hasReviewed) && (
+                        <div className="flex items-center gap-2 pb-3">
+                          {canRequestReturn && (
+                            <ReturnRequestDialog deliveryItemId={item.deliveryItemId!} />
+                          )}
+                          {canConfirmPurchase && (
+                            <ConfirmPurchaseButton deliveryItemId={item.deliveryItemId!} />
+                          )}
+                          {canWriteReview && (
+                            <ReviewWriteButton
+                              productId={item.productId!}
+                              deliveryItemId={item.deliveryItemId!}
+                              productName={item.productName}
+                              mainImage={item.mainImage}
+                              options={item.options}
+                              salePrice={item.salePrice}
+                            />
+                          )}
+                          {hasReviewed && (
+                            <Button variant="outline" size="sm" className="text-xs" asChild>
+                              <Link to={`/myPage/reviews?reviewId=${matchedReview!.reviewId}`}>
+                                내가 쓴 리뷰 보기
+                              </Link>
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
