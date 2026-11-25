@@ -14,7 +14,7 @@ import { authenticatedRole, authUid } from "drizzle-orm/supabase";
 import { profiles } from "../users/schema";
 
 /**
- * 앱 푸시 알림 (readme/todo/push-notification-plan.md)
+ * 앱 푸시 알림 (readme/active/push-notification-plan.md)
  *
  * 흐름: 상태 변경(kend·seller·크론) → DB 트리거가 notifications insert
  *       → pg_net으로 Edge Function send-push 호출 → Expo Push API → 기기

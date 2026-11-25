@@ -1,7 +1,7 @@
 # KEND 환경 분리 + 라이브 결제 전환 계획
 
 > **목표**: 운영(prod)과 개발(dev) 환경을 분리해 운영 DB를 보호하고, 운영에만 Toss 라이브 키를 적용한다. iOS 재제출 전 필수.
-> **상태**: 계획 확정 (2026-11-04), 착수 전
+> **상태**: 진행 중 — A~D 완료·운영 전환(2026-11-11), 남은 것 E(RLS)·F(라이브 결제 검증)·G(메일) (2026-11-25 갱신)
 > **범위**: kend + kend-seller(같은 DB 공유) + kend-native(웹 URL 하드코딩). seller·native 실제 편집은 해당 단계에서 별도 승인 후 진행.
 > 이전판(2026-04-14)은 "지금 프로젝트=prod, 새 프로젝트=dev" 전제였으나 아래 결정으로 대체됨.
 
@@ -126,9 +126,9 @@ Vercel kend-seller  Production (master)      → seller.kend.co.kr     → Supab
 - [x] **Apple client secret 재발급** (2026-11-10, Key ID `3A2H88KC8T`, 만료 **2027-05-09** — 그 전에 재발급 필요). 4월 발급분은 180일 만료로 이미 만료 추정 → dev에도 같은 값 적용. Apple 토큰 엔드포인트로 유효성 확인 ✅
 - [x] 네이버: 로그인 링크 복귀 주소를 호출 서버 기준으로 변경(`a5c999b`) — 예전엔 함수 시크릿 `SITE_URL` 하나라 로컬/앱 중 한쪽이 다른 주소로 튕겼음. 네이버 콘솔 서비스 URL `https://kend.co.kr`, Callback: kend.co.kr / 개발 서버 / localhost:5173 / kend-seven(전환 후 삭제)
 - [x] dev Supabase Redirect URLs: `localhost:5173/**`, `kend-seven.vercel.app/**`, 개발 서버 `/**` (Site URL은 kend-seven 유지 → D6에서 변경)
-- [ ] Vercel Preview **Deployment Protection**: 현재 켜짐(Vercel Authentication) → kend는 개발 앱(WebView) 때문에 끄기, seller는 유지
-- [ ] 임시 코드 제거: `home-page.tsx`의 `?code=` 처리 (prod·dev 양쪽 소셜 로그인 확인 후)
-- [ ] 네이버 앱 상태 "개발 중"이면 출시 전 검수 요청
+- [x] Vercel Preview **Deployment Protection**: kend 개발 서버 공개 접근 확인(2026-11-25, Kend Dev 앱 접속 정상) — seller 상태는 seller에서 확인
+- [x] 임시 코드 제거: `home-page.tsx`의 `?code=` 처리 (`0d20525`, 2026-11-12)
+- [x] 네이버 로그인 검수 승인 (2026-11-13 요청 → 승인), 빌드 27 앱 네이버 로그인 확인. 후속: naver-start state CSRF 검증(출시 전 권장)
 
 ### D. 환경변수 전환 + 브랜치
 > ⚠️ `vercel env rm NAME <env>`는 여러 환경이 공유하는 변수면 **변수 전체**를 지운다 → 공유 변수는 지운 뒤 세 환경 값을 바로 다시 넣는다. `vercel env add NAME preview "" --value ... --yes`로 "모든 Preview 브랜치" 지정.
@@ -137,10 +137,10 @@ Vercel kend-seller  Production (master)      → seller.kend.co.kr     → Supab
 - [x] Vercel **Preview** (2026-11-10): kend — dev 새 키 3종, `REDIRECT_LOGIN_URL`=개발 서버, Toss 테스트 키, `KAKAO_REST_API_KEY`, `CRON_SECRET` / seller — publishable 키 2종. 개발 서버 로그인(이메일·네이버·구글·카카오·애플) 사용자 확인 ✅
 - [x] Vercel **Production** (2026-11-11): kend — Supabase URL·키 prod, `REDIRECT_LOGIN_URL=https://kend.co.kr`, **Toss 라이브 위젯 키**(`live_gck_`/`live_gsk_`, 시크릿 키 인증 확인), prod 전용 `CRON_SECRET`(`.env.production`의 `PROD_CRON_SECRET`) / seller — Supabase URL·publishable 키 prod. Supabase URL은 환경별 분리
 - [x] 앱 런타임은 `DATABASE_URL`을 쓰지 않음 (`app/db.ts` 미사용) → Vercel에서 삭제 대상
-- [ ] master 머지 (kend, seller) → 운영이 prod DB·라이브 결제로 전환
-- [ ] 머지 후 Vercel 정리: 예전 이름 `SUPABASE_ANON_KEY`·`VITE_SUPABASE_ANON_KEY`·`SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`·`DATABASE_PASSWORD` 삭제 (seller도)
+- [x] master 머지 (kend, seller) → 운영이 prod DB·라이브 결제로 전환 (2026-11-11, 운영 로그인 5종 확인)
+- [x] 머지 후 Vercel 정리: kend는 예전 이름 변수 없음 확인(2026-11-25) — seller는 seller에서 확인
 - [ ] `package.json` `db:typegen`의 하드코딩 project-id 정리, prod 마이그레이션 실행 스크립트(`.env.production` 사용)
-- [ ] **kend-native** (승인됨, 착수 전 변경안 공유): 개발/운영 두 앱으로 분리 — 번들 ID `com.kend.app`(운영, App Store) / `com.kend.app.dev`(개발, 내부 배포), `app.config.js` + EAS 프로필별 `WEB_APP_URL`·`KEND_HOST` (운영 `kend.co.kr`, 개발 = 개발 서버)
+- [x] **kend-native** 개발/운영 두 앱 분리 완료 — 운영 빌드 27·28 `kend.co.kr` 접속, Kend Dev는 개발 서버 (상세 changelog-native). 원래 계획: — 번들 ID `com.kend.app`(운영, App Store) / `com.kend.app.dev`(개발, 내부 배포), `app.config.js` + EAS 프로필별 `WEB_APP_URL`·`KEND_HOST` (운영 `kend.co.kr`, 개발 = 개발 서버)
 
 ### E. RLS
 - [ ] dev에서 전체 테이블(~33개) 정책 작성 → kend·seller 전 흐름 테스트 (전수점검 쿼리: [kend-error-handling-roadmap](kend-error-handling-roadmap.md) 1-5)

@@ -7,7 +7,7 @@ import { APP_STORE_URL } from "~/common/constants/app-links";
 import { makeSSRClient } from "~/supa-client";
 
 /**
- * 공개 홈페이지 (kend.co.kr) — readme/todo/web-access-policy.md
+ * 공개 홈페이지 (kend.co.kr) — readme/active/web-access-policy.md
  * - 앱(WebView)·로그인 사용자 → 앱 첫 화면(/stores)
  * - 그 외(브라우저) → 서비스 소개 + 앱 다운로드 + 법적 문서 링크
  *   (Google OAuth 브랜딩 인증의 "홈페이지" 요건: 로그인 없이 열림, 앱 이름 표시, 개인정보처리방침 링크)

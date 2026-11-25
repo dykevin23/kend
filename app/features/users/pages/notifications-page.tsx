@@ -13,7 +13,7 @@ import type { Route } from "./+types/notifications-page";
  * 알림 설정 (/myPage/notifications)
  * - 기기 알림 권한(앱에서만): 꺼짐 → 권한 요청 / 거부됨 → 설정 앱 열기
  * - 알림 종류별 수신 설정: notification_settings 저장 (꺼두면 푸시를 보내지 않음, 알림함에는 남음)
- * - 혜택/이벤트(광고성)는 수신 동의 기록 작업과 함께 2차 — readme/todo/push-notification-plan.md
+ * - 혜택/이벤트(광고성)는 수신 동의 기록 작업과 함께 2차 — readme/active/push-notification-plan.md
  */
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { client } = makeSSRClient(request);

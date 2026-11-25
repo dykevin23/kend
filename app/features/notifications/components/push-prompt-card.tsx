@@ -4,7 +4,7 @@ import { openAppSettingsFromNative, type PushState } from "~/lib/native-bridge";
 import { enablePush, getPushState, refreshPushToken } from "../push";
 
 /**
- * 상황별 알림 안내 카드 (readme/todo/push-notification-plan.md §4-1)
+ * 상황별 알림 안내 카드 (readme/active/push-notification-plan.md §4-1)
  * - 앱에서 알림이 꺼져 있을 때만 보인다 (허용 상태·브라우저·지원 안 하는 빌드는 숨김)
  *   - 아직 안 물어봄 → "알림 받기" = iOS 권한 팝업
  *   - 이미 거부 → "설정에서 켜기" = 설정 앱 (iOS는 한 번 거부하면 앱에서 다시 팝업 불가)

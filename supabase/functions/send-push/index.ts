@@ -1,4 +1,4 @@
-// 앱 푸시 발송 — readme/todo/push-notification-plan.md
+// 앱 푸시 발송 — readme/active/push-notification-plan.md
 //
 // 호출자: DB(pg_net) — notifications insert 직후 kick_send_push 트리거, 5분 재시도 크론.
 // 대기(pending) 알림을 claim_pending_notifications()로 "처리 중"으로 바꾸며 가져가

@@ -1,5 +1,5 @@
 /**
- * 앱(WebView) 접속 판별 — readme/todo/web-access-policy.md
+ * 앱(WebView) 접속 판별 — readme/active/web-access-policy.md
  *
  * native가 Google 로그인 차단을 피하려고 일반 Safari User-Agent를 쓰기 때문에
  * 서버(SSR)는 User-Agent로 앱/브라우저를 구분할 수 없다.

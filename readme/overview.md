@@ -1,6 +1,6 @@
 # KEND 프로젝트 현재 상황 (Overview)
 
-> 최종 업데이트: 2026-09-21
+> 최종 업데이트: 2026-11-25
 > 프로젝트 현재 상태를 한눈에 보는 **단일 대시보드**. 개발 진행마다 갱신한다.
 > 완료 상세 → [changelog-kend.md](./changelog-kend.md) / 큰 계획 → [kend-roadmap-to-launch.md](./kend-roadmap-to-launch.md) / Phase 트래킹 → [kend-milestones.md](./kend-milestones.md)
 
@@ -12,24 +12,25 @@
 
 ---
 
-## 🚦 지금 상황 (2026-09-17)
+## 🚦 지금 상황 (2026-11-25)
 
-- 🟡 **TossPayments 실키 계약심사 — Toss 회신 수신(2026-09-08), 사용자 결정 2건 대기**: URL 제출/실 상품 노출/결제경로 파일 방식은 답 나옴(그대로 진행 가능). **결제 최고가 금액 확정**·**임시 등록할 실 판매 예정 상품 선정**은 사용자(대표) 결정 필요 — 결정되는 대로 임시 상품 등록 → 결제경로 PPT 캡처 → 회신. ⚠️ Toss 문의량 폭주로 **회신까지 1~2개월 소요 가능** 안내받음, 9월 말 내부 타겟에 영향 가능성. 상세: [tosspayments-review-checklist.md](./tosspayments-review-checklist.md)
-- 🚨 **iOS App Store 심사 3달+ 정체** — Guideline 5.6 재제출정지 → appeal 승인(새 binary 재제출 가능)됐으나, 개발 완성도 더 끌어올린 뒤 재제출하는 쪽으로 **의도적 보류** 중. 상세: [kend-milestones.md P0-1](./kend-milestones.md)
-- 🎉 **법인 설립 완료**, **통신판매업 신고는 아직**(Toss PG계약 시 발급되는 구매안전서비스 이용확인증이 선행돼야 해서 순서상 정상 — EXT-1b). NICE는 Holding(본인확인 불필요 방향)
-- ✅ **Phase 3(kend-seller 관리보완) 대량 진척** — 상품수정(B-1)·재고관리 Stocks Keeping(B-2)·Seller 대시보드+디자인시스템 리뉴얼(B-3)·공지사항(B-5)·리뷰관리(B-7) 전부 실사용 테스트까지 완료. **CS관리(B-4)는 구현 완료, 클릭 테스트만 대기**(kend-seller 자체 changelog에 명시). 남은 건 교환(B-6, 정책 대기) 뿐 — 상세 [kend-milestones.md Phase 3](./kend-milestones.md)
-- ⚠️ **반품 정책 법률 검토 필요 발견**: 반품 사유 자가신고(증빙 없음) + 반품배송비 부담주체 미구현 + 판매자귀책 사유 반품기간이 전자상거래법 법정기준보다 짧을 가능성 — 상세는 [order-cancel-refund-exchange-flow.md §5-4](./todo/order-cancel-refund-exchange-flow.md). **Toss 실키 전환 전 법률 검토 권장**
-- **다음 개발 후보**: Toss 문의 답변 대응(최우선) → P2.5-3 교환(정책 결정 선행) → `.server.ts` 시크릿 노출 감사 / P0-3 잔여 → CS관리 실사용 클릭 테스트
+- 🟢 **iOS 출시 준비 단계** — 환경 분리(dev/prod)·Toss 라이브 키·도메인 `kend.co.kr`·소셜 로그인 5종 운영 전환 완료(11-11). 운영 앱 빌드 28이 TestFlight에서 `kend.co.kr`로 동작 중. 남은 순서는 아래 "다음 작업"
+- ✅ **앱 푸시 알림 운영 적용** — 알림 설정 placeholder(Apple 2.1/5.6 리젝 위험) 해소. 주문·배송·반품·문의 답변 7종, 알림함, 빌드 28 수신·탭 이동 확인. 권한 방식 변경(첫 실행 팝업·상황별 카드)은 development에만 있음 → 운영 머지 대기
+- ✅ **Toss 계약심사 완료**(10-15) → 라이브 키 운영 적용(11-11). 실결제 검증은 아직(운영 판매자·상품 등록 후 소액 결제)
+- 🟡 **통신판매업 신고** — 접수·등록면허세 납부(11-17), **신고증 대기**. 받으면 신고번호 표시 + 통신판매중개자 고지(중개·직접판매 둘 다 사업자 업종에 있음)
+- ⏸ **Google 로그인 브랜딩 인증 보류** — 승인된 도메인에 `*.supabase.co`가 있어 소유권 확인 불가. prod Pro 전환 + Supabase 커스텀 도메인 때 함께(기한 없음, 로그인 동작엔 영향 없음)
+- 🚨 iOS 심사: 06-23 5.6 → 07-29 appeal 승인(새 빌드 재제출 가능), **출시 준비 마친 뒤 제출**
 
 ---
 
 ## ✅ 최근 완료
 
-- 2026-09-21: **"최근 본 상품" 기능(kend, Phase 3)** — `product_views` 테이블(찜 테이블과 동일 패턴, 로그 아님) 신설, 조회 기록을 컴포넌트 마운트 후 액션으로 분리(loader에 뒀다가 `ProductCard` prefetch로 오탐지되던 버그 실사용 테스트로 발견해 수정). 실사용 재검증 통과 ✅
-- 2026-09-21: **`follows` 테이블/`profiles.stats` 정리(kend)** — 예전 사람 팔로우 기능 잔재(고아 테이블) DB drop 완료·확인. 스토어 카드 찜 UI는 `likeCount`로 명명 정리 ✅
-- 2026-09-21: **상품상세 타이틀 옆 별점·리뷰수 하드코딩 제거(kend)** — "4.6·리뷰(4,321)" 고정 표기를 실데이터로 교체(09-07 정리 때 놓쳤던 블록), 타이틀과 한 줄 우측정렬로 레이아웃 조정 — 구현됨, 실사용 화면 확인 대기
-- 2026-09-17: **공지사항 화면(kend↔seller, B-5)** — kend-seller `notices` 스키마+admin CRUD+판매자 조회화면, kend `/myPage/notices` 연결(target 필터로 SELLER 전용 제외). 양쪽 실사용 테스트 통과(kend-seller 사용자 확인) ✅
-- 2026-09-16: **"현재 위치로 주소 찾기" 배지 표시(kend)** — GPS로 채워진 주소임을 알리는 배지 UI 보강, 우편번호 직접 재검색 시 해제 ✅
+- 2026-11-25: **앱 푸시 알림 운영 적용** — 운영 DB·`send-push`·웹 반영, TestFlight 빌드 28에서 앱 켜짐/종료 상태 수신·탭 이동 확인 ✅ (운영 주문 트리거는 실주문 시 재확인)
+- 2026-11-25: **주문 상세·목록 다듬기** — 작은 outline 버튼 연회색, 판매자 줄 "문의하기 >", 문의 상세 "목록으로" 제거, 취소 건 빈 타임라인 수정 ✅
+- 2026-11-24: **당겨서 새로고침(목록 5곳)·화면 이동 중 조작 차단·주문 상세에서 문의하기(주문·상품 자동 선택)** ✅
+- 2026-11-19: **공개 홈페이지 `/`·공개 고객지원 `/support`** + 앱 접속 판별 쿠키(native 수정 없이) — 운영 확인 ✅
+- 2026-11-11: **환경 분리·운영 전환** (prod Supabase, Toss 라이브 키, 도메인, 소셜 로그인 5종) + **시간 컬럼 timestamptz**(9시간 어긋남) ✅
+- 2026-10-15~23: **디자인 리뉴얼** (토큰·공통 컴포넌트·주요 화면·인증 화면) ✅
 
 > 상세: [changelog-kend.md](./changelog-kend.md)
 
@@ -39,31 +40,29 @@
 
 | 항목 | 상태 |
 |------|------|
-| iOS 심사 (P0-1) | 🚨 appeal 승인, 개발 완성도 확보 후 재제출 (의도적 보류) — 상세 [milestones P0-1](./kend-milestones.md) |
-| 결제 앱 WebView 보강 | kend 재배포 + [native-payment-webview-handoff](./todo/native-payment-webview-handoff.md) EAS 빌드 대기 |
-| [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 결제 리다이렉트 구간 포함 재정비 완료 (2026-09-10), EAS 빌드 대기 |
-| [environment-separation-plan](./todo/environment-separation-plan.md) | Phase 4, 출시 전 필수, 미착수 |
-| CS관리(B-4) | kend-seller 구현 완료, 실사용 클릭 테스트 대기 |
-| 교환(exchange) | Phase 3, 정책 미정으로 착수 불가 |
-
-> 완료된 계획은 `archive/`로 이동함 (internal-test-1st 15/18, ios-review-rejection-apr14 스냅샷 등).
+| [environment-separation-plan](./active/environment-separation-plan.md) | A~D 완료·운영 전환. 남은 것: E RLS · F 라이브 결제 검증(void 처리 포함) · G 운영 메일 SMTP |
+| [push-notification-plan](./active/push-notification-plan.md) | iOS 운영 완료. 권한 방식 변경 운영 머지 대기, Android(FCM)는 Android 출시 때 |
+| [web-access-policy](./active/web-access-policy.md) | 1단계(공개 홈페이지·판별 쿠키) 완료. 2단계 PC·모바일 브라우저 차단(운영만) 미착수 |
+| [native-swipe-blacklist](./active/native-swipe-blacklist.md) | 결제 구간 포함 재정비 완료, 빌드 반영됨 — 정리 후 archive 후보 |
+| 통신판매업 신고증 | 대기 (사용자) |
+| 교환(exchange) | 정책 미정으로 착수 불가 |
 
 ---
 
-## 📋 다음 작업
+## 📋 다음 작업 (iOS 출시 순서)
 
 | 항목 | 우선순위 | 비고 |
 |------|---------|------|
-| **Toss 계약심사 — 결정 2건 + PPT 준비** | **최우선** | ①결제 최고가 금액 확정 ②임시 등록할 실 판매 예정 상품 선정(사용자 결정 필요) → 상품 등록 → 결제경로 PPT 캡처 → 홈페이지 URL과 함께 회신. [상세](./tosspayments-review-checklist.md) |
-| **P2.5-3 교환(exchange)** | 다음 | 정책 미정 항목 다수(옵션재고 없을때 처리, 배송비 부담주체, 횟수제한 등) — 착수 전 정책 결정 필요 |
-| 반품 정책 법률 검토 (전자상거래법) | 실키 전환 전 | 사유 자가신고 검증·배송비 부담주체·법정 반품기간 대조 — [상세](./todo/order-cancel-refund-exchange-flow.md#5-알려진-미해결-이슈) |
-| pg_cron 반품환불 자동 트리거 등록 | 프로덕션 도메인 확정 후 | `schedule_process_returns.sql` 준비됨, 도메인 플레이스홀더만 남음 |
-| **`.server.ts` / 시크릿 노출 감사** | 다음 | service_role·서버 키 클라이언트 번들 노출 점검 |
-| P0-3 잔여 — PostHog / WebView 브리지 / Edge Function 표준화 | 대기 | |
-| 전체 테이블 RLS 적용 (~33개) | 출시 전 하드닝 | 실데이터 없어 긴급도 낮음. 정책은 개발단계 선행 (Phase 4 P4-3) |
-| PostHog / WebView 에러 브리지 | 출시 전(QA) | |
+| 알림 권한 방식 변경 운영 머지 | 바로 | 설정 앱에서 켠 사용자 토큰 미등록 버그 수정 포함 |
+| **PostHog** (행동 로그 + 웹 에러) | 다음 | 이벤트 목록 계획 먼저. 처리방침·App Store 라벨에 "이용 행태 분석" 추가 |
+| **RLS** (~40개 테이블, kend·seller) + 동의 기록 + 탈퇴 시 거래기록 5년 보관 + 약관 DB 버전 관리 | 출시 전 필수 | 약관·처리방침은 관리자 입력·버전 관리, 출시 문서를 v1로. 처리방침 전체 정리(회사명·담당부서·위탁 업체) 함께 |
+| 리젝 위험 웹 항목 | 출시 전 | 탈퇴 시 Apple 토큰 철회, 네이버 state CSRF, (신고증 후) 신고번호·중개자 고지 |
+| confirm 실패 void → prod 판매자·상품 등록 → 라이브 소액 결제·취소 | 출시 전 | 이때 운영 주문 푸시도 확인 |
+| 운영 메일 SMTP · native 충돌 모니터링 | 출시 전 | 비밀번호 재설정 메일 |
+| prod Pro 전환(백업) + 커스텀 도메인 + Google 브랜딩 | App Store 제출 2~3주 전 권장 | 브랜딩은 늦어져도 무방 |
+| 데모 계정·App Store Connect 입력 → 심사 제출 | 마지막 | 지원 URL `kend.co.kr/support` |
 
-> 외부 의존성: **Toss 실키 계약심사 진행 중(회신 수신, 사용자 결정 2건 대기 — 회신까지 1~2개월 소요 가능 안내받음)** / 통신판매업 신고는 PG계약 완료 후 진행 / NICE는 Holding
+> 출시 후: Expo SDK 58(UIScene, ~2027-03 전), 앱 강제 업데이트, 크론 실패 알림, 가입 CAPTCHA, Android 출시(FCM 포함)
 
 ---
 
@@ -72,8 +71,9 @@
 - **kend** (웹): React Router SSR, Remix-style loader/action, Tailwind + shadcn/ui
 - **kend-native** (앱): React Native + WebView (iOS/Android)
 - **kend-seller** (판매자 관리자): 웹 전용
-- **단일 Supabase DB**: PostgreSQL + Drizzle ORM (RLS로 권한 제어 — ⚠️ **현재 미적용, 출시 전 하드닝 예정**)
-- **결제**: TossPayments (E2E 검증 완료/테스트 키, `PAYMENT_COMING_SOON=false`로 활성화, 실키 계약심사 진행 중)
+- **Supabase dev/prod 분리** (2026-11): dev = 로컬·개발 서버(development 브랜치), prod = `kend.co.kr`(master). PostgreSQL + Drizzle ORM (RLS — ⚠️ **알림 테이블만 적용, 전체는 출시 전 하드닝**)
+- **결제**: TossPayments — 운영 라이브 키, 개발 테스트 키 (실결제 검증 전)
+- **앱 푸시**: DB 트리거 → pg_net → Edge Function `send-push` → Expo Push (iOS)
 - **소셜 로그인**: Google, Kakao, Naver, Apple
 
 > 상세: [core/application-architecture.md](./core/application-architecture.md)
@@ -97,14 +97,16 @@
 ## 🚧 출시 전 반드시 필요한 작업 (체크리스트)
 
 - [ ] iOS 심사 통과
-- [x] 결제 E2E 검증 (테스트 키), 결제 기능 활성화 → [ ] 실키 전환(라이브키) — 계약심사 진행 중(회신 수신, 사용자 결정 2건 대기) *(NICE는 Holding)*
-- [ ] 통신판매업 신고 — Toss PG계약(구매안전서비스 이용확인증 발급) 완료 후 진행
-- [x] 주문 취소·전액 환불 (P1-5) / [x] 재고 차감·복원 (P2-4) / [x] SLA 자동취소 (P2.5-1) / [x] 구매확정 (P2.5-2) / [x] 플랫폼 조건부 무료배송 (P2.5-5) / [x] 반품(P2.5-3, 교환 제외) / [x] 문의하기(P2.5-4, kend+seller+admin 전부) / [x] 정산 시스템(Phase 3.5, kend-seller) → [ ] 교환(P2.5-3, Phase 3 이관·정책 미정)
-- [x] 리뷰 작성/조회(kend) / [x] 찜 목록 스토어 탭 → 🔄 리뷰관리(답변/통계, kend-seller 진행 중)
-- [ ] Supabase dev/prod 환경 분리
-- [ ] 전체 테이블 RLS 적용·검증 (~33개, kend/seller 공유 DB)
-- [ ] 에러 핸들링 잔여 (PostHog, WebView 에러 브리지, QA)
-- [x] kend-seller Phase 2 핵심(판매자 기반·주문관리·배송처리·재고차감) 완료 → [ ] Phase 2.5(반품/환불/구매확정)
+- [x] 결제 E2E 검증(테스트 키) / [x] Toss 계약심사 완료·라이브 키 운영 적용 → [ ] 라이브 실결제·취소 검증 (+ confirm 실패 void)
+- [ ] 통신판매업 신고 — 접수·납부 완료, 신고증 대기 → 신고번호 표시·중개자 고지
+- [x] 주문 라이프사이클(취소·환불·재고·SLA·구매확정·반품·문의·정산) → [ ] 교환(정책 미정)
+- [x] Supabase dev/prod 환경 분리 · 도메인 · 소셜 로그인 5종 운영 전환
+- [x] 앱 푸시 알림(iOS) — 알림 설정 placeholder 해소
+- [ ] 전체 테이블 RLS 적용·검증 (~40개, kend/seller 공유) + 동의 기록 + 탈퇴 시 거래기록 보관
+- [ ] PostHog(행동 로그·웹 에러) + native 충돌 모니터링
+- [ ] 리젝 위험 항목: Apple 토큰 철회, 네이버 state CSRF
+- [ ] 운영 메일 SMTP, DB 백업(prod Pro)
+- [ ] 데모 계정·App Store Connect 입력
 
 ---
 

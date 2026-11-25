@@ -1,5 +1,5 @@
 -- ============================================================
--- 앱 푸시 알림 — 트리거·함수·재시도 크론 (readme/todo/push-notification-plan.md)
+-- 앱 푸시 알림 — 트리거·함수·재시도 크론 (readme/active/push-notification-plan.md)
 --
 -- 테이블(push_tokens·notification_settings·notifications)은 Drizzle 마이그레이션
 -- (0035)으로 먼저 만들고, 이 파일을 각 환경(dev → prod) SQL Editor 또는 psql로 실행한다.
